@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+  <!-- Background rectangle with rounded corners for the text -->
+  <rect x="20" y="20" width="160" height="60" rx="8" fill="#2A2A2A"/>
+  
+  <!-- Main text -->
+  <text x="100" y="62" 
+        font-family="Arial, sans-serif" 
+        font-size="38" 
+        font-weight="bold" 
+        fill="#FFFFFF" 
+        text-anchor="middle">
+    Aoih
+  </text>
+  
+  <!-- Cursor effect -->
+  <rect x="145" y="30" width="3" height="40" fill="#4CAF50">
+    <animate attributeName="opacity"
+             values="1;0;1" 
+             dur="1.5s"
+             repeatCount="indefinite"/>
+  </rect>
+  
+  <!-- Code bracket decorative elements -->
+  <path d="M40 35 L35 50 L40 65" 
+        stroke="#4CAF50" 
+        stroke-width="3" 
+        fill="none"/>
+  <path d="M160 35 L165 50 L160 65" 
+        stroke="#4CAF50" 
+        stroke-width="3" 
+        fill="none"/>
+</svg>
