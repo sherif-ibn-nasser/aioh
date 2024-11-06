@@ -1,6 +1,6 @@
-# Aoih - A Modern Text Editor for Nazm Programming Language
+# Aioh - A Modern Text Editor for Nazm Programming Language
 
-![Aoih Editor Logo](assets/aoih-logo.svg)
+![Aioh Editor Logo](assets/aioh-logo.svg)
 
 <div>
 A high-performance text editor with hardware-accelerated rendering, designed specifically for the Nazm Arabic programming language.
@@ -8,9 +8,11 @@ A high-performance text editor with hardware-accelerated rendering, designed spe
 
 ## Overview
 
-Aoih is a modern text editor built for [Nazm Programming Language](https://github.com/sherif-ibn-nasser/nazm-lang). Using OpenGL for rendering, it provides smooth scrolling, crisp text rendering, and excellent performance even with large files, while maintaining perfect RTL (Right-to-Left) support for Arabic text.
+Aioh is a modern text editor built for [Nazm Programming Language](https://github.com/sherif-ibn-nasser/nazm-lang).
+Using OpenGL for rendering, it provides smooth scrolling, crisp text rendering, and excellent performance even with
+large files, while maintaining perfect RTL (Right-to-Left) support for Arabic text.
 
-**```## Key Features
+## Key Features
 
 - 🚀 Hardware-accelerated rendering using OpenGL
 - 🌐 Native RTL (Right-to-Left) support optimized for Arabic
@@ -25,7 +27,7 @@ Aoih is a modern text editor built for [Nazm Programming Language](https://githu
 ## Links
 
 - [Nazm Programming Language](https://github.com/sherif-ibn-nasser/nazm-lang)
-- [Report Issues](https://github.com/yourusername/aoih/issues)
+- [Report Issues](https://github.com/yourusername/aioh/issues)
 - [OpenGL Documentation](https://www.opengl.org/)
 
 ---
