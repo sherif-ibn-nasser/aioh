@@ -6,7 +6,12 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.FPSAnimator;
 
+import static com.aioh.AiohEventListener.MAX_HEIGHT;
+import static com.aioh.AiohEventListener.MAX_WIDTH;
+
 public class Main {
+
+    public static GLWindow win;
     public static GL4 gl;
 
     public static void glCall(Runnable callBack) {
@@ -31,15 +36,13 @@ public class Main {
         GLProfile.initSingleton();
         final GLProfile profile = GLProfile.get(GLProfile.GL4);
         final GLCapabilities capabilities = new GLCapabilities(profile);
-        final GLWindow window = GLWindow.create(capabilities);
-        window.setSize(500, 500);
-        window.setResizable(true);
-        window.setTitle("Aioh");
-        window.addGLEventListener(new AiohEventListener());
-
-        FPSAnimator animator = new FPSAnimator(window, 120);
+        win = GLWindow.create(capabilities);
+        win.setSize((int) MAX_WIDTH, (int) MAX_HEIGHT);
+        win.setResizable(true);
+        win.setTitle("Aioh");
+        win.addGLEventListener(new AiohEventListener());
+        FPSAnimator animator = new FPSAnimator(win, 120);
         animator.start();
-
-        window.setVisible(true);
+        win.setVisible(true);
     }
 }

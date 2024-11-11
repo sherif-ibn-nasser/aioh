@@ -3,6 +3,8 @@ package com.aioh;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import glm_.mat4x4.Mat4;
+import glm_.vec3.Vec3;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -13,21 +15,31 @@ import static glm_.Java.glm;
 
 public class AiohEventListener implements GLEventListener {
 
+    public static final float MAX_WIDTH = 960;
+    public static final float MAX_HEIGHT = 540;
+    public static final float LEFT = -MAX_WIDTH / 2;
+    public static final float RIGHT = MAX_WIDTH / 2;
+    public static final float BOTTOM = -MAX_HEIGHT / 2;
+    public static final float TOP = MAX_HEIGHT / 2;
     private AiohRenderer renderer;
     private Shader shader;
     private VertexArray va;
     private IndexBuffer ib;
-    private com.jogamp.opengl.util.texture.Texture texture;
+    private Texture texture;
+
+    private Mat4 proj = glm.ortho(LEFT, RIGHT, BOTTOM, TOP, -1, 1);
+    private Mat4 view = glm.translate(new Mat4(), new Vec3(0, 0, 0));
+    private Mat4 model = glm.translate(new Mat4(), new Vec3(0, 0, 0));
 
     @Override
     public void init(GLAutoDrawable drawable) {
         renderer = new AiohRenderer();
 
         var positions = new float[]{
-                -0.5f, -0.5f, 0, 0,
-                0.5f, -0.5f, 1, 0,
-                0.5f, 0.5f, 1, 1,
-                -0.5f, 0.5f, 0, 1,
+                -50, -50, 0, 0,
+                50, -50, 1, 0,
+                50, 50, 1, 1,
+                -50, 50, 0, 1,
         };
 
         var indexes = new int[]{
@@ -48,26 +60,15 @@ public class AiohEventListener implements GLEventListener {
         layout.pushFloat(2);
         layout.pushFloat(2);
 
-
         this.va.addBuffer(vb, layout);
 
         this.ib = new IndexBuffer(IntBuffer.wrap(indexes), indexes.length);
 
         this.shader = new Shader("./src/main/resources/shader/basic.shader");
 
-        var texture = new Texture("./assets/aioh-logo.png");
+        texture = new Texture("./assets/aioh-logo.png");
         texture.bind();
         this.shader.setUniform1i("u_Texture", texture.getSlot());
-
-        float left = -1.5f;
-        float right = 1.5f;
-        float bottom = -2.5f;
-        float top = 2.5f;
-        float near = -1.0f;
-        float far = 1.0f;
-
-        var mat = glm.ortho(left, right, bottom, top, near, far);
-        this.shader.setUniformMat4f("u_MVP", mat.array);
 
         va.unbind();
         ib.unbind();
@@ -77,20 +78,25 @@ public class AiohEventListener implements GLEventListener {
     }
 
 
-    private float red = 0;
-    private float green = 0;
-    private float blue = 0;
-
-    private int redDir = 1;
-    private int greenDir = 0;
-    private int blueDir = 0;
+    private float dir = 1;
 
     @Override
     public void display(GLAutoDrawable drawable) {
         gl = drawable.getGL().getGL4();
         renderer.clear();
 
+        if (model.getD0() > RIGHT - 50) {
+            dir = -1;
+        } else if (model.getD0() < LEFT + 50) {
+            dir = 1;
+        }
+
+        model = model.translate(new Vec3(dir, 0, 0));
+
         shader.bind();
+
+        Mat4 mvp = proj.times(view).times(model);
+        shader.setUniformMat4f("u_MVP", mvp.array);
 
         renderer.draw(va, ib, shader);
     }
