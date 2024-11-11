@@ -15,6 +15,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation 'org.jogamp.gluegen:gluegen-rt-main:2.4.0'
     implementation 'org.jogamp.jogl:jogl-all-main:2.4.0'
+    implementation 'io.github.kotlin-graphics:glm:0.9.9.1-12'
 }
 
 test {

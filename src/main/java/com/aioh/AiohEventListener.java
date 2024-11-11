@@ -9,6 +9,7 @@ import java.nio.IntBuffer;
 
 import static com.aioh.Main.gl;
 import static com.aioh.Main.glCall;
+import static glm_.Java.glm;
 
 public class AiohEventListener implements GLEventListener {
 
@@ -47,6 +48,7 @@ public class AiohEventListener implements GLEventListener {
         layout.pushFloat(2);
         layout.pushFloat(2);
 
+
         this.va.addBuffer(vb, layout);
 
         this.ib = new IndexBuffer(IntBuffer.wrap(indexes), indexes.length);
@@ -56,6 +58,16 @@ public class AiohEventListener implements GLEventListener {
         var texture = new Texture("./assets/aioh-logo.png");
         texture.bind();
         this.shader.setUniform1i("u_Texture", texture.getSlot());
+
+        float left = -1.5f;
+        float right = 1.5f;
+        float bottom = -2.5f;
+        float top = 2.5f;
+        float near = -1.0f;
+        float far = 1.0f;
+
+        var mat = glm.ortho(left, right, bottom, top, near, far);
+        this.shader.setUniformMat4f("u_MVP", mat.array);
 
         va.unbind();
         ib.unbind();
