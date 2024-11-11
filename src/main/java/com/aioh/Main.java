@@ -6,7 +6,6 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.FPSAnimator;
 
-
 public class Main {
     public static GL4 gl;
 
@@ -35,7 +34,7 @@ public class Main {
         final GLWindow window = GLWindow.create(capabilities);
         window.setSize(500, 500);
         window.setResizable(true);
-        window.setTitle("Aoih");
+        window.setTitle("Aioh");
         window.addGLEventListener(new AiohEventListener());
 
         FPSAnimator animator = new FPSAnimator(window, 120);

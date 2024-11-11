@@ -55,6 +55,9 @@ public class Shader {
         glCall(() -> gl.glUniform4f(getUniformLocation(name), v0, v1, v2, v3));
     }
 
+    public void setUniform1i(String name, int value) {
+        glCall(() -> gl.glUniform1i(getUniformLocation(name), value));
+    }
 
     public int createShader(String vertexShader, String fragmentShader) {
         var program = gl.glCreateProgram();

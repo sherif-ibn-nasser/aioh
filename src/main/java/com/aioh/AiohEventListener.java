@@ -1,5 +1,6 @@
 package com.aioh;
 
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
@@ -7,6 +8,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static com.aioh.Main.gl;
+import static com.aioh.Main.glCall;
 
 public class AiohEventListener implements GLEventListener {
 
@@ -14,16 +16,17 @@ public class AiohEventListener implements GLEventListener {
     private Shader shader;
     private VertexArray va;
     private IndexBuffer ib;
+    private com.jogamp.opengl.util.texture.Texture texture;
 
     @Override
     public void init(GLAutoDrawable drawable) {
         renderer = new AiohRenderer();
 
         var positions = new float[]{
-                -0.5f, -0.5f,
-                0.5f, -0.5f,
-                0.5f, 0.5f,
-                -0.5f, 0.5f,
+                -0.5f, -0.5f, 0, 0,
+                0.5f, -0.5f, 1, 0,
+                0.5f, 0.5f, 1, 1,
+                -0.5f, 0.5f, 0, 1,
         };
 
         var indexes = new int[]{
@@ -33,11 +36,15 @@ public class AiohEventListener implements GLEventListener {
 
         gl = drawable.getGL().getGL4();
 
+        glCall(() -> gl.glEnable(GL4.GL_BLEND));
+        glCall(() -> gl.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA));
+
         this.va = new VertexArray();
 
         var vb = new VertexBuffer(FloatBuffer.wrap(positions), positions.length * Float.BYTES);
 
         var layout = new VertexBufferLayout();
+        layout.pushFloat(2);
         layout.pushFloat(2);
 
         this.va.addBuffer(vb, layout);
@@ -46,12 +53,17 @@ public class AiohEventListener implements GLEventListener {
 
         this.shader = new Shader("./src/main/resources/shader/basic.shader");
 
+        var texture = new Texture("./assets/aioh-logo.png");
+        texture.bind();
+        this.shader.setUniform1i("u_Texture", texture.getSlot());
+
         va.unbind();
         ib.unbind();
         vb.unbind();
         shader.unbind();
 
     }
+
 
     private float red = 0;
     private float green = 0;
@@ -64,35 +76,11 @@ public class AiohEventListener implements GLEventListener {
     @Override
     public void display(GLAutoDrawable drawable) {
         gl = drawable.getGL().getGL4();
-
         renderer.clear();
+
         shader.bind();
-        shader.setUniform4f("u_Color", this.red, this.green, this.blue, 1);
+
         renderer.draw(va, ib, shader);
-
-        if (this.red > 1 && redDir != 0) {
-            redDir = 0;
-            greenDir = 1;
-        } else if (this.red < 0 && redDir != 0) {
-            redDir = 0;
-            greenDir = -1;
-        } else if (this.green > 1 && greenDir != 0) {
-            greenDir = 0;
-            blueDir = 1;
-        } else if (this.green < 0 && greenDir != 0) {
-            greenDir = 0;
-            blueDir = -1;
-        } else if (this.blue > 1 && blueDir != 0) {
-            blueDir = 0;
-            redDir = -1;
-        } else if (this.blue < 0 && blueDir != 0) {
-            blueDir = 0;
-            redDir = 1;
-        }
-
-        this.red += this.redDir * 0.01;
-        this.green += this.greenDir * 0.01;
-        this.blue += this.blueDir * 0.01;
     }
 
     @Override
