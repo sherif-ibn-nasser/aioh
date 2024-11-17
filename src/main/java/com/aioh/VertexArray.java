@@ -1,16 +1,15 @@
 package com.aioh;
 
-import static com.aioh.Main.gl;
-import static com.aioh.Main.glCall;
+import static com.aioh.AiohWindow.glCall;
+import static org.lwjgl.opengl.GL46.*;
 
 public class VertexArray {
 
-    private int[] rendererId;
+    private int rendererId;
 
     public VertexArray() {
-        this.rendererId = new int[1];
-        glCall(() -> gl.glGenVertexArrays(1, rendererId, 0));
-        glCall(() -> gl.glBindVertexArray(rendererId[0]));
+        glCall(() -> rendererId = glGenVertexArrays());
+        glCall(() -> glBindVertexArray(rendererId));
     }
 
     public void addBuffer(VertexBuffer vb, VertexBufferLayout vbl) {
@@ -22,17 +21,17 @@ public class VertexArray {
             var element = elements.get(i);
             int finalI = i;
             int finalOffset = offset;
-            glCall(() -> gl.glEnableVertexAttribArray(finalI));
-            glCall(() -> gl.glVertexAttribPointer(finalI, element.count(), element.getGlType(), element.normalized(), vbl.getStride(), finalOffset));
+            glCall(() -> glEnableVertexAttribArray(finalI));
+            glCall(() -> glVertexAttribPointer(finalI, element.count(), element.getGlType(), element.normalized(), vbl.getStride(), finalOffset));
             offset += element.count() * element.getTypeSize();
         }
     }
 
     public void bind() {
-        glCall(() -> gl.glBindVertexArray(rendererId[0]));
+        glCall(() -> glBindVertexArray(rendererId));
     }
 
     public void unbind() {
-        glCall(() -> gl.glBindVertexArray(0));
+        glCall(() -> glBindVertexArray(0));
     }
 }

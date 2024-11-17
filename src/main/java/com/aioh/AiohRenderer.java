@@ -1,13 +1,11 @@
 package com.aioh;
 
-import com.jogamp.opengl.GL4;
-
-import static com.aioh.Main.gl;
-import static com.aioh.Main.glCall;
+import static com.aioh.AiohWindow.glCall;
+import static org.lwjgl.opengl.GL46.*;
 
 public class AiohRenderer {
     public void clear() {
-        glCall(() -> gl.glClear(GL4.GL_COLOR_BUFFER_BIT));
+        glCall(() -> glClear(GL_COLOR_BUFFER_BIT));
     }
 
     public void draw(VertexArray va, IndexBuffer ib, Shader shader) {
@@ -15,7 +13,7 @@ public class AiohRenderer {
         va.bind();
         ib.bind();
 
-        glCall(() -> gl.glDrawElements(GL4.GL_TRIANGLES, 6, GL4.GL_UNSIGNED_INT, 0));
+        glCall(() -> glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
         va.unbind();
         ib.unbind();

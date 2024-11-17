@@ -1,14 +1,14 @@
 package com.aioh;
 
-import com.jogamp.opengl.GL4;
+import static org.lwjgl.opengl.GL46.*;
 
 public record VertexBufferElement(VertexBufferElementType type, int count, boolean normalized) {
 
     public int getGlType() {
         return switch (type) {
-            case FLOAT -> GL4.GL_FLOAT;
-            case UNSIGNED_INT -> GL4.GL_UNSIGNED_INT;
-            case UNSIGNED_BYTE -> GL4.GL_UNSIGNED_BYTE;
+            case FLOAT -> GL_FLOAT;
+            case UNSIGNED_INT -> GL_UNSIGNED_INT;
+            case UNSIGNED_BYTE -> GL_UNSIGNED_BYTE;
         };
     }
 

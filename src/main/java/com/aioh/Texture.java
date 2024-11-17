@@ -1,26 +1,21 @@
 package com.aioh;
 
-import com.jogamp.opengl.GL4;
+import org.lwjgl.BufferUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
-import static com.aioh.Main.gl;
-import static com.aioh.Main.glCall;
+import static com.aioh.AiohWindow.glCall;
+import static org.lwjgl.opengl.GL46.*;
 
 public class Texture {
-    private int[] rendererId;
-    private String filePath;
-    private byte[] localBuffer;
+    private int rendererId;
     private int width, height, BPP, slot = 0;
 
     public Texture(String filePath) {
-        this.rendererId = new int[1];
-        glCall(() -> gl.glGenTextures(1, this.rendererId, 0));
-        this.filePath = filePath;
+        glCall(() -> rendererId = glGenTextures());
 
         BufferedImage bufferedImage = null;
         try {
@@ -38,13 +33,15 @@ public class Texture {
         }
         byte[] rgba = intARGBtoByteRGBA(argb);
 
-        glCall(() -> gl.glBindTexture(GL4.GL_TEXTURE_2D, this.rendererId[0]));
-        glCall(() -> gl.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_MIN_FILTER, GL4.GL_LINEAR));
-        glCall(() -> gl.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_MAG_FILTER, GL4.GL_LINEAR));
-        glCall(() -> gl.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_WRAP_S, GL4.GL_CLAMP_TO_EDGE));
-        glCall(() -> gl.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_WRAP_T, GL4.GL_CLAMP_TO_EDGE));
-
-        glCall(() -> gl.glTexImage2D(GL4.GL_TEXTURE_2D, 0, GL4.GL_RGBA8, width, height, 0, GL4.GL_RGBA, GL4.GL_UNSIGNED_BYTE, ByteBuffer.wrap(rgba)));
+        glCall(() -> glBindTexture(GL_TEXTURE_2D, rendererId));
+        glCall(() -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        glCall(() -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        glCall(() -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+        glCall(() -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        var buffer = BufferUtils.createByteBuffer(rgba.length);
+        buffer.put(rgba);
+        buffer.flip();
+        glCall(() -> glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer));
         unbind();
 
         // We can drop localBuffer
@@ -69,12 +66,12 @@ public class Texture {
 
     public void bind(int slot) {
         this.slot = slot;
-        glCall(() -> gl.glActiveTexture(GL4.GL_TEXTURE0 + slot));
-        glCall(() -> gl.glBindTexture(GL4.GL_TEXTURE_2D, this.rendererId[0]));
+        glCall(() -> glActiveTexture(GL_TEXTURE0 + slot));
+        glCall(() -> glBindTexture(GL_TEXTURE_2D, rendererId));
     }
 
     public void unbind() {
-        glCall(() -> gl.glBindTexture(GL4.GL_TEXTURE_2D, 0));
+        glCall(() -> glBindTexture(GL_TEXTURE_2D, 0));
     }
 
     public int getWidth() {
