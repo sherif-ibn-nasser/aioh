@@ -1,4 +1,4 @@
-package com.aioh;
+package com.aioh.graphics;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;

@@ -1,6 +1,6 @@
 package com.aioh;
 
-import static com.aioh.AiohWindow.glCall;
+import static com.aioh.graphics.AiohWindow.glCall;
 import static org.lwjgl.opengl.GL46.*;
 
 public class VertexArray {

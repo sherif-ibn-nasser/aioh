@@ -2,7 +2,7 @@ package com.aioh;
 
 import org.lwjgl.BufferUtils;
 
-import static com.aioh.AiohWindow.glCall;
+import static com.aioh.graphics.AiohWindow.glCall;
 import static org.lwjgl.opengl.GL46.*;
 
 

@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import static com.aioh.AiohWindow.glCall;
+import static com.aioh.graphics.AiohWindow.glCall;
 import static org.lwjgl.opengl.GL46.*;
 
 public class Texture {

@@ -1,9 +1,9 @@
 package com.aioh;
 
-import static com.aioh.AiohWindow.glCall;
+import static com.aioh.graphics.AiohWindow.glCall;
 import static org.lwjgl.opengl.GL46.*;
 
-public class AiohRenderer {
+public class AiohRenderer2 {
     public void clear() {
         glCall(() -> glClear(GL_COLOR_BUFFER_BIT));
     }

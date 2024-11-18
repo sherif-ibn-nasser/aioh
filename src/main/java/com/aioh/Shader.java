@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import static com.aioh.AiohWindow.*;
+import static com.aioh.graphics.AiohWindow.*;
 import static org.lwjgl.opengl.GL46.*;
 
 public class Shader {

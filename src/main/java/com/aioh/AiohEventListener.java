@@ -13,7 +13,7 @@ public class AiohEventListener {
     public static final float RIGHT = MAX_WIDTH / 2;
     public static final float BOTTOM = -MAX_HEIGHT / 2;
     public static final float TOP = MAX_HEIGHT / 2;
-    private AiohRenderer renderer;
+    private AiohRenderer2 renderer;
     private Shader shader;
     private VertexArray va;
     private IndexBuffer ib;
@@ -26,7 +26,7 @@ public class AiohEventListener {
     private Mat4 model = glm.translate(new Mat4(), new Vec3(0, 0, 0));
 
     public void init() {
-        renderer = new AiohRenderer();
+        renderer = new AiohRenderer2();
 
         var positions = new float[]{
                 -100, -50, 0, 0,
