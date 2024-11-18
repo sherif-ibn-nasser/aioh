@@ -15,5 +15,5 @@ public class AiohGlyphMetric {
      * x offset of glyph in texture coordinates
      *
      */
-    float ax, ay, bw, bh, bl, bt, tx;
+    public float ax, ay, bw, bh, bl, bt, tx;
 }

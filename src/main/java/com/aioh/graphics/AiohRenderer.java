@@ -1,7 +1,9 @@
 package com.aioh.graphics;
 
 import com.aioh.AiohUtils;
+import com.aioh.text.AiohFreeGlyphAtlas;
 import glm_.vec2.Vec2;
+import glm_.vec4.Vec4;
 import org.lwjgl.BufferUtils;
 
 import static com.aioh.graphics.AiohWindow.*;
@@ -30,7 +32,9 @@ public class AiohRenderer {
     private int vao, vbo;
     private AiohShader currentShader;
     private float time, cameraScale = 0.3f, cameraScaleVel;
-    private Vec2 resolution = new Vec2(), cameraPos = new Vec2(), cameraVel = new Vec2();
+    private final Vec2 resolution = new Vec2();
+    private Vec2 cameraPos = new Vec2();
+    private Vec2 cameraVel = new Vec2();
     private AiohVertices vertices = new AiohVertices();
     private int[] programs, uniformsSlots = new int[4];
 
@@ -98,9 +102,10 @@ public class AiohRenderer {
             glCall(() -> glAttachShader(program, vs));
             glCall(() -> glAttachShader(program, fs));
             glCall(() -> glLinkProgram(program));
+            glCall(() -> glValidateProgram(program));
 
             var result = BufferUtils.createIntBuffer(1);
-            glCall(() -> glGetProgramiv(program, GL_COMPILE_STATUS, result));
+            glCall(() -> glGetProgramiv(program, GL_LINK_STATUS, result));
 
             if (result.get(0) == GL_FALSE) {
                 String msg = glGetProgramInfoLog(program);
@@ -137,11 +142,11 @@ public class AiohRenderer {
         this.currentShader = shader;
         var program = this.programs[shader.ordinal()];
         glCall(() -> glUseProgram(program));
-        for (int i = 0; i < this.uniformsSlots.length; i++) {
+        for (int i = 1; i < this.uniformsSlots.length; i++) {
             this.uniformsSlots[i] = getUniformLocation(program, UNIFORM_SLOTS_NAMES[i]);
         }
-        glCall(() -> glUniform2f(this.uniformsSlots[0], this.resolution.getX(), this.resolution.getY()));
-        glCall(() -> glUniform1f(this.uniformsSlots[1], this.time));
+//        glCall(() -> glUniform1f(this.uniformsSlots[0], this.time));
+        glCall(() -> glUniform2f(this.uniformsSlots[1], this.resolution.getX(), this.resolution.getY()));
         glCall(() -> glUniform2f(this.uniformsSlots[2], this.cameraPos.getX(), this.cameraPos.getY()));
         glCall(() -> glUniform1f(this.uniformsSlots[3], this.cameraScale));
     }
@@ -180,5 +185,41 @@ public class AiohRenderer {
         sync();
         draw();
         this.vertices.clear();
+    }
+
+    public void renderLineOfText(AiohFreeGlyphAtlas atlas, String text, Vec2 pos, Vec4 color) {
+        for (int i = 0; i < text.length(); i++) {
+            var glyph_index = text.charAt(i);
+
+            // TODO: support for glyphs outside of ASCII range
+            if (glyph_index >= AiohFreeGlyphAtlas.GLYPH_METRICS_CAPACITY) {
+                glyph_index = '?';
+            }
+
+            var metric = atlas.getMetrics()[glyph_index];
+            float x2 = pos.getX() + metric.bl;
+            float y2 = -pos.getY() - metric.bt;
+            float w = metric.bw;
+            float h = metric.bh;
+
+            pos.setX(pos.getX() + metric.ax);
+            pos.setY(pos.getY() + metric.ay);
+
+            vertices.addImageRect(
+                    new Vec2(x2, -y2),
+                    new Vec2(w, -h),
+                    new Vec2(metric.tx, 0),
+                    new Vec2(metric.bw / atlas.getAtlasWidth(), metric.bh / atlas.getAtlasHeight()),
+                    color
+            );
+        }
+    }
+
+    public void setTime(float time) {
+        this.time = time;
+    }
+
+    public Vec2 getResolution() {
+        return resolution;
     }
 }

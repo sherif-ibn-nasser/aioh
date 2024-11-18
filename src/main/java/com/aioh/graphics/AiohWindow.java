@@ -9,15 +9,46 @@ import static org.lwjgl.opengl.GL46.*;
 
 public class AiohWindow {
 
+    public interface EventsHandler {
+        void onTextInput(char[] newChars);
+
+        void onBackspacePressed();
+    }
+
     private String title;
     private int width, height;
     private long window;
     private boolean resize;
 
-    public AiohWindow(String title, int width, int height) {
+    public AiohWindow(String title, int width, int height, EventsHandler handler) {
         this.title = title;
         this.width = width;
         this.height = height;
+
+        init();
+
+        glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {
+
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                glfwSetWindowShouldClose(window, true);
+                return;
+            }
+
+            if (action != GLFW_PRESS)
+                return;
+
+            switch (key) {
+                case GLFW_KEY_BACKSPACE -> {
+                    handler.onBackspacePressed();
+                }
+            }
+
+        });
+
+        glfwSetCharCallback(window, (window, codePoint) -> {
+            var newChars = Character.toChars(codePoint);
+            handler.onTextInput(newChars);
+        });
     }
 
     public static void glCall(Runnable callBack) {
@@ -38,7 +69,7 @@ public class AiohWindow {
         }
     }
 
-    public void init() {
+    private void init() {
         GLFWErrorCallback.createPrint(System.err);
 
         if (!glfwInit())
@@ -76,11 +107,6 @@ public class AiohWindow {
             this.resize = true;
         });
 
-        glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-                glfwSetWindowShouldClose(window, true);
-        });
-
         if (maximized)
             glfwMaximizeWindow(window);
         else {
@@ -106,11 +132,16 @@ public class AiohWindow {
         glfwDestroyWindow(window);
     }
 
-    public boolean isKeyPressed(int keyCode) {
-        return glfwGetKey(window, keyCode) == GLFW_PRESS;
-    }
-
     public boolean shouldClose() {
         return glfwWindowShouldClose(window);
     }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
 }
