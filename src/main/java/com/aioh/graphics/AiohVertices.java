@@ -6,12 +6,10 @@ import glm_.vec4.Vec4;
 public class AiohVertices {
     public static final int VERTICES_CAP = 640 * 1024;
     private float[] buffer = new float[VERTICES_CAP];
-    private int bufferSize = 0;
     private int count = 0;
 
     public AiohVertexIndex add(AiohVertex vertex) {
-        vertex.writeToBuffer(buffer, bufferSize);
-        bufferSize += AiohVertex.BYTES;
+        vertex.writeToBuffer(buffer, getBufferSize());
         var index = count;
         count += 1;
         return new AiohVertexIndex(index);
@@ -55,15 +53,19 @@ public class AiohVertices {
     }
 
     public void clear() {
-        bufferSize = count = 0;
+        count = 0;
     }
 
     public float[] getBuffer() {
-        return buffer;
+        var slice = new float[getBufferSize()];
+        for (int i = 0; i < slice.length; i++) {
+            slice[i] = buffer[i];
+        }
+        return slice;
     }
 
     public int getBufferSize() {
-        return bufferSize;
+        return count * AiohVertex.BYTES;
     }
 
     public int getCount() {

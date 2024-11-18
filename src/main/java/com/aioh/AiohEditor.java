@@ -22,15 +22,17 @@ public class AiohEditor {
         this.renderer.getResolution().setX(w);
         this.renderer.getResolution().setY(h);
         this.renderer.setTime((float) GLFW.glfwGetTime());
-        renderText();
+        var max_line_len = renderText();
+        updateCamera(w, max_line_len);
     }
 
-
-    private void renderText() {
+    private float renderText() {
+        float max_line_len = 0.0f;
 
         renderer.setCurrentShader(AiohShader.TEXT);
-        var pos = new Vec2();
-        var color = new Vec4(1, 0, 0, 0);
+
+        var pos = new Vec2(0, 0);
+        var color = new Vec4(1);
 
         for (int i = 0; i < text.length(); i++) {
             var glyph_index = text.charAt(i);
@@ -45,8 +47,48 @@ public class AiohEditor {
             var metric = atlas.getMetrics()[glyph_index];
             pos.setX(pos.getX() + metric.ax);
 
+            if (max_line_len < pos.getX()) max_line_len = pos.getX();
+
         }
         renderer.flush();
+
+        return max_line_len;
+    }
+
+    private void updateCamera(float w, float max_line_len) {
+
+        Vec2 cursor_pos = new Vec2();
+        if (max_line_len > 1000.0f) {
+            max_line_len = 1000.0f;
+        }
+
+        float target_scale = w / 3 / (max_line_len * 0.75f); // TODO: division by 0
+
+        Vec2 target = cursor_pos;
+        float offset = 0.0f;
+
+        if (target_scale > 3.0f) {
+            target_scale = 3.0f;
+        } else {
+            offset = cursor_pos.getX() - w / 3 / renderer.getCameraScale();
+            if (offset < 0.0f) offset = 0.0f;
+            target = new Vec2(w / 3 / renderer.getCameraScale() + offset, cursor_pos.getY());
+        }
+
+        renderer.setCameraVel(
+                target.minus(renderer.getCameraPos()).times(new Vec2(2))
+        );
+
+        renderer.setCameraScaleVel(
+                (target_scale - renderer.getCameraScale()) * 2
+        );
+
+        renderer.setCameraPos(renderer.getCameraPos().plus(
+                renderer.getCameraVel().times(new Vec2(AiohRenderer.DELTA_TIME))
+        ));
+
+        renderer.setCameraScale(renderer.getCameraScale() + renderer.getCameraScaleVel() * AiohRenderer.DELTA_TIME);
+
     }
 
     public StringBuilder getText() {

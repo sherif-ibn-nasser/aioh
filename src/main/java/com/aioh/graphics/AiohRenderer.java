@@ -10,6 +10,8 @@ import static com.aioh.graphics.AiohWindow.*;
 import static org.lwjgl.opengl.GL46.*;
 
 public class AiohRenderer {
+    public static final float DELTA_TIME = 1 / 60f;
+
     public static final String ROOT = "/home/sherif/IdeaProjects/aioh/src/main/resources/shaders/";
     public static final String VERTEX_SHADER_PATH = ROOT + "simple.vert";
     public static final String COLOR_FRAG_SHADER_PATH = ROOT + "simple_color.frag";
@@ -49,7 +51,7 @@ public class AiohRenderer {
         glCall(() -> vbo = glGenBuffers());
         glCall(() -> glBindBuffer(GL_ARRAY_BUFFER, vbo));
         var buffer = BufferUtils.createFloatBuffer(AiohVertices.VERTICES_CAP);
-        buffer.put(this.vertices.getBuffer());
+        buffer.put(new float[AiohVertices.VERTICES_CAP]);
         buffer.flip();
         glCall(() -> glBufferData(GL_ARRAY_BUFFER, buffer, GL_DYNAMIC_DRAW));
 
@@ -171,7 +173,7 @@ public class AiohRenderer {
     }
 
     public void sync() {
-        var buffer = BufferUtils.createFloatBuffer(AiohVertices.VERTICES_CAP);
+        var buffer = BufferUtils.createFloatBuffer(this.vertices.getBufferSize());
         buffer.put(this.vertices.getBuffer());
         buffer.flip();
         glCall(() -> glBufferSubData(GL_ARRAY_BUFFER, 0, buffer));
@@ -181,22 +183,26 @@ public class AiohRenderer {
         glCall(() -> glDrawArrays(GL_TRIANGLES, 0, this.vertices.getCount()));
     }
 
+    public void clear() {
+        this.vertices.clear();
+    }
+
     public void flush() {
         sync();
         draw();
-        this.vertices.clear();
+        clear();
     }
 
     public void renderLineOfText(AiohFreeGlyphAtlas atlas, String text, Vec2 pos, Vec4 color) {
         for (int i = 0; i < text.length(); i++) {
-            var glyph_index = text.charAt(i);
+            var glyphIndex = text.charAt(i);
 
             // TODO: support for glyphs outside of ASCII range
-            if (glyph_index >= AiohFreeGlyphAtlas.GLYPH_METRICS_CAPACITY) {
-                glyph_index = '?';
+            if (glyphIndex >= AiohFreeGlyphAtlas.GLYPH_METRICS_CAPACITY) {
+                glyphIndex = '?';
             }
 
-            var metric = atlas.getMetrics()[glyph_index];
+            var metric = atlas.getMetrics()[glyphIndex];
             float x2 = pos.getX() + metric.bl;
             float y2 = -pos.getY() - metric.bt;
             float w = metric.bw;
@@ -212,6 +218,7 @@ public class AiohRenderer {
                     new Vec2(metric.bw / atlas.getAtlasWidth(), metric.bh / atlas.getAtlasHeight()),
                     color
             );
+
         }
     }
 
@@ -219,7 +226,45 @@ public class AiohRenderer {
         this.time = time;
     }
 
+    public void setCameraScale(float cameraScale) {
+        this.cameraScale = cameraScale;
+    }
+
+    public void setCameraScaleVel(float cameraScaleVel) {
+        this.cameraScaleVel = cameraScaleVel;
+    }
+
+    public void setCameraPos(Vec2 cameraPos) {
+        this.cameraPos = cameraPos;
+    }
+
+    public void setCameraVel(Vec2 cameraVel) {
+        this.cameraVel = cameraVel;
+    }
+
     public Vec2 getResolution() {
         return resolution;
     }
+
+    public float getCameraScale() {
+        return cameraScale;
+    }
+
+    public float getTime() {
+        return time;
+    }
+
+    public float getCameraScaleVel() {
+        return cameraScaleVel;
+    }
+
+    public Vec2 getCameraPos() {
+        return cameraPos;
+    }
+
+    public Vec2 getCameraVel() {
+        return cameraVel;
+    }
+
+
 }
