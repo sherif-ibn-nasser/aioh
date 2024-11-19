@@ -93,19 +93,28 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     private boolean isCursorAtEndOfFile() {
-        return cursorLine == lines.size() && cursorCol == getCurrentLine().length();
+        return cursorLine == lines.size() - 1 && cursorCol == getCurrentLine().length();
     }
 
     @Override
     public void onTextInput(char[] newChars) {
 
         if (newChars[0] == '\n') {
-            lines.add(new StringBuilder(LINE_INITIAL_CAP));
+            if (cursorCol == getCurrentLine().length() && cursorCol != 0)
+                lines.add(new StringBuilder(LINE_INITIAL_CAP));
+
+            else {
+                var prevLine = getCurrentLine();
+                var newLine = prevLine.substring(cursorCol);
+                prevLine.setLength(cursorCol);
+                lines.add(cursorLine + 1, new StringBuilder(newLine));
+            }
+
             cursorCol = 0;
             cursorLine += 1;
         } else {
             getCurrentLine().insert(cursorCol, newChars);
-            cursorCol += 1;
+            cursorCol += newChars.length;
         }
 
         maxCursorCol = cursorCol;
@@ -129,9 +138,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             return;
 
         if (cursorCol == 0) {
+            var lineBelow = getCurrentLine();
+            lines.remove(cursorLine);
             cursorLine -= 1;
             cursorCol = getCurrentLine().length();
-            lines.removeLast();
+            getCurrentLine().append(lineBelow);
         } else {
             cursorCol -= 1;
             getCurrentLine().deleteCharAt(cursorCol);
