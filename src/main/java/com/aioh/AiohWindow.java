@@ -1,4 +1,4 @@
-package com.aioh.graphics;
+package com.aioh;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -13,6 +13,14 @@ public class AiohWindow {
         void onTextInput(char[] newChars);
 
         void onBackspacePressed();
+
+        void onUpArrowPressed();
+
+        void onDownArrowPressed();
+
+        void onLeftArrowPressed();
+
+        void onRightArrowPressed();
     }
 
     private String title;
@@ -40,6 +48,21 @@ public class AiohWindow {
             switch (key) {
                 case GLFW_KEY_BACKSPACE -> {
                     handler.onBackspacePressed();
+                }
+                case GLFW_KEY_ENTER -> {
+                    handler.onTextInput(new char[]{'\n'});
+                }
+                case GLFW_KEY_UP -> {
+                    handler.onUpArrowPressed();
+                }
+                case GLFW_KEY_DOWN -> {
+                    handler.onDownArrowPressed();
+                }
+                case GLFW_KEY_LEFT -> {
+                    handler.onLeftArrowPressed();
+                }
+                case GLFW_KEY_RIGHT -> {
+                    handler.onRightArrowPressed();
                 }
             }
 

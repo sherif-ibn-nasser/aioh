@@ -1,270 +1,404 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright © 2014-2018, Heiko Brumme
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.aioh.graphics;
 
+import com.aioh.AiohEditor;
 import com.aioh.AiohUtils;
-import com.aioh.text.AiohFreeGlyphAtlas;
-import glm_.vec2.Vec2;
+import com.aioh.graphics.text.Font;
+import glm_.mat4x4.Mat4;
 import glm_.vec4.Vec4;
-import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
-import static com.aioh.graphics.AiohWindow.*;
-import static org.lwjgl.opengl.GL46.*;
+import java.awt.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import static glm_.Java.glm;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
+
+/**
+ * This class is performing the rendering process.
+ *
+ * @author Heiko Brumme
+ */
 public class AiohRenderer {
-    public static final float DELTA_TIME = 1 / 60f;
 
-    public static final String ROOT = "/home/sherif/IdeaProjects/aioh/src/main/resources/shaders/";
-    public static final String VERTEX_SHADER_PATH = ROOT + "simple.vert";
-    public static final String COLOR_FRAG_SHADER_PATH = ROOT + "simple_color.frag";
-    public static final String IMAGE_FRAG_SHADER_PATH = ROOT + "simple_image.frag";
-    public static final String TEXT_FRAG_SHADER_PATH = ROOT + "simple_text.frag";
-    public static final String EPIC_FRAG_SHADER_PATH = ROOT + "simple_epic.frag";
+    private VertexArrayObject vao;
+    private VertexBufferObject vbo;
+    private ShaderProgram program;
 
-    public static final String UNIFORM_SLOT_TIME = "time";
-    public static final String UNIFORM_SLOT_RESOLUTION = "resolution";
-    public static final String UNIFORM_SLOT_CAMERA_POS = "camera_pos";
-    public static final String UNIFORM_SLOT_CAMERA_SCALE = "camera_scale";
+    private FloatBuffer vertices;
+    private int numVertices;
+    private boolean drawing;
 
-    public static final String[] FRAG_SHADERS_PATHS = new String[]{
-            COLOR_FRAG_SHADER_PATH, IMAGE_FRAG_SHADER_PATH, TEXT_FRAG_SHADER_PATH, EPIC_FRAG_SHADER_PATH
-    };
-    public static final String[] UNIFORM_SLOTS_NAMES = new String[]{
-            UNIFORM_SLOT_TIME, UNIFORM_SLOT_RESOLUTION, UNIFORM_SLOT_CAMERA_POS, UNIFORM_SLOT_CAMERA_SCALE
-    };
+    private Font font;
+    private Font debugFont;
 
-    private int vao, vbo;
-    private AiohShader currentShader;
-    private float time, cameraScale = 0.3f, cameraScaleVel;
-    private final Vec2 resolution = new Vec2();
-    private Vec2 cameraPos = new Vec2();
-    private Vec2 cameraVel = new Vec2();
-    private AiohVertices vertices = new AiohVertices();
-    private int[] programs, uniformsSlots = new int[4];
+    /**
+     * Initializes the renderer.
+     */
+    public void init() {
+        /* Setup shader programs */
+        setupShaderProgram();
 
-    public AiohRenderer() {
-        initVertices();
-        this.programs = loadShaders();
-    }
+        /* Enable blending */
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    private void initVertices() {
-        glCall(() -> vao = glGenVertexArrays());
-        glCall(() -> glBindVertexArray(vao));
-        glCall(() -> vbo = glGenBuffers());
-        glCall(() -> glBindBuffer(GL_ARRAY_BUFFER, vbo));
-        var buffer = BufferUtils.createFloatBuffer(AiohVertices.VERTICES_CAP);
-        buffer.put(new float[AiohVertices.VERTICES_CAP]);
-        buffer.flip();
-        glCall(() -> glBufferData(GL_ARRAY_BUFFER, buffer, GL_DYNAMIC_DRAW));
-
-        // position
-        glCall(() -> glEnableVertexAttribArray(AiohVertexAttr.POSITION.ordinal()));
-        glCall(() -> glVertexAttribPointer(
-                AiohVertexAttr.POSITION.ordinal(),
-                AiohVertexAttr.POSITION.size,
-                GL_FLOAT,
-                false,
-                AiohVertex.BYTES,
-                AiohVertexAttr.POSITION.offset));
-
-        // color
-        glCall(() -> glEnableVertexAttribArray(AiohVertexAttr.COLOR.ordinal()));
-        glCall(() -> glVertexAttribPointer(
-                AiohVertexAttr.COLOR.ordinal(),
-                AiohVertexAttr.COLOR.size,
-                GL_FLOAT,
-                false,
-                AiohVertex.BYTES,
-                AiohVertexAttr.COLOR.offset));
-
-        // uv
-        glCall(() -> glEnableVertexAttribArray(AiohVertexAttr.UV.ordinal()));
-        glCall(() -> glVertexAttribPointer(
-                AiohVertexAttr.UV.ordinal(),
-                AiohVertexAttr.UV.size,
-                GL_FLOAT,
-                false,
-                AiohVertex.BYTES,
-                AiohVertexAttr.UV.offset));
-    }
-
-    public void reloadShaders() {
-        var programs = loadShaders();
-        for (int i = 0; i < this.programs.length; i++) {
-            glDeleteProgram(this.programs[i]);
+        /* Create fonts */
+        try {
+            font = new Font(new FileInputStream(AiohUtils.FONTS_PATH + "/iosevka-regular.ttf"), AiohEditor.FONT_SIZE);
+        } catch (FontFormatException | IOException ex) {
+            Logger.getLogger(AiohRenderer.class.getName()).log(Level.CONFIG, null, ex);
+            font = new Font();
         }
-        this.programs = programs;
+        debugFont = new Font(12, false);
     }
 
-    private int[] loadShaders() {
-        var programs = new int[4];
-        var vs = compileShader(VERTEX_SHADER_PATH, GL_VERTEX_SHADER);
-
-        for (int i = 0; i < programs.length; i++) {
-            var fs = compileShader(FRAG_SHADERS_PATHS[i], GL_FRAGMENT_SHADER);
-            var program = programs[i] = glCreateProgram();
-            glCall(() -> glAttachShader(program, vs));
-            glCall(() -> glAttachShader(program, fs));
-            glCall(() -> glLinkProgram(program));
-            glCall(() -> glValidateProgram(program));
-
-            var result = BufferUtils.createIntBuffer(1);
-            glCall(() -> glGetProgramiv(program, GL_LINK_STATUS, result));
-
-            if (result.get(0) == GL_FALSE) {
-                String msg = glGetProgramInfoLog(program);
-                throw new RuntimeException("Failed to link program[" + i + "]\n" + msg);
-            }
-
-            glCall(() -> glDeleteShader(fs));
-        }
-
-        glCall(() -> glDeleteShader(vs));
-
-        return programs;
-    }
-
-    private int compileShader(String filePath, int shaderType) {
-        var source = AiohUtils.readFile(filePath);
-
-        var shaderId = glCreateShader(shaderType);
-        glCall(() -> glShaderSource(shaderId, source));
-        glCall(() -> glCompileShader(shaderId));
-
-        var result = BufferUtils.createIntBuffer(1);
-        glCall(() -> glGetShaderiv(shaderId, GL_COMPILE_STATUS, result));
-
-        if (result.get(0) == GL_FALSE) {
-            String msg = glGetShaderInfoLog(shaderId);
-            throw new RuntimeException("Failed to compile " + ((shaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment") + "\n" + msg);
-        }
-
-        return shaderId;
-    }
-
-    public void setCurrentShader(AiohShader shader) {
-        this.currentShader = shader;
-        var program = this.programs[shader.ordinal()];
-        glCall(() -> glUseProgram(program));
-        for (int i = 1; i < this.uniformsSlots.length; i++) {
-            this.uniformsSlots[i] = getUniformLocation(program, UNIFORM_SLOTS_NAMES[i]);
-        }
-//        glCall(() -> glUniform1f(this.uniformsSlots[0], this.time));
-        glCall(() -> glUniform2f(this.uniformsSlots[1], this.resolution.getX(), this.resolution.getY()));
-        glCall(() -> glUniform2f(this.uniformsSlots[2], this.cameraPos.getX(), this.cameraPos.getY()));
-        glCall(() -> glUniform1f(this.uniformsSlots[3], this.cameraScale));
-    }
-
-    public int getUniformLocation(int program, String name) {
-// TODO: load uniforms from cache
-
-//        var locationFromCache = this.uniformsLocations.get(name);
-//
-//        if (locationFromCache != null) {
-//            return locationFromCache;
-//        }
-//
-        glClearErrors();
-        var location = glGetUniformLocation(program, name);
-        glCheckErrors();
-        if (location == -1) {
-            System.err.println("[OpenGL Warning]: uniform '" + name + "' doesn't exist");
-        }
-//        this.uniformsLocations.put(name, location);
-        return location;
-    }
-
-    public void sync() {
-        var buffer = BufferUtils.createFloatBuffer(this.vertices.getBufferSize());
-        buffer.put(this.vertices.getBuffer());
-        buffer.flip();
-        glCall(() -> glBufferSubData(GL_ARRAY_BUFFER, 0, buffer));
-    }
-
-    public void draw() {
-        glCall(() -> glDrawArrays(GL_TRIANGLES, 0, this.vertices.getCount()));
-    }
-
+    /**
+     * Clears the drawing area.
+     */
     public void clear() {
-        this.vertices.clear();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
+    /**
+     * Begin rendering.
+     */
+    public void begin() {
+        if (drawing) {
+            throw new IllegalStateException("Renderer is already drawing!");
+        }
+        drawing = true;
+        numVertices = 0;
+    }
+
+    /**
+     * End rendering.
+     */
+    public void end() {
+        if (!drawing) {
+            throw new IllegalStateException("Renderer isn't drawing!");
+        }
+        drawing = false;
+        flush();
+    }
+
+    /**
+     * Flushes the data to the GPU to let it get rendered.
+     */
     public void flush() {
-        sync();
-        draw();
-        clear();
-    }
+        if (numVertices > 0) {
+            vertices.flip();
 
-    public void renderLineOfText(AiohFreeGlyphAtlas atlas, String text, Vec2 pos, Vec4 color) {
-        for (int i = 0; i < text.length(); i++) {
-            var glyphIndex = text.charAt(i);
-
-            // TODO: support for glyphs outside of ASCII range
-            if (glyphIndex >= AiohFreeGlyphAtlas.GLYPH_METRICS_CAPACITY) {
-                glyphIndex = '?';
+            if (vao != null) {
+                vao.bind();
+            } else {
+                vbo.bind(GL_ARRAY_BUFFER);
+                specifyVertexAttributes();
             }
+            program.use();
 
-            var metric = atlas.getMetrics()[glyphIndex];
-            float x2 = pos.getX() + metric.bl;
-            float y2 = -pos.getY() - metric.bt;
-            float w = metric.bw;
-            float h = metric.bh;
+            /* Upload the new vertex data */
+            vbo.bind(GL_ARRAY_BUFFER);
+            vbo.uploadSubData(GL_ARRAY_BUFFER, 0, vertices);
 
-            pos.setX(pos.getX() + metric.ax);
-            pos.setY(pos.getY() + metric.ay);
+            /* Draw batch */
+            glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
-            vertices.addImageRect(
-                    new Vec2(x2, -y2),
-                    new Vec2(w, -h),
-                    new Vec2(metric.tx, 0),
-                    new Vec2(metric.bw / atlas.getAtlasWidth(), metric.bh / atlas.getAtlasHeight()),
-                    color
-            );
-
+            /* Clear vertex data for next batch */
+            vertices.clear();
+            numVertices = 0;
         }
     }
 
-    public void setTime(float time) {
-        this.time = time;
+    /**
+     * Draws the currently bound texture on specified coordinates.
+     *
+     * @param texture Used for getting width and height of the texture
+     * @param x       X position of the texture
+     * @param y       Y position of the texture
+     */
+    public void drawTexture(Texture texture, float x, float y) {
+        drawTexture(texture, x, y, new Vec4(1));
     }
 
-    public void setCameraScale(float cameraScale) {
-        this.cameraScale = cameraScale;
+    /**
+     * Draws the currently bound texture on specified coordinates and with
+     * specified color.
+     *
+     * @param texture Used for getting width and height of the texture
+     * @param x       X position of the texture
+     * @param y       Y position of the texture
+     * @param c       The color to use
+     */
+    public void drawTexture(Texture texture, float x, float y, Vec4 c) {
+        /* Vertex positions */
+        float x1 = x;
+        float y1 = y;
+        float x2 = x1 + texture.getWidth();
+        float y2 = y1 + texture.getHeight();
+
+        /* Texture coordinates */
+        float s1 = 0f;
+        float t1 = 0f;
+        float s2 = 1f;
+        float t2 = 1f;
+
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
     }
 
-    public void setCameraScaleVel(float cameraScaleVel) {
-        this.cameraScaleVel = cameraScaleVel;
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param texture   Used for getting width and height of the texture
+     * @param x         X position of the texture
+     * @param y         Y position of the texture
+     * @param regX      X position of the texture region
+     * @param regY      Y position of the texture region
+     * @param regWidth  Width of the texture region
+     * @param regHeight Height of the texture region
+     */
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight) {
+        drawTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, new Vec4(1));
     }
 
-    public void setCameraPos(Vec2 cameraPos) {
-        this.cameraPos = cameraPos;
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param texture   Used for getting width and height of the texture
+     * @param x         X position of the texture
+     * @param y         Y position of the texture
+     * @param regX      X position of the texture region
+     * @param regY      Y position of the texture region
+     * @param regWidth  Width of the texture region
+     * @param regHeight Height of the texture region
+     * @param c         The color to use
+     */
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, Vec4 c) {
+        /* Vertex positions */
+        float x1 = x;
+        float y1 = y;
+        float x2 = x + regWidth;
+        float y2 = y + regHeight;
+
+        /* Texture coordinates */
+        float s1 = regX / texture.getWidth();
+        float t1 = regY / texture.getHeight();
+        float s2 = (regX + regWidth) / texture.getWidth();
+        float t2 = (regY + regHeight) / texture.getHeight();
+
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
     }
 
-    public void setCameraVel(Vec2 cameraVel) {
-        this.cameraVel = cameraVel;
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param x1 Bottom left x position
+     * @param y1 Bottom left y position
+     * @param x2 Top right x position
+     * @param y2 Top right y position
+     * @param s1 Bottom left s coordinate
+     * @param t1 Bottom left t coordinate
+     * @param s2 Top right s coordinate
+     * @param t2 Top right t coordinate
+     */
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2) {
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, new Vec4(1));
     }
 
-    public Vec2 getResolution() {
-        return resolution;
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param x1 Bottom left x position
+     * @param y1 Bottom left y position
+     * @param x2 Top right x position
+     * @param y2 Top right y position
+     * @param s1 Bottom left s coordinate
+     * @param t1 Bottom left t coordinate
+     * @param s2 Top right s coordinate
+     * @param t2 Top right t coordinate
+     * @param c  The color to use
+     */
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, Vec4 c) {
+        if (vertices.remaining() < 8 * 6) {
+            /* We need more space in the buffer, so flush it */
+            flush();
+        }
+
+        float r = c.getR();
+        float g = c.getG();
+        float b = c.getB();
+        float a = c.getA();
+
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
+        vertices.put(x1).put(y2).put(r).put(g).put(b).put(a).put(s1).put(t2);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
+
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
+        vertices.put(x2).put(y1).put(r).put(g).put(b).put(a).put(s2).put(t1);
+
+        numVertices += 6;
     }
 
-    public float getCameraScale() {
-        return cameraScale;
+    /**
+     * Dispose renderer and clean up its used data.
+     */
+    public void dispose() {
+        MemoryUtil.memFree(vertices);
+
+        if (vao != null) {
+            vao.delete();
+        }
+        vbo.delete();
+        program.delete();
+
+        font.dispose();
+        debugFont.dispose();
     }
 
-    public float getTime() {
-        return time;
+    /**
+     * Setups the default shader program.
+     */
+    private void setupShaderProgram() {
+        if (AiohEditor.isDefaultContext()) {
+            /* Generate Vertex Array Object */
+            vao = new VertexArrayObject();
+            vao.bind();
+        } else {
+            vao = null;
+        }
+
+        /* Generate Vertex Buffer Object */
+        vbo = new VertexBufferObject();
+        vbo.bind(GL_ARRAY_BUFFER);
+
+        /* Create FloatBuffer */
+        vertices = MemoryUtil.memAllocFloat(4096);
+
+        /* Upload null data to allocate storage for the VBO */
+        long size = vertices.capacity() * Float.BYTES;
+        vbo.uploadData(GL_ARRAY_BUFFER, size, GL_DYNAMIC_DRAW);
+
+        /* Initialize variables */
+        numVertices = 0;
+        drawing = false;
+
+        /* Load shaders */
+        Shader vertexShader, fragmentShader;
+        if (AiohEditor.isDefaultContext()) {
+            vertexShader = Shader.loadShader(GL_VERTEX_SHADER, AiohUtils.SHADERS_PATH + "/default.vert");
+            fragmentShader = Shader.loadShader(GL_FRAGMENT_SHADER, AiohUtils.SHADERS_PATH + "/default.frag");
+        } else {
+            vertexShader = Shader.loadShader(GL_VERTEX_SHADER, AiohUtils.SHADERS_PATH + "/legacy.vert");
+            fragmentShader = Shader.loadShader(GL_FRAGMENT_SHADER, AiohUtils.SHADERS_PATH + "/legacy.frag");
+        }
+
+        /* Create shader program */
+        program = new ShaderProgram();
+        program.attachShader(vertexShader);
+        program.attachShader(fragmentShader);
+        if (AiohEditor.isDefaultContext()) {
+            program.bindFragmentDataLocation(0, "fragColor");
+        }
+        program.link();
+        program.use();
+
+        /* Delete linked shaders */
+        vertexShader.delete();
+        fragmentShader.delete();
+
+        /* Get width and height of framebuffer */
+        long window = GLFW.glfwGetCurrentContext();
+        int width, height;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer widthBuffer = stack.mallocInt(1);
+            IntBuffer heightBuffer = stack.mallocInt(1);
+            GLFW.glfwGetFramebufferSize(window, widthBuffer, heightBuffer);
+            width = widthBuffer.get();
+            height = heightBuffer.get();
+        }
+
+        /* Specify Vertex Pointers */
+        specifyVertexAttributes();
+
+        /* Set texture uniform */
+        int uniTex = program.getUniformLocation("texImage");
+        program.setUniform(uniTex, 0);
+
+        /* Set model matrix to identity matrix */
+        var model = new Mat4();
+        int uniModel = program.getUniformLocation("model");
+        program.setUniform(uniModel, model);
+
+        /* Set view matrix to identity matrix */
+        var view = new Mat4();
+        int uniView = program.getUniformLocation("view");
+        program.setUniform(uniView, view);
+
+        /* Set projection matrix to an orthographic projection */
+        var projection = glm.ortho(0f, width, 0f, height, -1f, 1f);
+        int uniProjection = program.getUniformLocation("projection");
+        program.setUniform(uniProjection, projection);
     }
 
-    public float getCameraScaleVel() {
-        return cameraScaleVel;
+    /**
+     * Specifies the vertex pointers.
+     */
+    private void specifyVertexAttributes() {
+        /* Specify Vertex Pointer */
+        int posAttrib = program.getAttributeLocation("position");
+        program.enableVertexAttribute(posAttrib);
+        program.pointVertexAttribute(posAttrib, 2, 8 * Float.BYTES, 0);
+
+        /* Specify Color Pointer */
+        int colAttrib = program.getAttributeLocation("color");
+        program.enableVertexAttribute(colAttrib);
+        program.pointVertexAttribute(colAttrib, 4, 8 * Float.BYTES, 2 * Float.BYTES);
+
+        /* Specify Texture Pointer */
+        int texAttrib = program.getAttributeLocation("texcoord");
+        program.enableVertexAttribute(texAttrib);
+        program.pointVertexAttribute(texAttrib, 2, 8 * Float.BYTES, 6 * Float.BYTES);
     }
 
-    public Vec2 getCameraPos() {
-        return cameraPos;
+    public Font getFont() {
+        return font;
     }
-
-    public Vec2 getCameraVel() {
-        return cameraVel;
-    }
-
-
 }

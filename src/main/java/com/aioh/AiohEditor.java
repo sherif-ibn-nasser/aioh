@@ -1,93 +1,51 @@
 package com.aioh;
 
 import com.aioh.graphics.AiohRenderer;
-import com.aioh.graphics.AiohShader;
-import com.aioh.text.AiohFreeGlyphAtlas;
+import com.aioh.graphics.Timer;
 import glm_.vec2.Vec2;
 import glm_.vec4.Vec4;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
 
 public class AiohEditor {
-    private AiohFreeGlyphAtlas atlas;
-    private AiohRenderer renderer;
-    private StringBuilder text = new StringBuilder(1024);
+    public static final int FONT_SIZE = 32;
+    public static final int CURSOR_BLINK_THRESHOLD = 500;
+    public static final int CURSOR_BLINK_PERIOD = 1000;
+
+    private Timer timer = new Timer();
+    private AiohRenderer renderer = new AiohRenderer();
+    private StringBuilder text = new StringBuilder("");
+    private Vec2 cursorPos = new Vec2();
+    private float windowWidth, windowHeight;
+
+    public static boolean isDefaultContext() {
+        return GL.getCapabilities().OpenGL32;
+    }
 
     public void init() {
-        var face = AiohUtils.initFace();
-        atlas = new AiohFreeGlyphAtlas(face);
-        renderer = new AiohRenderer();
+        renderer.init();
     }
 
-    public void render(float w, float h) {
-        this.renderer.getResolution().setX(w);
-        this.renderer.getResolution().setY(h);
-        this.renderer.setTime((float) GLFW.glfwGetTime());
-        var max_line_len = renderText();
-        updateCamera(w, max_line_len);
+    public void loop(float windowWidth, float windowHeight) {
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
+        renderer.getFont().drawText(renderer, text, windowWidth / 2, windowHeight / 2 - cursorPos.getY() * renderer.getFont().getFontHeight());
+        drawCursor();
     }
 
-    private float renderText() {
-        float max_line_len = 0.0f;
+    private void drawCursor() {
+        var t = (timer.getTime() - timer.getLastLoopTime()) * 1000;
 
-        renderer.setCurrentShader(AiohShader.TEXT);
+        if (t > CURSOR_BLINK_THRESHOLD)
+            renderer.getFont().drawText(
+                    renderer,
+                    "|",
+                    cursorPos.getX() * FONT_SIZE / 2 - (float) FONT_SIZE / 4 + windowWidth / 2,
+                    windowHeight / 2,
+                    new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1)
+            );
 
-        var pos = new Vec2(0, 0);
-        var color = new Vec4(1);
-
-        for (int i = 0; i < text.length(); i++) {
-            var glyph_index = text.charAt(i);
-
-            // TODO: support for glyphs outside of ASCII range
-            if (glyph_index >= AiohFreeGlyphAtlas.GLYPH_METRICS_CAPACITY) {
-                glyph_index = '?';
-            }
-
-            renderer.renderLineOfText(atlas, String.valueOf(glyph_index), pos, color);
-
-            var metric = atlas.getMetrics()[glyph_index];
-            pos.setX(pos.getX() + metric.ax);
-
-            if (max_line_len < pos.getX()) max_line_len = pos.getX();
-
-        }
-        renderer.flush();
-
-        return max_line_len;
-    }
-
-    private void updateCamera(float w, float max_line_len) {
-
-        Vec2 cursor_pos = new Vec2();
-        if (max_line_len > 1000.0f) {
-            max_line_len = 1000.0f;
-        }
-
-        float target_scale = w / 3 / (max_line_len * 0.75f); // TODO: division by 0
-
-        Vec2 target = cursor_pos;
-        float offset = 0.0f;
-
-        if (target_scale > 3.0f) {
-            target_scale = 3.0f;
-        } else {
-            offset = cursor_pos.getX() - w / 3 / renderer.getCameraScale();
-            if (offset < 0.0f) offset = 0.0f;
-            target = new Vec2(w / 3 / renderer.getCameraScale() + offset, cursor_pos.getY());
-        }
-
-        renderer.setCameraVel(
-                target.minus(renderer.getCameraPos()).times(new Vec2(2))
-        );
-
-        renderer.setCameraScaleVel(
-                (target_scale - renderer.getCameraScale()) * 2
-        );
-
-        renderer.setCameraPos(renderer.getCameraPos().plus(
-                renderer.getCameraVel().times(new Vec2(AiohRenderer.DELTA_TIME))
-        ));
-
-        renderer.setCameraScale(renderer.getCameraScale() + renderer.getCameraScaleVel() * AiohRenderer.DELTA_TIME);
+        if (t > CURSOR_BLINK_PERIOD)
+            timer.getDelta();
 
     }
 
@@ -95,4 +53,7 @@ public class AiohEditor {
         return text;
     }
 
+    public Vec2 getCursorPos() {
+        return cursorPos;
+    }
 }

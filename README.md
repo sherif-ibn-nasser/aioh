@@ -29,6 +29,7 @@ large files, while maintaining perfect RTL (Right-to-Left) support for Arabic te
 - [Nazm Programming Language](https://github.com/sherif-ibn-nasser/nazm-lang)
 - [Report Issues](https://github.com/yourusername/aioh/issues)
 - [OpenGL Documentation](https://www.opengl.org/)
+- [LWJGL](www.lwjgl.org)
 
 ---
 
