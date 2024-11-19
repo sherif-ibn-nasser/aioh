@@ -104,7 +104,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             cursorCol = 0;
             cursorLine += 1;
         } else {
-            getCurrentLine().append(newChars);
+            getCurrentLine().insert(cursorCol, newChars);
             cursorCol += 1;
         }
     }
@@ -140,10 +140,36 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private void onUpArrowPressed() {
 
+        if (isCursorAtStartOfFile())
+            return;
+
+        if (cursorLine == 0) {
+            cursorCol = 0;
+            return;
+        }
+
+        cursorLine -= 1;
+        var currentLen = getCurrentLine().length();
+
+        if (currentLen < cursorCol)
+            cursorCol = currentLen;
     }
 
     private void onDownArrowPressed() {
 
+        if (isCursorAtEndOfFile())
+            return;
+
+        if (cursorLine == lines.size() - 1) {
+            cursorCol = getCurrentLine().length();
+            return;
+        }
+
+        cursorLine += 1;
+        var currentLen = getCurrentLine().length();
+
+        if (currentLen < cursorCol)
+            cursorCol = currentLen;
     }
 
     private void onLeftArrowPressed() {
