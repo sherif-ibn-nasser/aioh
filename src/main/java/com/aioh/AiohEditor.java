@@ -174,9 +174,30 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private void onLeftArrowPressed() {
 
+        if (isCursorAtStartOfFile())
+            return;
+
+        if (cursorCol == 0) {
+            cursorLine -= 1;
+            cursorCol = getCurrentLine().length();
+            return;
+        }
+
+        cursorCol -= 1;
+
     }
 
     private void onRightArrowPressed() {
 
+        if (isCursorAtEndOfFile())
+            return;
+
+        if (cursorCol == getCurrentLine().length()) {
+            cursorLine += 1;
+            cursorCol = 0;
+            return;
+        }
+
+        cursorCol += 1;
     }
 }
