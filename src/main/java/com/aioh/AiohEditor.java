@@ -19,7 +19,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private AiohRenderer renderer = new AiohRenderer();
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
     private float windowWidth, windowHeight;
-    private int cursorLine = 0, cursorCol = 0;
+    private int cursorLine = 0, cursorCol = 0, maxCursorCol = 0;
 
     public static boolean isDefaultContext() {
         return GL.getCapabilities().OpenGL32;
@@ -107,6 +107,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             getCurrentLine().insert(cursorCol, newChars);
             cursorCol += 1;
         }
+
+        maxCursorCol = cursorCol;
     }
 
     @Override
@@ -135,6 +137,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             getCurrentLine().deleteCharAt(cursorCol);
         }
 
+        maxCursorCol = cursorCol;
+
         // TODO: Handle deleting 3 and 4 bytes characters
     }
 
@@ -151,8 +155,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         cursorLine -= 1;
         var currentLen = getCurrentLine().length();
 
-        if (currentLen < cursorCol)
-            cursorCol = currentLen;
+        cursorCol = Math.min(currentLen, maxCursorCol);
     }
 
     private void onDownArrowPressed() {
@@ -168,8 +171,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         cursorLine += 1;
         var currentLen = getCurrentLine().length();
 
-        if (currentLen < cursorCol)
-            cursorCol = currentLen;
+        cursorCol = Math.min(currentLen, maxCursorCol);
     }
 
     private void onLeftArrowPressed() {
@@ -179,11 +181,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
         if (cursorCol == 0) {
             cursorLine -= 1;
-            cursorCol = getCurrentLine().length();
+            maxCursorCol = cursorCol = getCurrentLine().length();
             return;
         }
 
-        cursorCol -= 1;
+        maxCursorCol = cursorCol -= 1;
 
     }
 
@@ -194,10 +196,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
         if (cursorCol == getCurrentLine().length()) {
             cursorLine += 1;
-            cursorCol = 0;
+            maxCursorCol = cursorCol = 0;
             return;
         }
 
-        cursorCol += 1;
+        maxCursorCol = cursorCol += 1;
     }
 }
