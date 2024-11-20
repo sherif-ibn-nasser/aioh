@@ -12,15 +12,8 @@ public class AiohWindow {
     public interface EventsHandler {
         void onTextInput(char[] newChars);
 
-        void onBackspacePressed();
+        void onKeyPressed(int keyCode);
 
-        void onUpArrowPressed();
-
-        void onDownArrowPressed();
-
-        void onLeftArrowPressed();
-
-        void onRightArrowPressed();
     }
 
     private String title;
@@ -42,29 +35,8 @@ public class AiohWindow {
                 return;
             }
 
-            if (action != GLFW_PRESS)
-                return;
-
-            switch (key) {
-                case GLFW_KEY_BACKSPACE -> {
-                    handler.onBackspacePressed();
-                }
-                case GLFW_KEY_ENTER -> {
-                    handler.onTextInput(new char[]{'\n'});
-                }
-                case GLFW_KEY_UP -> {
-                    handler.onUpArrowPressed();
-                }
-                case GLFW_KEY_DOWN -> {
-                    handler.onDownArrowPressed();
-                }
-                case GLFW_KEY_LEFT -> {
-                    handler.onLeftArrowPressed();
-                }
-                case GLFW_KEY_RIGHT -> {
-                    handler.onRightArrowPressed();
-                }
-            }
+            if (action == GLFW_PRESS)
+                handler.onKeyPressed(key);
 
         });
 

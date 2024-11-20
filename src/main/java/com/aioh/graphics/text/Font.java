@@ -363,7 +363,6 @@ public class Font {
 //        }
 
         texture.bind();
-        renderer.begin();
         for (int i = 0; i < text.length(); i++) {
             char ch = text.charAt(i);
 
@@ -381,7 +380,6 @@ public class Font {
             renderer.drawTextureRegion(texture, drawX, drawY, g.x, g.y, g.width, g.height, c);
             drawX += g.width;
         }
-        renderer.end();
     }
 
     /**
