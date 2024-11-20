@@ -48,7 +48,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.getFont().drawText(
                 renderer,
                 text,
-                0,
+                (float) FONT_SIZE / 4 - (float) (cursorCol * FONT_SIZE) / 2,
                 cursorLine * renderer.getFont().getFontHeight()
         );
     }
@@ -60,7 +60,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             renderer.getFont().drawText(
                     renderer,
                     "|",
-                    (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 4,
+                    0,
                     0,
                     new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1)
             );
