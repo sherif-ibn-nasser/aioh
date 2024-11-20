@@ -18,7 +18,6 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private Timer timer = new Timer();
     private AiohRenderer renderer = new AiohRenderer();
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
-    private float windowWidth, windowHeight;
     private int cursorLine = 0, cursorCol = 0, maxCursorCol = 0;
 
     public static boolean isDefaultContext() {
@@ -30,10 +29,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.init();
     }
 
-    public void loop(float windowWidth, float windowHeight) {
-        this.windowWidth = windowWidth;
-        this.windowHeight = windowHeight;
-
+    public void loop() {
         renderer.begin();
         drawText();
         drawCursor();
@@ -52,8 +48,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.getFont().drawText(
                 renderer,
                 text,
-                windowWidth / 2,
-                windowHeight / 2 + cursorLine * renderer.getFont().getFontHeight()
+                0,
+                cursorLine * renderer.getFont().getFontHeight()
         );
     }
 
@@ -64,8 +60,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             renderer.getFont().drawText(
                     renderer,
                     "|",
-                    (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 4 + windowWidth / 2,
-                    windowHeight / 2,
+                    (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 4,
+                    0,
                     new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1)
             );
 

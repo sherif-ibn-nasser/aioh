@@ -1,5 +1,6 @@
 package com.aioh;
 
+import com.aioh.graphics.AiohRenderer;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
@@ -100,6 +101,8 @@ public class AiohWindow {
             this.width = width;
             this.height = height;
             this.resize = true;
+            glViewport(0, 0, width, height);
+            AiohRenderer.updateProjectionMatrix(width, height);
         });
 
         if (maximized)

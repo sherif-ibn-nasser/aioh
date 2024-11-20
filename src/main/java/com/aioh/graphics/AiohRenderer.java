@@ -56,7 +56,7 @@ public class AiohRenderer {
 
     private VertexArrayObject vao;
     private VertexBufferObject vbo;
-    private ShaderProgram program;
+    public static ShaderProgram program;
 
     private FloatBuffer vertices;
     private int numVertices;
@@ -372,8 +372,13 @@ public class AiohRenderer {
         int uniView = program.getUniformLocation("view");
         program.setUniform(uniView, view);
 
+        updateProjectionMatrix(width, height);
+
+    }
+
+    public static void updateProjectionMatrix(float width, float height) {
         /* Set projection matrix to an orthographic projection */
-        var projection = glm.ortho(0f, width, 0f, height, -1f, 1f);
+        var projection = glm.ortho(-width / 2, width / 2, -height / 2, height / 2, -1f, 1f);
         int uniProjection = program.getUniformLocation("projection");
         program.setUniform(uniProjection, projection);
     }
