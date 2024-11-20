@@ -362,18 +362,22 @@ public class AiohRenderer {
         int uniTex = program.getUniformLocation("texImage");
         program.setUniform(uniTex, 0);
 
-        /* Set model matrix to identity matrix */
-        var model = new Mat4();
-        int uniModel = program.getUniformLocation("model");
-        program.setUniform(uniModel, model);
-
-        /* Set view matrix to identity matrix */
-        var view = new Mat4();
-        int uniView = program.getUniformLocation("view");
-        program.setUniform(uniView, view);
-
+        updateModelMatrix(new Mat4());
+        updateViewMatrix(new Mat4());
         updateProjectionMatrix(width, height);
 
+    }
+
+    public static void updateModelMatrix(Mat4 model) {
+        /* Set model matrix to identity matrix */
+        int uniModel = program.getUniformLocation("model");
+        program.setUniform(uniModel, model);
+    }
+
+    public static void updateViewMatrix(Mat4 view) {
+        /* Set view matrix to identity matrix */
+        int uniView = program.getUniformLocation("view");
+        program.setUniform(uniView, view);
     }
 
     public static void updateProjectionMatrix(float width, float height) {

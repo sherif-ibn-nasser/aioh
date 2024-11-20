@@ -2,6 +2,7 @@ package com.aioh;
 
 import com.aioh.graphics.AiohRenderer;
 import com.aioh.graphics.Timer;
+import glm_.vec2.Vec2;
 import glm_.vec4.Vec4;
 import org.lwjgl.opengl.GL;
 
@@ -10,15 +11,19 @@ import java.util.ArrayList;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class AiohEditor implements AiohWindow.EventsHandler {
-    public static final int FONT_SIZE = 32;
+    public static final Vec4 GREEN_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1);
+    public static final int FONT_SIZE = 128;
     public static final int CURSOR_BLINK_THRESHOLD = 500;
     public static final int CURSOR_BLINK_PERIOD = 1000;
     public static final int LINE_INITIAL_CAP = 512;
+    public static final int CAMERA_START_VELOCITY_X = 10;
+    public static final int CAMERA_START_VELOCITY_Y = 10;
 
     private Timer timer = new Timer();
     private AiohRenderer renderer = new AiohRenderer();
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
     private int cursorLine = 0, cursorCol = 0, maxCursorCol = 0;
+    private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraVelocity = new Vec2();
 
     public static boolean isDefaultContext() {
         return GL.getCapabilities().OpenGL32;
@@ -32,6 +37,19 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public void loop() {
         renderer.begin();
         drawText();
+
+        cursorPos.setX(
+                (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 4
+        );
+        cursorPos.setY(
+                -cursorLine * renderer.getFont().getFontHeight()
+        );
+
+        cameraVelocity = cursorPos.minus(cameraPos).times(2);
+        cameraPos = cameraPos.plus(
+                cameraVelocity.times(1f / 60)
+        );
+
         drawCursor();
         renderer.end();
     }
@@ -48,9 +66,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.getFont().drawText(
                 renderer,
                 text,
-                (float) FONT_SIZE / 4 - (float) (cursorCol * FONT_SIZE) / 2,
-                cursorLine * renderer.getFont().getFontHeight()
+                -cameraPos.getX(),
+                -cameraPos.getY()
         );
+
     }
 
     private void drawCursor() {
@@ -62,7 +81,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
                     "|",
                     0,
                     0,
-                    new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1)
+                    GREEN_COLOR
             );
 
         if (t > CURSOR_BLINK_PERIOD)
@@ -114,6 +133,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         }
 
         maxCursorCol = cursorCol;
+
     }
 
     @Override
