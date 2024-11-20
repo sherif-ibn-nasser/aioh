@@ -54,14 +54,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         cameraPos = cameraPos.plus(
                 cameraCursorDiff.times(CAMERA_VELOCITY / 60f)
         );
-
-
-//        cursorPos.setX(cursorCol * FONT_SIZE);
-//        cursorPos.setY(-cursorLine * renderer.getFont().getFontHeight());
-//
-//        // Smoothly move the camera toward the cursor position
-//        cameraVelocity = cursorPos.minus(cameraPos).times(5);
-//        cameraPos = cameraPos.plus(cameraVelocity.times(1f / 60));
+        
     }
 
     private void drawText() {
@@ -123,7 +116,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
         if (newChars[0] == '\n') {
             if (cursorCol == getCurrentLine().length() && cursorCol != 0)
-                lines.add(new StringBuilder(LINE_INITIAL_CAP));
+                lines.add(cursorLine + 1, new StringBuilder(LINE_INITIAL_CAP));
 
             else {
                 var prevLine = getCurrentLine();
