@@ -12,17 +12,22 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class AiohEditor implements AiohWindow.EventsHandler {
     public static final Vec4 GREEN_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1);
-    public static final int FONT_SIZE = 64;
+    public static final int FONT_SIZE = 128;
     public static final int CURSOR_BLINK_THRESHOLD = 500;
     public static final int CURSOR_BLINK_PERIOD = 1000;
     public static final int LINE_INITIAL_CAP = 512;
     public static final int CAMERA_VELOCITY = 5;
+    public static final int FPS = 60;
+    public static final int CHARS_COUNT_CAMERA_SCALE_THRESHOLD = 50;
+    public static final int LINES_COUNT_CAMERA_SCALE_THRESHOLD = 10;
 
     private Timer timer = new Timer();
     private AiohRenderer renderer = new AiohRenderer();
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
     private int cursorLine = 0, cursorCol = 0, maxCursorCol = 0;
     private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
+    private int cameraScaleUniform, maxLineLen;
+    private float cameraScale = 1;
 
     public static boolean isDefaultContext() {
         return GL.getCapabilities().OpenGL32;
@@ -31,17 +36,21 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public void init() {
         lines.add(new StringBuilder(LINE_INITIAL_CAP));
         renderer.init();
+        cameraScaleUniform = AiohRenderer.program.getUniformLocation("cameraScale");
     }
 
     public void loop() {
-        updateCamera();
+        updateCameraPos();
+        updateCameraScale();
         renderer.begin();
         drawText();
         drawCursor();
         renderer.end();
     }
 
-    private void updateCamera() {
+
+    private void updateCameraPos() {
+
         cursorPos.setX(
                 (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 4
         );
@@ -52,9 +61,46 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         cameraCursorDiff = cursorPos.minus(cameraPos);
 
         cameraPos = cameraPos.plus(
-                cameraCursorDiff.times(CAMERA_VELOCITY / 60f)
+                cameraCursorDiff.times((float) CAMERA_VELOCITY / FPS)
         );
-        
+
+    }
+
+    public void updateCameraScale() {
+        updateMaxLineLen();
+
+        var cameraScaleVelocity = getCameraScaleVelocity();
+
+        cameraScale += cameraScaleVelocity;
+
+        if (cameraScale < 0.25f)
+            cameraScale = 0.25f;
+
+        AiohRenderer.program.setUniform(cameraScaleUniform, cameraScale);
+    }
+
+
+    private void updateMaxLineLen() {
+        maxLineLen = 0;
+
+        int i = cursorLine - LINES_COUNT_CAMERA_SCALE_THRESHOLD / 2;
+
+        if (i < 0) i = 0;
+        for (; i < lines.size() && i <= cursorLine + LINES_COUNT_CAMERA_SCALE_THRESHOLD / 2; i++) {
+            var len = lines.get(i).length();
+            if (maxLineLen < len)
+                maxLineLen = len;
+        }
+    }
+
+    private float getCameraScaleVelocity() {
+
+        if (maxLineLen > CHARS_COUNT_CAMERA_SCALE_THRESHOLD)
+            maxLineLen = CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
+
+        var targetCameraScale = 1f - (float) maxLineLen / CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
+
+        return (targetCameraScale - cameraScale) / FPS;
     }
 
     private void drawText() {

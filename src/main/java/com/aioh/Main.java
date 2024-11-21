@@ -9,7 +9,7 @@ public class Main {
 
         var editor = new AiohEditor();
 
-        var window = new AiohWindow("Aioh", 960, 540, editor);
+        var window = new AiohWindow("Aioh", 1280, 720, editor);
 
         editor.init();
 
