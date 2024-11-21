@@ -15,7 +15,7 @@ public class Main {
 
         while (!window.shouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT);
-            editor.loop(window.getWidth(), window.getHeight());
+            editor.loop();
             window.update();
         }
 
