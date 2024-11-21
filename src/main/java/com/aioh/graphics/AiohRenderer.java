@@ -362,9 +362,9 @@ public class AiohRenderer {
         int uniTex = program.getUniformLocation("texImage");
         program.setUniform(uniTex, 0);
 
-        updateModelMatrix(new Mat4());
-        updateViewMatrix(new Mat4());
-        updateProjectionMatrix(width, height);
+//        updateModelMatrix(new Mat4());
+//        updateViewMatrix(new Mat4());
+        updateMVPMatrix(width, height);
 
     }
 
@@ -384,6 +384,13 @@ public class AiohRenderer {
         /* Set projection matrix to an orthographic projection */
         var projection = glm.ortho(-width / 2, width / 2, -height / 2, height / 2, -1f, 1f);
         int uniProjection = program.getUniformLocation("projection");
+        program.setUniform(uniProjection, projection);
+    }
+
+    public static void updateMVPMatrix(float width, float height) {
+        /* Set projection matrix to an orthographic projection */
+        var projection = glm.ortho(-width / 2, width / 2, -height / 2, height / 2, -1f, 1f);
+        int uniProjection = program.getUniformLocation("mvp");
         program.setUniform(uniProjection, projection);
     }
 

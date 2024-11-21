@@ -102,7 +102,7 @@ public class AiohWindow {
             this.height = height;
             this.resize = true;
             glViewport(0, 0, width, height);
-            AiohRenderer.updateProjectionMatrix(width, height);
+            AiohRenderer.updateMVPMatrix(width, height);
         });
 
         if (maximized)
