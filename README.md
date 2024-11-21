@@ -12,6 +12,14 @@ Aioh is a modern text editor built for [Nazm Programming Language](https://githu
 Using OpenGL for rendering, it provides smooth scrolling, crisp text rendering, and excellent performance even with
 large files, while maintaining perfect RTL (Right-to-Left) support for Arabic text.
 
+## TODO
+
+- [ ] Key bindings
+- [ ] Load/Save files
+- [ ] Files browsing
+- [ ] Syntax highlighting
+- [ ] RTL rendering
+
 ## Key Features
 
 - 🚀 Hardware-accelerated rendering using OpenGL
@@ -22,7 +30,7 @@ large files, while maintaining perfect RTL (Right-to-Left) support for Arabic te
 - 🔍 Real-time error detection
 - 🎯 Zero-latency typing experience
 - 🌙 GPU-accelerated animations and transitions
-- 💻 Support for high-DPI displays```**
+- 💻 Support for high-DPI displays**
 
 ## Links
 
