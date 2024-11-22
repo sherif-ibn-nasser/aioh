@@ -15,6 +15,7 @@ public class AiohWindow {
 
         void onKeyPressed(int keyCode);
 
+        void onModKeysPressed(int mods, int keyCode);
     }
 
     private String title;
@@ -27,24 +28,11 @@ public class AiohWindow {
         this.width = width;
         this.height = height;
 
-        init();
+        init(handler);
 
-        glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {
-
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                glfwSetWindowShouldClose(window, true);
-                return;
-            }
-
-            if (action == GLFW_PRESS)
-                handler.onKeyPressed(key);
-
-        });
-
-        glfwSetCharCallback(window, (window, codePoint) -> {
-            var newChars = Character.toChars(codePoint);
-            handler.onTextInput(newChars);
-        });
+        int major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
+        int minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
+        System.out.println("OpenGL version: " + major + "." + minor);
     }
 
     public static void glCall(Runnable callBack) {
@@ -65,7 +53,7 @@ public class AiohWindow {
         }
     }
 
-    private void init() {
+    private void init(EventsHandler handler) {
         GLFWErrorCallback.createPrint(System.err);
 
         if (!glfwInit())
@@ -93,9 +81,6 @@ public class AiohWindow {
         if (window == MemoryUtil.NULL)
             throw new RuntimeException("Failed to create a GLFW window");
 
-        int major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
-        int minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
-        System.out.println("OpenGL version: " + major + "." + minor);
 
         glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             this.width = width;
@@ -103,6 +88,27 @@ public class AiohWindow {
             this.resize = true;
             glViewport(0, 0, width, height);
             AiohRenderer.updateMVPMatrix(width, height);
+        });
+
+        glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {
+
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                glfwSetWindowShouldClose(window, true);
+                return;
+            }
+
+            if (action == GLFW_PRESS) {
+                if (mods != 0)
+                    handler.onModKeysPressed(mods, key);
+                else
+                    handler.onKeyPressed(key);
+            }
+
+        });
+
+        glfwSetCharCallback(window, (window, codePoint) -> {
+            var newChars = Character.toChars(codePoint);
+            handler.onTextInput(newChars);
         });
 
         if (maximized)
@@ -119,6 +125,7 @@ public class AiohWindow {
 
         glCall(() -> glEnable(GL_BLEND));
         glCall(() -> glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
     }
 
     public void update() {

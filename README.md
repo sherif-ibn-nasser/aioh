@@ -1,19 +1,22 @@
-# Aioh - A Modern Text Editor for Nazm Programming Language
+# Aioh - Advanced Integrated Optimized Harmonic text editor
 
 ![Aioh Editor Logo](assets/aioh-logo.svg)
 
-<div>
-A high-performance text editor with hardware-accelerated rendering, designed specifically for the Nazm Arabic programming language.
-</div>
+<div> A high-performance text editor with hardware-accelerated rendering, built for modern developers and optimized for smooth and efficient text editing workflows. </div>
 
 ## Overview
 
-Aioh is a modern text editor built for [Nazm Programming Language](https://github.com/sherif-ibn-nasser/nazm-lang).
-Using OpenGL for rendering, it provides smooth scrolling, crisp text rendering, and excellent performance even with
-large files, while maintaining perfect RTL (Right-to-Left) support for Arabic text.
+Aioh is a modern, versatile text editor designed for developers who demand high performance and flexibility. Leveraging
+OpenGL for rendering, Aioh delivers smooth scrolling, crisp text rendering, and exceptional performance, even when
+working with large files.
+
+While Aioh provides excellent support for Right-to-Left (RTL) languages, including Arabic, it is not limited to a
+specific language or programming environment. The editor includes specialized features for Nazm Programming Language,
+but it is designed as a general-purpose editor for a wide range of use cases.
 
 ## TODO
 
+- [ ] Text selection
 - [ ] Key bindings
 - [ ] Load/Save files
 - [ ] Files browsing
@@ -30,7 +33,7 @@ large files, while maintaining perfect RTL (Right-to-Left) support for Arabic te
 - 🔍 Real-time error detection
 - 🎯 Zero-latency typing experience
 - 🌙 GPU-accelerated animations and transitions
-- 💻 Support for high-DPI displays**
+- 💻 Support for high-DPI displays
 
 ## Links
 
@@ -38,9 +41,3 @@ large files, while maintaining perfect RTL (Right-to-Left) support for Arabic te
 - [Report Issues](https://github.com/yourusername/aioh/issues)
 - [OpenGL Documentation](https://www.opengl.org/)
 - [LWJGL](www.lwjgl.org)
-
----
-
-<div align="center">
-مُحرر نصوص عالي الأداء مخصص للغة نظم البرمجية
-</div>

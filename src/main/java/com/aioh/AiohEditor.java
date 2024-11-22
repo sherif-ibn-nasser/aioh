@@ -194,6 +194,16 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         }
     }
 
+    /**
+     * @param mods    an integer represents mod key they are pressed.
+     *                <a href="https://www.glfw.org/docs/3.3/group__mods.html#ga6ed94871c3208eefd85713fa929d45aa">See also</a>
+     * @param keyCode the key pressed with the mod key
+     */
+    @Override
+    public void onModKeysPressed(int mods, int keyCode) {
+        // TODO
+    }
+
     private void onBackspacePressed() {
 
         if (isCursorAtStartOfFile())
