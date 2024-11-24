@@ -8,6 +8,8 @@ import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
 
+import static com.aioh.graphics.AiohRenderer.mainProgram;
+import static com.aioh.graphics.AiohRenderer.textSelectionProgram;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class AiohEditor implements AiohWindow.EventsHandler {
@@ -36,15 +38,25 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public void init() {
         lines.add(new StringBuilder(LINE_INITIAL_CAP));
         renderer.init();
-        cameraScaleUniform = AiohRenderer.program.getUniformLocation("cameraScale");
+        cameraScaleUniform = mainProgram.getUniformLocation("cameraScale");
     }
 
     public void loop() {
         updateCameraPos();
         updateCameraScale();
         renderer.begin();
+        mainProgram.use();
+        mainProgram.setUniform(cameraScaleUniform, cameraScale);
         drawText();
         drawCursor();
+        renderer.end();
+
+        renderer.begin();
+        textSelectionProgram.use();
+        AiohRenderer.updateMVPMatrix(textSelectionProgram, 1280, 720);
+        var cameraScaleUniform = textSelectionProgram.getUniformLocation("cameraScale");
+        textSelectionProgram.setUniform(cameraScaleUniform, cameraScale);
+        drawText();
         renderer.end();
     }
 
@@ -76,7 +88,6 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (cameraScale < 0.25f)
             cameraScale = 0.25f;
 
-        AiohRenderer.program.setUniform(cameraScaleUniform, cameraScale);
     }
 
 

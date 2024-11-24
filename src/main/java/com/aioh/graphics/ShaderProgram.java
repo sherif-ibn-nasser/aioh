@@ -246,6 +246,7 @@ public class ShaderProgram {
      */
     public void use() {
         glUseProgram(id);
+        AiohRenderer.currentProgram = this;
     }
 
     /**

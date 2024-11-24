@@ -11,7 +11,7 @@ public class Main {
 
     public static java.awt.Font font;
 
-    public static String vertexShaderSource, fragmentShaderSource;
+    public static String vertexShaderSource, fragmentShaderSource, selectionFragmentShaderSource;
 
     public static void main(String[] args) throws Exception {
 
@@ -20,6 +20,7 @@ public class Main {
         font = java.awt.Font.createFont(TRUETYPE_FONT, fontFile).deriveFont(PLAIN, AiohEditor.FONT_SIZE);
         vertexShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.vert");
         fragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.frag");
+        selectionFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/selection.frag");
 
         var editor = new AiohEditor();
 
