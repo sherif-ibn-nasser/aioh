@@ -23,8 +23,6 @@
  */
 package com.aioh.graphics;
 
-import java.io.*;
-
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.*;
 
@@ -107,33 +105,7 @@ public class Shader {
         Shader shader = new Shader(type);
         shader.source(source);
         shader.compile();
-
         return shader;
-    }
-
-    /**
-     * Loads a shader from a file.
-     *
-     * @param type Type of the shader
-     * @param path File path of the shader
-     * @return Compiled Shader from specified file
-     */
-    public static Shader loadShader(int type, String path) {
-        StringBuilder builder = new StringBuilder();
-
-        try (InputStream in = new FileInputStream(path);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line).append("\n");
-            }
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to load a shader file!"
-                    + System.lineSeparator() + ex.getMessage());
-        }
-        CharSequence source = builder.toString();
-
-        return createShader(type, source);
     }
 
 }

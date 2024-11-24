@@ -24,7 +24,7 @@
 package com.aioh.graphics;
 
 import com.aioh.AiohEditor;
-import com.aioh.AiohUtils;
+import com.aioh.Main;
 import com.aioh.graphics.text.Font;
 import glm_.mat4x4.Mat4;
 import glm_.vec4.Vec4;
@@ -32,14 +32,11 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-import java.awt.*;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import static com.aioh.Main.fragmentShaderSource;
+import static com.aioh.Main.vertexShaderSource;
 import static glm_.Java.glm;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -77,13 +74,8 @@ public class AiohRenderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         /* Create fonts */
-        try {
-            font = new Font(new FileInputStream(AiohUtils.FONTS_PATH + "/iosevka-regular.ttf"), AiohEditor.FONT_SIZE);
-        } catch (FontFormatException | IOException ex) {
-            Logger.getLogger(AiohRenderer.class.getName()).log(Level.CONFIG, null, ex);
-            font = new Font();
-        }
-        debugFont = new Font(12, false);
+        font = new Font(Main.font, true);
+//        debugFont = new Font(12, false);
     }
 
     /**
@@ -323,11 +315,10 @@ public class AiohRenderer {
         /* Load shaders */
         Shader vertexShader, fragmentShader;
         if (AiohEditor.isDefaultContext()) {
-            vertexShader = Shader.loadShader(GL_VERTEX_SHADER, AiohUtils.SHADERS_PATH + "/default.vert");
-            fragmentShader = Shader.loadShader(GL_FRAGMENT_SHADER, AiohUtils.SHADERS_PATH + "/default.frag");
+            vertexShader = Shader.createShader(GL_VERTEX_SHADER, vertexShaderSource);
+            fragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
         } else {
-            vertexShader = Shader.loadShader(GL_VERTEX_SHADER, AiohUtils.SHADERS_PATH + "/legacy.vert");
-            fragmentShader = Shader.loadShader(GL_FRAGMENT_SHADER, AiohUtils.SHADERS_PATH + "/legacy.frag");
+            throw new RuntimeException("Minimum supported OpenGL version is 3.2. Try to upgrade your drivers.");
         }
 
         /* Create shader program */

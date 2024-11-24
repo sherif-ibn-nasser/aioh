@@ -123,9 +123,6 @@ public class AiohWindow {
 
         GL.createCapabilities();
 
-        glCall(() -> glEnable(GL_BLEND));
-        glCall(() -> glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
     }
 
     public void update() {
