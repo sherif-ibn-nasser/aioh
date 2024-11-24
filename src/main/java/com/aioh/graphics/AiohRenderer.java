@@ -367,8 +367,10 @@ public class AiohRenderer {
 
 //        updateModelMatrix(new Mat4());
 //        updateViewMatrix(new Mat4());
-        updateMVPMatrix(mainProgram, width, height);
+        textSelectionProgram.use();
         updateMVPMatrix(textSelectionProgram, width, height);
+        mainProgram.use();
+        updateMVPMatrix(mainProgram, width, height);
 
     }
 

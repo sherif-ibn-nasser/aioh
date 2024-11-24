@@ -7,6 +7,7 @@ import glm_.vec4.Vec4;
 import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import static com.aioh.graphics.AiohRenderer.mainProgram;
 import static com.aioh.graphics.AiohRenderer.textSelectionProgram;
@@ -20,7 +21,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public static final int LINE_INITIAL_CAP = 512;
     public static final int CAMERA_VELOCITY = 5;
     public static final int FPS = 60;
-    public static final int CHARS_COUNT_CAMERA_SCALE_THRESHOLD = 50;
+    public static final int CHARS_COUNT_CAMERA_SCALE_THRESHOLD = 100;
     public static final int LINES_COUNT_CAMERA_SCALE_THRESHOLD = 10;
 
     private Timer timer = new Timer();
@@ -28,7 +29,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
     private int cursorLine = 0, cursorCol = 0, maxCursorCol = 0;
     private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
-    private int cameraScaleUniform, maxLineLen;
+    private int maxLineLen;
     private float cameraScale = 1;
 
     public static boolean isDefaultContext() {
@@ -38,24 +39,22 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public void init() {
         lines.add(new StringBuilder(LINE_INITIAL_CAP));
         renderer.init();
-        cameraScaleUniform = mainProgram.getUniformLocation("cameraScale");
     }
 
     public void loop() {
         updateCameraPos();
         updateCameraScale();
+
         renderer.begin();
         mainProgram.use();
-        mainProgram.setUniform(cameraScaleUniform, cameraScale);
+        mainProgram.setUniform("cameraScale", cameraScale);
         drawText();
         drawCursor();
         renderer.end();
 
         renderer.begin();
         textSelectionProgram.use();
-        AiohRenderer.updateMVPMatrix(textSelectionProgram, 1280, 720);
-        var cameraScaleUniform = textSelectionProgram.getUniformLocation("cameraScale");
-        textSelectionProgram.setUniform(cameraScaleUniform, cameraScale);
+        textSelectionProgram.setUniform("cameraScale", cameraScale);
         drawText();
         renderer.end();
     }
@@ -79,12 +78,26 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     public void updateCameraScale() {
+
         updateMaxLineLen();
 
+        var len = lines.stream().max(Comparator.comparingInt(a -> a.length())).get().length();
+        maxLineLen = len;
+        if (len > 1000)
+            len = 1000;
+
+        float target_scale = 720f / 3f / (len * 0.75f);
+
+        if (target_scale > 1) {
+            target_scale = 1;
+        }
+
+//        var cameraScaleVelocity = (target_scale - cameraScale);
+//
         var cameraScaleVelocity = getCameraScaleVelocity();
-
+//
         cameraScale += cameraScaleVelocity;
-
+//
         if (cameraScale < 0.25f)
             cameraScale = 0.25f;
 
