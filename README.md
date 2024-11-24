@@ -16,6 +16,7 @@ but it is designed as a general-purpose editor for a wide range of use cases.
 
 ## TODO
 
+- [X] Text rendering
 - [ ] Text selection
 - [ ] Key bindings
 - [ ] Load/Save files
