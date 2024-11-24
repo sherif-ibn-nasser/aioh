@@ -6,6 +6,7 @@ in vec2 texcoord;
 
 out vec4 vertexColor;
 out vec2 textureCoord;
+out vec2 pos;
 
 //uniform mat4 model;
 //uniform mat4 view;
@@ -18,4 +19,5 @@ void main() {
     textureCoord = texcoord;
     //    mat4 mvp = projection * view * model;
     gl_Position = mvp * vec4(cameraScale * position, 0.0, 1.0);
+    pos = gl_Position.xy;
 }
