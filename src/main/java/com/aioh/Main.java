@@ -1,9 +1,12 @@
 package com.aioh;
 
+import com.aioh.graphics.AiohRenderer;
+
 import java.io.FileInputStream;
 
 import static java.awt.Font.PLAIN;
 import static java.awt.Font.TRUETYPE_FONT;
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.opengl.GL46.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL46.glClear;
 
@@ -27,7 +30,10 @@ public class Main {
 
         editor.init();
 
+        var timeUniform = AiohRenderer.program.getUniformLocation("time");
+
         while (!window.shouldClose()) {
+            AiohRenderer.program.setUniform(timeUniform, (float) glfwGetTime());
             glClear(GL_COLOR_BUFFER_BIT);
             editor.loop();
             window.update();
