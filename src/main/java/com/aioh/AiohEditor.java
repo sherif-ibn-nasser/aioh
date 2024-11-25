@@ -21,7 +21,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public static final int LINE_INITIAL_CAP = 512;
     public static final int CAMERA_VELOCITY = 5;
     public static final int FPS = 60;
-    public static final int CHARS_COUNT_CAMERA_SCALE_THRESHOLD = 100;
+    public static final int CHARS_COUNT_CAMERA_SCALE_THRESHOLD = 50;
     public static final int LINES_COUNT_CAMERA_SCALE_THRESHOLD = 10;
 
     private Timer timer = new Timer();
@@ -31,7 +31,6 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             cursorLine = 0,
             cursorCol = 0,
             maxCursorCol = 0,
-            maxLineLen,
             selectionStartLine = 0,
             selectionStartCol = 0,
             selectionEndLine = 0,
@@ -53,19 +52,45 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         updateCameraScale();
 
         renderer.begin();
+        textSelectionProgram.use();
+        textSelectionProgram.setUniform("cameraScale", cameraScale);
+//        renderer.drawTextureRegion(-5, (float) -renderer.getFont().getFontHeight() / 2, 5, (float) renderer.getFont().getFontHeight() / 2, 0, 0, 0, 0, new Vec4(1));
+        drawSelectedText();
+        renderer.end();
+
+        renderer.begin();
         mainProgram.use();
         mainProgram.setUniform("cameraScale", cameraScale);
         drawText();
         drawCursor();
         renderer.end();
-
-        renderer.begin();
-        textSelectionProgram.use();
-        textSelectionProgram.setUniform("cameraScale", cameraScale);
-        drawSelectedText();
-        renderer.end();
     }
 
+    private int getMaxLineLen() {
+        var line = lines.stream().max(Comparator.comparingInt(a -> a.length()));
+        return line.map(stringBuilder -> stringBuilder.length()).orElse(0);
+    }
+
+    private int getMaxLineLen(int fromIndex, int toIndex) {
+        if (fromIndex >= lines.size())
+            return 0;
+
+        if (fromIndex < 0)
+            fromIndex = 0;
+
+        if (toIndex >= lines.size())
+            toIndex = lines.size() - 1;
+
+        if (toIndex < fromIndex)
+            return 0;
+
+        if (toIndex == fromIndex)
+            return lines.get(fromIndex).length();
+
+        var line = lines.subList(fromIndex, toIndex).stream().max(Comparator.comparingInt(a -> a.length()));
+
+        return line.map(stringBuilder -> stringBuilder.length()).orElse(0);
+    }
 
     private void updateCameraPos() {
 
@@ -86,10 +111,6 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     public void updateCameraScale() {
 
-        updateMaxLineLen();
-
-        var len = lines.stream().max(Comparator.comparingInt(a -> a.length())).get().length();
-
         var cameraScaleVelocity = getCameraScaleVelocity();
 
         cameraScale += cameraScaleVelocity;
@@ -99,21 +120,9 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     }
 
-
-    private void updateMaxLineLen() {
-        maxLineLen = 0;
-
-        int i = cursorLine - LINES_COUNT_CAMERA_SCALE_THRESHOLD / 2;
-
-        if (i < 0) i = 0;
-        for (; i < lines.size() && i <= cursorLine + LINES_COUNT_CAMERA_SCALE_THRESHOLD / 2; i++) {
-            var len = lines.get(i).length();
-            if (maxLineLen < len)
-                maxLineLen = len;
-        }
-    }
-
     private float getCameraScaleVelocity() {
+
+        var maxLineLen = getMaxLineLen();
 
         if (maxLineLen > CHARS_COUNT_CAMERA_SCALE_THRESHOLD)
             maxLineLen = CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
@@ -142,30 +151,65 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     private void drawSelectedText() {
-        // TODO: Optimize and render only visible lines
+        selectionStartCol = 3;
+        selectionEndCol = 5;
+        selectionStartLine = 0;
+        selectionEndLine = 3;
 
-        selectionStartLine = 1;
-        selectionEndLine = 2;
+        if (selectionStartLine >= lines.size() || selectionEndLine >= lines.size())
+            return;
 
         var text = new StringBuilder(lines.size());
 
-        for (int i = selectionStartLine; i < lines.size() && i < selectionEndLine; i++) {
-
-            var line = lines.get(i);
-
-            text.repeat(" ", line.length());
-            text.append('\n');
+        if (selectionStartLine == selectionEndLine) {
+            text.repeat(" ", selectionEndCol - selectionStartCol);
+            renderer.getFont().drawText(
+                    renderer,
+                    text,
+                    -cameraPos.getX() + (float) (selectionStartCol * FONT_SIZE) / 2,
+                    -cameraPos.getY() - selectionStartLine * renderer.getFont().getFontHeight()
+            );
+            return;
         }
 
-        if (selectionEndLine < lines.size())
-            text.repeat(" ", lines.get(selectionEndLine).length());
+        var maxLen = getMaxLineLen();
+
+        text.repeat(" ", maxLen - selectionStartCol);
 
         renderer.getFont().drawText(
                 renderer,
                 text,
-                -cameraPos.getX(),
-                -cameraPos.getY() - (selectionEndLine - selectionStartLine) * renderer.getFont().getFontHeight()
+                -cameraPos.getX() + (float) (selectionStartCol * FONT_SIZE) / 2,
+                -cameraPos.getY() - selectionStartLine * renderer.getFont().getFontHeight()
         );
+
+        text.setLength(0);
+
+        for (int i = selectionStartLine + 1; i < lines.size() && i < selectionEndLine; i++) {
+
+            text.repeat(" ", maxLen);
+            text.append('\n');
+
+            renderer.getFont().drawText(
+                    renderer,
+                    text,
+                    -cameraPos.getX(),
+                    -cameraPos.getY() - i * renderer.getFont().getFontHeight()
+            );
+
+            text.setLength(0);
+        }
+
+        if (selectionEndLine < lines.size()) {
+            text.repeat(" ", selectionEndCol);
+
+            renderer.getFont().drawText(
+                    renderer,
+                    text,
+                    -cameraPos.getX(),
+                    -cameraPos.getY() - selectionEndLine * renderer.getFont().getFontHeight()
+            );
+        }
 
     }
 
