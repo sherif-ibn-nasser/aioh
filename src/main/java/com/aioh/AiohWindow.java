@@ -90,7 +90,9 @@ public class AiohWindow {
             AiohWindow.height = height;
             this.resize = true;
             glViewport(0, 0, width, height);
+            mainProgram.use();
             AiohRenderer.updateMVPMatrix(mainProgram, width, height);
+            textSelectionProgram.use();
             AiohRenderer.updateMVPMatrix(textSelectionProgram, width, height);
         });
 

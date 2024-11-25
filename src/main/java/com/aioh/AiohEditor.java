@@ -27,9 +27,15 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private Timer timer = new Timer();
     private AiohRenderer renderer = new AiohRenderer();
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
-    private int cursorLine = 0, cursorCol = 0, maxCursorCol = 0;
+    private int
+            cursorLine = 0,
+            cursorCol = 0,
+            maxCursorCol = 0,
+            maxLineLen,
+            selectionStartLine,
+            selectionStartCol,
+            selectionLen = 0;
     private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
-    private int maxLineLen;
     private float cameraScale = 1;
 
     public static boolean isDefaultContext() {
@@ -55,7 +61,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.begin();
         textSelectionProgram.use();
         textSelectionProgram.setUniform("cameraScale", cameraScale);
-        drawText();
+        drawSelectedText();
         renderer.end();
     }
 
@@ -82,22 +88,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         updateMaxLineLen();
 
         var len = lines.stream().max(Comparator.comparingInt(a -> a.length())).get().length();
-        maxLineLen = len;
-        if (len > 1000)
-            len = 1000;
 
-        float target_scale = 720f / 3f / (len * 0.75f);
-
-        if (target_scale > 1) {
-            target_scale = 1;
-        }
-
-//        var cameraScaleVelocity = (target_scale - cameraScale);
-//
         var cameraScaleVelocity = getCameraScaleVelocity();
-//
+
         cameraScale += cameraScaleVelocity;
-//
+
         if (cameraScale < 0.25f)
             cameraScale = 0.25f;
 
@@ -134,6 +129,37 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             text.append(lines.get(i));
             if (i < lines.size() - 1)
                 text.append('\n');
+        }
+
+        renderer.getFont().drawText(
+                renderer,
+                text,
+                -cameraPos.getX(),
+                -cameraPos.getY()
+        );
+
+    }
+
+    private void drawSelectedText() {
+        // TODO: Optimize and render only visible lines
+
+        selectionLen = 10;
+        var len = 0;
+        var text = new StringBuilder(lines.size());
+
+        for (int i = selectionStartLine; i < lines.size() && len < selectionLen; i++) {
+
+            var line = lines.get(i);
+
+            for (int j = 0; j < line.length() && len < selectionLen; j++) {
+                text.append(line.charAt(j));
+                len++;
+            }
+
+            if (i < lines.size() - 1 && len < selectionLen) {
+                text.append("          \n");
+                len++;
+            }
         }
 
         renderer.getFont().drawText(
