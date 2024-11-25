@@ -54,7 +54,7 @@ public class AiohRenderer {
     private VertexBufferObject vbo;
     public static ShaderProgram currentProgram;
     public static ShaderProgram mainProgram;
-    public static ShaderProgram textSelectionProgram;
+    public static ShaderProgram colorProgram;
 
     private FloatBuffer vertices;
     private int numVertices;
@@ -281,7 +281,7 @@ public class AiohRenderer {
         }
         vbo.delete();
         mainProgram.delete();
-        textSelectionProgram.delete();
+        colorProgram.delete();
 
         font.dispose();
         debugFont.dispose();
@@ -307,7 +307,7 @@ public class AiohRenderer {
         vertices = MemoryUtil.memAllocFloat(4096);
 
         /* Upload null data to allocate storage for the VBO */
-        long size = vertices.capacity() * Float.BYTES;
+        long size = (long) vertices.capacity() * Float.BYTES;
         vbo.uploadData(GL_ARRAY_BUFFER, size, GL_DYNAMIC_DRAW);
 
         /* Initialize variables */
@@ -315,28 +315,28 @@ public class AiohRenderer {
         drawing = false;
 
         /* Load shaders */
-        Shader vertexShader, fragmentShader, selectionFragmentShader;
+        Shader vertexShader, defaultFragmentShader, colorFragmentShader;
         if (AiohEditor.isDefaultContext()) {
             vertexShader = Shader.createShader(GL_VERTEX_SHADER, vertexShaderSource);
-            fragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-            selectionFragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, selectionFragmentShaderSource);
+            defaultFragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, defaultFragmentShaderSource);
+            colorFragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, colorFragmentShaderSource);
         } else {
             throw new RuntimeException("Minimum supported OpenGL version is 3.2. Try to upgrade your drivers.");
         }
 
 
         /* Create shader program */
-        textSelectionProgram = new ShaderProgram();
-        textSelectionProgram.attachShader(vertexShader);
-        textSelectionProgram.attachShader(selectionFragmentShader);
-        textSelectionProgram.link();
-        specifyVertexAttributes(textSelectionProgram);
-        selectionFragmentShader.delete();
+        colorProgram = new ShaderProgram();
+        colorProgram.attachShader(vertexShader);
+        colorProgram.attachShader(colorFragmentShader);
+        colorProgram.link();
+        specifyVertexAttributes(colorProgram);
+        colorFragmentShader.delete();
 
         /* Create shader program */
         mainProgram = new ShaderProgram();
         mainProgram.attachShader(vertexShader);
-        mainProgram.attachShader(fragmentShader);
+        mainProgram.attachShader(defaultFragmentShader);
         if (AiohEditor.isDefaultContext()) {
             mainProgram.bindFragmentDataLocation(0, "fragColor");
         }
@@ -344,7 +344,7 @@ public class AiohRenderer {
         mainProgram.use();
 
         /* Delete linked shaders */
-        fragmentShader.delete();
+        defaultFragmentShader.delete();
         vertexShader.delete();
 
         /* Get width and height of framebuffer */
@@ -367,8 +367,8 @@ public class AiohRenderer {
 
 //        updateModelMatrix(new Mat4());
 //        updateViewMatrix(new Mat4());
-        textSelectionProgram.use();
-        updateMVPMatrix(textSelectionProgram, width, height);
+        colorProgram.use();
+        updateMVPMatrix(colorProgram, width, height);
         mainProgram.use();
         updateMVPMatrix(mainProgram, width, height);
 

@@ -5,8 +5,8 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 
+import static com.aioh.graphics.AiohRenderer.colorProgram;
 import static com.aioh.graphics.AiohRenderer.mainProgram;
-import static com.aioh.graphics.AiohRenderer.textSelectionProgram;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL46.*;
 
@@ -92,8 +92,8 @@ public class AiohWindow {
             glViewport(0, 0, width, height);
             mainProgram.use();
             AiohRenderer.updateMVPMatrix(mainProgram, width, height);
-            textSelectionProgram.use();
-            AiohRenderer.updateMVPMatrix(textSelectionProgram, width, height);
+            colorProgram.use();
+            AiohRenderer.updateMVPMatrix(colorProgram, width, height);
         });
 
         glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {
