@@ -32,9 +32,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             cursorCol = 0,
             maxCursorCol = 0,
             maxLineLen,
-            selectionStartLine,
-            selectionStartCol,
-            selectionLen = 0;
+            selectionStartLine = 0,
+            selectionStartCol = 0,
+            selectionEndLine = 0,
+            selectionEndCol = 0;
     private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
     private float cameraScale = 1;
 
@@ -143,30 +144,27 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private void drawSelectedText() {
         // TODO: Optimize and render only visible lines
 
-        selectionLen = 10;
-        var len = 0;
+        selectionStartLine = 1;
+        selectionEndLine = 2;
+
         var text = new StringBuilder(lines.size());
 
-        for (int i = selectionStartLine; i < lines.size() && len < selectionLen; i++) {
+        for (int i = selectionStartLine; i < lines.size() && i < selectionEndLine; i++) {
 
             var line = lines.get(i);
 
-            for (int j = 0; j < line.length() && len < selectionLen; j++) {
-                text.append(line.charAt(j));
-                len++;
-            }
-
-            if (i < lines.size() - 1 && len < selectionLen) {
-                text.append("          \n");
-                len++;
-            }
+            text.repeat(" ", line.length());
+            text.append('\n');
         }
+
+        if (selectionEndLine < lines.size())
+            text.repeat(" ", lines.get(selectionEndLine).length());
 
         renderer.getFont().drawText(
                 renderer,
                 text,
                 -cameraPos.getX(),
-                -cameraPos.getY()
+                -cameraPos.getY() - (selectionEndLine - selectionStartLine) * renderer.getFont().getFontHeight()
         );
 
     }
