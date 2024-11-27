@@ -415,7 +415,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             selectionStartLine = selectionEndLine = cursorLine;
             selectionStartCol = selectionEndCol = cursorCol;
         }
-        
+
         if (selectionEndCol < lines.get(selectionEndLine).length())
             selectionEndCol += 1;
         else if (selectionEndCol == lines.get(selectionEndLine).length() && selectionEndLine < lines.size() - 1) {
@@ -427,16 +427,18 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private void selectCharToLeft() {
 
-        if (isEmptySelection())
-            return;
-
-        if (selectionEndCol > 0)
-            selectionEndCol -= 1;
-        else if (selectionEndCol == 0 && selectionEndLine > 0) {
-            selectionEndLine -= 1;
-            selectionEndCol = lines.get(selectionEndLine).length();
+        if (isEmptySelection()) {
+            // Move selection to the cursor
+            selectionStartLine = selectionEndLine = cursorLine;
+            selectionStartCol = selectionEndCol = cursorCol;
         }
 
+        if (selectionStartCol > 0)
+            selectionStartCol -= 1;
+        else if (selectionStartCol == 0 && selectionStartLine > 0) {
+            selectionStartLine -= 1;
+            selectionStartCol = lines.get(selectionStartLine).length();
+        }
 
     }
 }
