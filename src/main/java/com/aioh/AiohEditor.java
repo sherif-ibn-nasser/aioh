@@ -258,6 +258,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         return cursorLine == lines.size() - 1 && cursorCol == getCurrentLine().length();
     }
 
+    private boolean isEmptySelection() {
+        return selectionStartLine == selectionEndLine && selectionStartCol == selectionEndCol;
+    }
+
     @Override
     public void onTextInput(char[] newChars) {
 
@@ -290,8 +294,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             case GLFW_KEY_BACKSPACE -> onBackspacePressed();
             case GLFW_KEY_UP -> onUpArrowPressed();
             case GLFW_KEY_DOWN -> onDownArrowPressed();
-            case GLFW_KEY_LEFT -> onLeftArrowPressed();
             case GLFW_KEY_RIGHT -> onRightArrowPressed();
+            case GLFW_KEY_LEFT -> onLeftArrowPressed();
         }
     }
 
@@ -302,7 +306,14 @@ public class AiohEditor implements AiohWindow.EventsHandler {
      */
     @Override
     public void onModKeysPressed(int mods, int keyCode) {
-        // TODO
+        if ((mods & GLFW_MOD_SHIFT) != 0) {
+            switch (keyCode) {
+                case GLFW_KEY_UP -> onCtrlUpArrowPressed();
+                case GLFW_KEY_DOWN -> onCtrlDownArrowPressed();
+                case GLFW_KEY_RIGHT -> selectCharToRight();
+                case GLFW_KEY_LEFT -> selectCharToLeft();
+            }
+        }
     }
 
     private void onBackspacePressed() {
@@ -358,6 +369,20 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         cursorCol = Math.min(currentLen, maxCursorCol);
     }
 
+    private void onRightArrowPressed() {
+
+        if (isCursorAtEndOfFile())
+            return;
+
+        if (cursorCol == getCurrentLine().length()) {
+            cursorLine += 1;
+            maxCursorCol = cursorCol = 0;
+            return;
+        }
+
+        maxCursorCol = cursorCol += 1;
+    }
+
     private void onLeftArrowPressed() {
 
         if (isCursorAtStartOfFile())
@@ -373,17 +398,45 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     }
 
-    private void onRightArrowPressed() {
 
-        if (isCursorAtEndOfFile())
-            return;
+    private void onCtrlUpArrowPressed() {
 
-        if (cursorCol == getCurrentLine().length()) {
-            cursorLine += 1;
-            maxCursorCol = cursorCol = 0;
-            return;
+
+    }
+
+    private void onCtrlDownArrowPressed() {
+
+    }
+
+    private void selectCharToRight() {
+
+        if (isEmptySelection()) {
+            // Move selection to the cursor
+            selectionStartLine = selectionEndLine = cursorLine;
+            selectionStartCol = selectionEndCol = cursorCol;
+        }
+        
+        if (selectionEndCol < lines.get(selectionEndLine).length())
+            selectionEndCol += 1;
+        else if (selectionEndCol == lines.get(selectionEndLine).length() && selectionEndLine < lines.size() - 1) {
+            selectionEndLine += 1;
+            selectionEndCol = 0;
         }
 
-        maxCursorCol = cursorCol += 1;
+    }
+
+    private void selectCharToLeft() {
+
+        if (isEmptySelection())
+            return;
+
+        if (selectionEndCol > 0)
+            selectionEndCol -= 1;
+        else if (selectionEndCol == 0 && selectionEndLine > 0) {
+            selectionEndLine -= 1;
+            selectionEndCol = lines.get(selectionEndLine).length();
+        }
+
+
     }
 }
