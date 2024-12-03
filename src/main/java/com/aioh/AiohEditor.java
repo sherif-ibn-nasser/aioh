@@ -37,6 +37,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             selectionStartCol = 0,
             selectionEndLine = 0,
             selectionEndCol = 0;
+    private boolean selectRight = false, selectLeft = false;
     private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
     private float cameraScale = 1, fontHeight;
 
@@ -339,6 +340,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private void onUpArrowPressed() {
 
+        if (selectRight || selectLeft) {
+            clearTextSelection();
+            return;
+        }
+
         if (isCursorAtStartOfFile())
             return;
 
@@ -354,6 +360,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     private void onDownArrowPressed() {
+
+        if (selectRight || selectLeft) {
+            clearTextSelection();
+            return;
+        }
 
         if (isCursorAtEndOfFile())
             return;
@@ -371,6 +382,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private void onRightArrowPressed() {
 
+        if (selectRight || selectLeft) {
+            clearTextSelection();
+            return;
+        }
+
         if (isCursorAtEndOfFile())
             return;
 
@@ -384,6 +400,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     private void onLeftArrowPressed() {
+
+        if (selectRight || selectLeft) {
+            clearTextSelection();
+            return;
+        }
 
         if (isCursorAtStartOfFile())
             return;
@@ -401,44 +422,85 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private void onCtrlUpArrowPressed() {
 
-
     }
 
     private void onCtrlDownArrowPressed() {
 
     }
 
+    private void clearTextSelection() {
+        selectionStartLine = selectionEndLine = cursorLine;
+        selectionStartCol = selectionEndCol = cursorCol;
+    }
+
+    private void updateCursorIfEmptyTextSelection() {
+        if (isEmptySelection()) {
+            clearTextSelection();
+            selectLeft = selectRight = false;
+        }
+    }
+
     private void selectCharToRight() {
 
-        if (isEmptySelection()) {
-            // Move selection to the cursor
-            selectionStartLine = selectionEndLine = cursorLine;
-            selectionStartCol = selectionEndCol = cursorCol;
-        }
+        updateCursorIfEmptyTextSelection();
 
-        if (selectionEndCol < lines.get(selectionEndLine).length())
-            selectionEndCol += 1;
-        else if (selectionEndCol == lines.get(selectionEndLine).length() && selectionEndLine < lines.size() - 1) {
-            selectionEndLine += 1;
-            selectionEndCol = 0;
+        if (selectLeft) {
+
+            if (selectionStartCol < lines.get(selectionStartLine).length())
+                selectionStartCol += 1;
+            else if (selectionStartCol == lines.get(selectionStartLine).length() && selectionStartLine < lines.size() - 1) {
+                selectionStartLine += 1;
+                selectionStartCol = 0;
+            }
+
+            cursorLine = selectionStartLine;
+            cursorCol = selectionStartCol;
+        } else {
+
+            if (selectionEndCol < lines.get(selectionEndLine).length())
+                selectionEndCol += 1;
+            else if (selectionEndCol == lines.get(selectionEndLine).length() && selectionEndLine < lines.size() - 1) {
+                selectionEndLine += 1;
+                selectionEndCol = 0;
+            }
+
+            cursorLine = selectionEndLine;
+            cursorCol = selectionEndCol;
+            selectRight = true;
         }
 
     }
 
     private void selectCharToLeft() {
 
-        if (isEmptySelection()) {
-            // Move selection to the cursor
-            selectionStartLine = selectionEndLine = cursorLine;
-            selectionStartCol = selectionEndCol = cursorCol;
+        updateCursorIfEmptyTextSelection();
+
+        if (selectRight) {
+
+            if (selectionEndCol > 0)
+                selectionEndCol -= 1;
+            else if (selectionEndCol == 0 && selectionEndLine > 0) {
+                selectionEndLine -= 1;
+                selectionEndCol = lines.get(selectionEndLine).length();
+            }
+
+            cursorLine = selectionEndLine;
+            cursorCol = selectionEndCol;
+
+        } else {
+
+            if (selectionStartCol > 0)
+                selectionStartCol -= 1;
+            else if (selectionStartCol == 0 && selectionStartLine > 0) {
+                selectionStartLine -= 1;
+                selectionStartCol = lines.get(selectionStartLine).length();
+            }
+
+            cursorLine = selectionStartLine;
+            cursorCol = selectionStartCol;
+            selectLeft = true;
         }
 
-        if (selectionStartCol > 0)
-            selectionStartCol -= 1;
-        else if (selectionStartCol == 0 && selectionStartLine > 0) {
-            selectionStartLine -= 1;
-            selectionStartCol = lines.get(selectionStartLine).length();
-        }
 
     }
 }
