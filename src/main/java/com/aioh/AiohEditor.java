@@ -309,8 +309,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public void onModKeysPressed(int mods, int keyCode) {
         if ((mods & GLFW_MOD_SHIFT) != 0) {
             switch (keyCode) {
-                case GLFW_KEY_UP -> onCtrlUpArrowPressed();
-                case GLFW_KEY_DOWN -> onCtrlDownArrowPressed();
+                case GLFW_KEY_UP -> selectToUp();
+                case GLFW_KEY_DOWN -> selectToDown();
                 case GLFW_KEY_RIGHT -> selectCharToRight();
                 case GLFW_KEY_LEFT -> selectCharToLeft();
             }
@@ -341,7 +341,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private void onUpArrowPressed() {
 
         if (selectRight || selectLeft) {
-            clearTextSelection();
+            clearTextSelection(selectionStartLine, selectionStartCol);
             return;
         }
 
@@ -362,7 +362,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private void onDownArrowPressed() {
 
         if (selectRight || selectLeft) {
-            clearTextSelection();
+            clearTextSelection(selectionEndLine, selectionEndCol);
             return;
         }
 
@@ -383,7 +383,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private void onRightArrowPressed() {
 
         if (selectRight || selectLeft) {
-            clearTextSelection();
+            clearTextSelection(selectionEndLine, selectionEndCol);
             return;
         }
 
@@ -402,7 +402,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private void onLeftArrowPressed() {
 
         if (selectRight || selectLeft) {
-            clearTextSelection();
+            clearTextSelection(selectionStartLine, selectionStartCol);
             return;
         }
 
@@ -419,25 +419,72 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     }
 
-
-    private void onCtrlUpArrowPressed() {
-
-    }
-
-    private void onCtrlDownArrowPressed() {
-
-    }
-
-    private void clearTextSelection() {
-        selectionStartLine = selectionEndLine = cursorLine;
-        selectionStartCol = selectionEndCol = cursorCol;
+    private void clearTextSelection(int newLine, int newCol) {
+        selectionStartLine = selectionEndLine = cursorLine = newLine;
+        selectionStartCol = selectionEndCol = cursorCol = newCol;
+        selectRight = selectLeft = false;
     }
 
     private void updateCursorIfEmptyTextSelection() {
         if (isEmptySelection()) {
-            clearTextSelection();
+            selectionStartLine = selectionEndLine = cursorLine;
+            selectionStartCol = selectionEndCol = cursorCol;
             selectLeft = selectRight = false;
         }
+    }
+
+    private void selectToUp() {
+
+        updateCursorIfEmptyTextSelection();
+
+        if (selectRight) {
+
+            if (selectionEndLine > 0) {
+                selectionEndLine -= 1;
+                selectionEndCol = Math.min(lines.get(selectionEndLine).length(), selectionStartCol);
+            }
+
+            cursorLine = selectionEndLine;
+            cursorCol = selectionEndCol;
+
+        } else {
+
+            if (selectionStartLine > 0) {
+                selectionStartLine -= 1;
+                selectionStartCol = Math.max(lines.get(selectionStartLine).length(), selectionEndCol);
+            }
+
+            cursorLine = selectionStartLine;
+            cursorCol = selectionStartCol;
+            selectLeft = true;
+        }
+    }
+
+    private void selectToDown() {
+
+        updateCursorIfEmptyTextSelection();
+
+        if (selectLeft) {
+
+            if (selectionStartLine < lines.size() - 1) {
+                selectionStartLine += 1;
+                selectionStartCol = Math.max(lines.get(selectionStartLine).length(), selectionEndCol);
+            }
+
+            cursorLine = selectionStartLine;
+            cursorCol = selectionStartCol;
+        } else {
+
+            if (selectionEndLine < lines.size() - 1) {
+                selectionEndLine += 1;
+                selectionEndCol = Math.min(lines.get(selectionEndLine).length(), selectionStartCol);
+            }
+
+            cursorLine = selectionEndLine;
+            cursorCol = selectionEndCol;
+            selectRight = true;
+        }
+
     }
 
     private void selectCharToRight() {
@@ -500,7 +547,6 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             cursorCol = selectionStartCol;
             selectLeft = true;
         }
-
 
     }
 }
