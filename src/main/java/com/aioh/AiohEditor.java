@@ -278,7 +278,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             }
 
             cursorCol = 0;
-            cursorLine += 1;
+            cursorLine++;
         } else {
             getCurrentLine().insert(cursorCol, newChars);
             cursorCol += newChars.length;
@@ -325,11 +325,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (cursorCol == 0) {
             var lineBelow = getCurrentLine();
             lines.remove(cursorLine);
-            cursorLine -= 1;
+            cursorLine--;
             cursorCol = getCurrentLine().length();
             getCurrentLine().append(lineBelow);
         } else {
-            cursorCol -= 1;
+            cursorCol--;
             getCurrentLine().deleteCharAt(cursorCol);
         }
 
@@ -353,7 +353,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             return;
         }
 
-        cursorLine -= 1;
+        cursorLine--;
         var currentLen = getCurrentLine().length();
 
         cursorCol = Math.min(currentLen, maxCursorCol);
@@ -374,7 +374,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             return;
         }
 
-        cursorLine += 1;
+        cursorLine++;
         var currentLen = getCurrentLine().length();
 
         cursorCol = Math.min(currentLen, maxCursorCol);
@@ -391,12 +391,12 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             return;
 
         if (cursorCol == getCurrentLine().length()) {
-            cursorLine += 1;
+            cursorLine++;
             maxCursorCol = cursorCol = 0;
             return;
         }
 
-        maxCursorCol = cursorCol += 1;
+        maxCursorCol = ++cursorCol;
     }
 
     private void onLeftArrowPressed() {
@@ -410,25 +410,25 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             return;
 
         if (cursorCol == 0) {
-            cursorLine -= 1;
+            cursorLine--;
             maxCursorCol = cursorCol = getCurrentLine().length();
             return;
         }
 
-        maxCursorCol = cursorCol -= 1;
+        maxCursorCol = --cursorCol;
 
     }
 
     private void clearTextSelection(int newLine, int newCol) {
         selectionStartLine = selectionEndLine = cursorLine = newLine;
-        selectionStartCol = selectionEndCol = cursorCol = newCol;
+        selectionStartCol = selectionEndCol = maxCursorCol = cursorCol = newCol;
         selectRight = selectLeft = false;
     }
 
     private void updateCursorIfEmptyTextSelection() {
         if (isEmptySelection()) {
             selectionStartLine = selectionEndLine = cursorLine;
-            selectionStartCol = selectionEndCol = cursorCol;
+            selectionStartCol = selectionEndCol = maxCursorCol = cursorCol;
             selectLeft = selectRight = false;
         }
     }
@@ -440,8 +440,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (selectRight) {
 
             if (selectionEndLine > 0) {
-                selectionEndLine -= 1;
-                selectionEndCol = Math.min(lines.get(selectionEndLine).length(), selectionStartCol);
+                selectionEndLine--;
+                selectionEndCol = Math.min(lines.get(selectionEndLine).length(), maxCursorCol);
             }
 
             cursorLine = selectionEndLine;
@@ -449,9 +449,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
         } else {
 
+            if (selectionStartLine == 0 && selectionStartCol > 0)
+                selectionStartCol = 0;
             if (selectionStartLine > 0) {
-                selectionStartLine -= 1;
-                selectionStartCol = Math.max(lines.get(selectionStartLine).length(), selectionEndCol);
+                selectionStartLine--;
+                selectionStartCol = Math.min(lines.get(selectionStartLine).length(), maxCursorCol);
             }
 
             cursorLine = selectionStartLine;
@@ -467,17 +469,21 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (selectLeft) {
 
             if (selectionStartLine < lines.size() - 1) {
-                selectionStartLine += 1;
-                selectionStartCol = Math.max(lines.get(selectionStartLine).length(), selectionEndCol);
+                selectionStartLine++;
+                selectionStartCol = Math.min(lines.get(selectionStartLine).length(), maxCursorCol);
             }
 
             cursorLine = selectionStartLine;
             cursorCol = selectionStartCol;
-        } else {
 
-            if (selectionEndLine < lines.size() - 1) {
-                selectionEndLine += 1;
-                selectionEndCol = Math.min(lines.get(selectionEndLine).length(), selectionStartCol);
+        } else {
+            var endLineLen = lines.get(selectionEndLine).length();
+
+            if (selectionEndLine == lines.size() - 1 && selectionEndCol < endLineLen)
+                selectionEndCol = endLineLen;
+            else if (selectionEndLine < lines.size() - 1) {
+                selectionEndLine++;
+                selectionEndCol = Math.min(lines.get(selectionEndLine).length(), maxCursorCol);
             }
 
             cursorLine = selectionEndLine;
@@ -494,9 +500,9 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (selectLeft) {
 
             if (selectionStartCol < lines.get(selectionStartLine).length())
-                selectionStartCol += 1;
+                selectionStartCol++;
             else if (selectionStartCol == lines.get(selectionStartLine).length() && selectionStartLine < lines.size() - 1) {
-                selectionStartLine += 1;
+                selectionStartLine++;
                 selectionStartCol = 0;
             }
 
@@ -505,9 +511,9 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         } else {
 
             if (selectionEndCol < lines.get(selectionEndLine).length())
-                selectionEndCol += 1;
+                selectionEndCol++;
             else if (selectionEndCol == lines.get(selectionEndLine).length() && selectionEndLine < lines.size() - 1) {
-                selectionEndLine += 1;
+                selectionEndLine++;
                 selectionEndCol = 0;
             }
 
@@ -525,9 +531,9 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (selectRight) {
 
             if (selectionEndCol > 0)
-                selectionEndCol -= 1;
+                selectionEndCol--;
             else if (selectionEndCol == 0 && selectionEndLine > 0) {
-                selectionEndLine -= 1;
+                selectionEndLine--;
                 selectionEndCol = lines.get(selectionEndLine).length();
             }
 
@@ -537,9 +543,9 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         } else {
 
             if (selectionStartCol > 0)
-                selectionStartCol -= 1;
+                selectionStartCol--;
             else if (selectionStartCol == 0 && selectionStartLine > 0) {
-                selectionStartLine -= 1;
+                selectionStartLine--;
                 selectionStartCol = lines.get(selectionStartLine).length();
             }
 
