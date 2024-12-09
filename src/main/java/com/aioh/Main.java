@@ -21,12 +21,14 @@ public class Main {
         vertexShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.vert");
         defaultFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.frag");
         colorFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/color.frag");
-
         var editor = new AiohEditor();
 
         var window = new AiohWindow("Aioh", 1280, 720, editor);
 
-        editor.init();
+        if (args.length == 0)
+            editor.init();
+        else
+            editor.init(args[0]);
 
         while (!window.shouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT);

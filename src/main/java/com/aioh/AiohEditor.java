@@ -6,8 +6,11 @@ import glm_.vec2.Vec2;
 import glm_.vec4.Vec4;
 import org.lwjgl.opengl.GL;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Scanner;
 
 import static com.aioh.graphics.AiohRenderer.colorProgram;
 import static com.aioh.graphics.AiohRenderer.mainProgram;
@@ -47,6 +50,20 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     public void init() {
         lines.add(new StringBuilder(LINE_INITIAL_CAP));
+        renderer.init();
+        fontHeight = renderer.getFont().getFontHeight();
+    }
+
+    public void init(String filePath) {
+        try {
+            var scanner = new Scanner(new File(filePath));
+            while (scanner.hasNextLine()) {
+                var line = scanner.nextLine();
+                lines.add(new StringBuilder(line));
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         renderer.init();
         fontHeight = renderer.getFont().getFontHeight();
     }
