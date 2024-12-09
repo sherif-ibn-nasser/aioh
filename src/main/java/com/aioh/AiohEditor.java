@@ -267,6 +267,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         return Math.min(getCurrentLine().length(), maxCursorCol);
     }
 
+    private int getMinCursorCol(int index) {
+        return Math.min(lines.get(index).length(), maxCursorCol);
+    }
+
     @Override
     public void onTextInput(char[] newChars) {
 
@@ -441,7 +445,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
             if (selectionEndLine > 0) {
                 selectionEndLine--;
-                selectionEndCol = getMinCursorCol();
+                selectionEndCol = getMinCursorCol(selectionEndLine);
             }
 
             cursorLine = selectionEndLine;
@@ -453,7 +457,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
                 selectionStartCol = 0;
             if (selectionStartLine > 0) {
                 selectionStartLine--;
-                selectionStartCol = getMinCursorCol();
+                selectionStartCol = getMinCursorCol(selectionStartLine);
             }
 
             cursorLine = selectionStartLine;
@@ -470,7 +474,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
             if (selectionStartLine < lines.size() - 1) {
                 selectionStartLine++;
-                selectionStartCol = getMinCursorCol();
+                selectionStartCol = getMinCursorCol(selectionStartLine);
             }
 
             cursorLine = selectionStartLine;
@@ -483,7 +487,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
                 selectionEndCol = endLineLen;
             else if (selectionEndLine < lines.size() - 1) {
                 selectionEndLine++;
-                selectionEndCol = getMinCursorCol();
+                selectionEndCol = getMinCursorCol(selectionEndLine);
             }
 
             cursorLine = selectionEndLine;
