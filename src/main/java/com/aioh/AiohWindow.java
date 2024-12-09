@@ -5,6 +5,8 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 
+import static com.aioh.graphics.AiohRenderer.colorProgram;
+import static com.aioh.graphics.AiohRenderer.mainProgram;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL46.*;
 
@@ -18,15 +20,16 @@ public class AiohWindow {
         void onModKeysPressed(int mods, int keyCode);
     }
 
+    public static int width, height;
+
     private String title;
-    private int width, height;
     private long window;
     private boolean resize;
 
     public AiohWindow(String title, int width, int height, EventsHandler handler) {
         this.title = title;
-        this.width = width;
-        this.height = height;
+        AiohWindow.width = width;
+        AiohWindow.height = height;
 
         init(handler);
 
@@ -83,11 +86,14 @@ public class AiohWindow {
 
 
         glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
-            this.width = width;
-            this.height = height;
+            AiohWindow.width = width;
+            AiohWindow.height = height;
             this.resize = true;
             glViewport(0, 0, width, height);
-            AiohRenderer.updateMVPMatrix(width, height);
+            mainProgram.use();
+            AiohRenderer.updateMVPMatrix(mainProgram, width, height);
+            colorProgram.use();
+            AiohRenderer.updateMVPMatrix(colorProgram, width, height);
         });
 
         glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {

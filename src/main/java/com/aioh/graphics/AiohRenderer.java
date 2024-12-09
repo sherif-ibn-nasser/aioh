@@ -35,8 +35,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import static com.aioh.Main.fragmentShaderSource;
-import static com.aioh.Main.vertexShaderSource;
+import static com.aioh.Main.*;
 import static glm_.Java.glm;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -53,7 +52,9 @@ public class AiohRenderer {
 
     private VertexArrayObject vao;
     private VertexBufferObject vbo;
-    public static ShaderProgram program;
+    public static ShaderProgram currentProgram;
+    public static ShaderProgram mainProgram;
+    public static ShaderProgram colorProgram;
 
     private FloatBuffer vertices;
     private int numVertices;
@@ -118,9 +119,9 @@ public class AiohRenderer {
                 vao.bind();
             } else {
                 vbo.bind(GL_ARRAY_BUFFER);
-                specifyVertexAttributes();
+                specifyVertexAttributes(currentProgram);
             }
-            program.use();
+            currentProgram.use();
 
             /* Upload the new vertex data */
             vbo.bind(GL_ARRAY_BUFFER);
@@ -279,7 +280,8 @@ public class AiohRenderer {
             vao.delete();
         }
         vbo.delete();
-        program.delete();
+        mainProgram.delete();
+        colorProgram.delete();
 
         font.dispose();
         debugFont.dispose();
@@ -305,7 +307,7 @@ public class AiohRenderer {
         vertices = MemoryUtil.memAllocFloat(4096);
 
         /* Upload null data to allocate storage for the VBO */
-        long size = vertices.capacity() * Float.BYTES;
+        long size = (long) vertices.capacity() * Float.BYTES;
         vbo.uploadData(GL_ARRAY_BUFFER, size, GL_DYNAMIC_DRAW);
 
         /* Initialize variables */
@@ -313,27 +315,37 @@ public class AiohRenderer {
         drawing = false;
 
         /* Load shaders */
-        Shader vertexShader, fragmentShader;
+        Shader vertexShader, defaultFragmentShader, colorFragmentShader;
         if (AiohEditor.isDefaultContext()) {
             vertexShader = Shader.createShader(GL_VERTEX_SHADER, vertexShaderSource);
-            fragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+            defaultFragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, defaultFragmentShaderSource);
+            colorFragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, colorFragmentShaderSource);
         } else {
             throw new RuntimeException("Minimum supported OpenGL version is 3.2. Try to upgrade your drivers.");
         }
 
+
         /* Create shader program */
-        program = new ShaderProgram();
-        program.attachShader(vertexShader);
-        program.attachShader(fragmentShader);
+        colorProgram = new ShaderProgram();
+        colorProgram.attachShader(vertexShader);
+        colorProgram.attachShader(colorFragmentShader);
+        colorProgram.link();
+        specifyVertexAttributes(colorProgram);
+        colorFragmentShader.delete();
+
+        /* Create shader program */
+        mainProgram = new ShaderProgram();
+        mainProgram.attachShader(vertexShader);
+        mainProgram.attachShader(defaultFragmentShader);
         if (AiohEditor.isDefaultContext()) {
-            program.bindFragmentDataLocation(0, "fragColor");
+            mainProgram.bindFragmentDataLocation(0, "fragColor");
         }
-        program.link();
-        program.use();
+        mainProgram.link();
+        mainProgram.use();
 
         /* Delete linked shaders */
+        defaultFragmentShader.delete();
         vertexShader.delete();
-        fragmentShader.delete();
 
         /* Get width and height of framebuffer */
         long window = GLFW.glfwGetCurrentContext();
@@ -347,38 +359,41 @@ public class AiohRenderer {
         }
 
         /* Specify Vertex Pointers */
-        specifyVertexAttributes();
+        specifyVertexAttributes(mainProgram);
 
         /* Set texture uniform */
-        int uniTex = program.getUniformLocation("texImage");
-        program.setUniform(uniTex, 0);
+        int uniTex = mainProgram.getUniformLocation("texImage");
+        mainProgram.setUniform(uniTex, 0);
 
 //        updateModelMatrix(new Mat4());
 //        updateViewMatrix(new Mat4());
-        updateMVPMatrix(width, height);
+        colorProgram.use();
+        updateMVPMatrix(colorProgram, width, height);
+        mainProgram.use();
+        updateMVPMatrix(mainProgram, width, height);
 
     }
 
-    public static void updateModelMatrix(Mat4 model) {
+    public static void updateModelMatrix(ShaderProgram program, Mat4 model) {
         /* Set model matrix to identity matrix */
         int uniModel = program.getUniformLocation("model");
         program.setUniform(uniModel, model);
     }
 
-    public static void updateViewMatrix(Mat4 view) {
+    public static void updateViewMatrix(ShaderProgram program, Mat4 view) {
         /* Set view matrix to identity matrix */
         int uniView = program.getUniformLocation("view");
         program.setUniform(uniView, view);
     }
 
-    public static void updateProjectionMatrix(float width, float height) {
+    public static void updateProjectionMatrix(ShaderProgram program, float width, float height) {
         /* Set projection matrix to an orthographic projection */
         var projection = glm.ortho(-width / 2, width / 2, -height / 2, height / 2, -1f, 1f);
         int uniProjection = program.getUniformLocation("projection");
         program.setUniform(uniProjection, projection);
     }
 
-    public static void updateMVPMatrix(float width, float height) {
+    public static void updateMVPMatrix(ShaderProgram program, float width, float height) {
         /* Set projection matrix to an orthographic projection */
         var projection = glm.ortho(-width / 2, width / 2, -height / 2, height / 2, -1f, 1f);
         int uniProjection = program.getUniformLocation("mvp");
@@ -388,7 +403,7 @@ public class AiohRenderer {
     /**
      * Specifies the vertex pointers.
      */
-    private void specifyVertexAttributes() {
+    private void specifyVertexAttributes(ShaderProgram program) {
         /* Specify Vertex Pointer */
         int posAttrib = program.getAttributeLocation("position");
         program.enableVertexAttribute(posAttrib);

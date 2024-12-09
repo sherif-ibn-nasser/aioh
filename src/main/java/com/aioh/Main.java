@@ -11,7 +11,7 @@ public class Main {
 
     public static java.awt.Font font;
 
-    public static String vertexShaderSource, fragmentShaderSource;
+    public static String vertexShaderSource, defaultFragmentShaderSource, colorFragmentShaderSource;
 
     public static void main(String[] args) throws Exception {
 
@@ -19,7 +19,8 @@ public class Main {
         // FIXME: This line is too slow
         font = java.awt.Font.createFont(TRUETYPE_FONT, fontFile).deriveFont(PLAIN, AiohEditor.FONT_SIZE);
         vertexShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.vert");
-        fragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.frag");
+        defaultFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.frag");
+        colorFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/color.frag");
 
         var editor = new AiohEditor();
 

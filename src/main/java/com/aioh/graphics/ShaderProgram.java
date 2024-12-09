@@ -32,6 +32,7 @@ import glm_.vec4.Vec4;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
+import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
@@ -51,10 +52,16 @@ public class ShaderProgram {
     private final int id;
 
     /**
+     * A cache for the uniforms
+     */
+    private final HashMap<String, Integer> uniforms;
+
+    /**
      * Creates a shader program.
      */
     public ShaderProgram() {
         id = glCreateProgram();
+        uniforms = new HashMap<>();
     }
 
     /**
@@ -133,8 +140,15 @@ public class ShaderProgram {
      * @param name Uniform name
      * @return Location of the uniform
      */
-    public int getUniformLocation(CharSequence name) {
-        return glGetUniformLocation(id, name);
+    public int getUniformLocation(String name) {
+        var cachedUniform = uniforms.get(name);
+        if (cachedUniform != null)
+            return cachedUniform;
+
+        var uniformLocation = glGetUniformLocation(id, name);
+        uniforms.put(name, uniformLocation);
+
+        return uniformLocation;
     }
 
     /**
@@ -241,11 +255,117 @@ public class ShaderProgram {
         }
     }
 
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, int value) {
+        glUniform1i(getUniformLocation(name), value);
+    }
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, float value) {
+        glUniform1f(getUniformLocation(name), value);
+    }
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, Vec2 value) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(2);
+            buffer.put(value.array).flip();
+            glUniform2fv(getUniformLocation(name), buffer);
+        }
+    }
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, Vec3 value) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(3);
+            buffer.put(value.array).flip();
+            glUniform3fv(getUniformLocation(name), buffer);
+        }
+    }
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, Vec4 value) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(4);
+            buffer.put(value.array).flip();
+            glUniform4fv(getUniformLocation(name), buffer);
+        }
+    }
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, Mat2 value) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(2 * 2);
+            buffer.put(value.array).flip();
+            glUniformMatrix2fv(getUniformLocation(name), false, buffer);
+        }
+    }
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, Mat3 value) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(3 * 3);
+            buffer.put(value.array).flip();
+            glUniformMatrix3fv(getUniformLocation(name), false, buffer);
+        }
+    }
+
+    /**
+     * Sets the uniform variable for specified location.
+     *
+     * @param name  Uniform name
+     * @param value Value to set
+     */
+    public void setUniform(String name, Mat4 value) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(4 * 4);
+            buffer.put(value.array).flip();
+            glUniformMatrix4fv(getUniformLocation(name), false, buffer);
+        }
+    }
+
     /**
      * Use this shader program.
      */
     public void use() {
         glUseProgram(id);
+        AiohRenderer.currentProgram = this;
     }
 
     /**

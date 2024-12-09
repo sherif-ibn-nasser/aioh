@@ -7,11 +7,16 @@ import glm_.vec4.Vec4;
 import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
+import static com.aioh.graphics.AiohRenderer.colorProgram;
+import static com.aioh.graphics.AiohRenderer.mainProgram;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class AiohEditor implements AiohWindow.EventsHandler {
-    public static final Vec4 GREEN_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1);
+    public static final Vec4 CURSOR_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1);
+    public static final Vec4 TEXT_SELECTION_COLOR = new Vec4(0.5f);
+    public static final Vec4 WHITE_COLOR = new Vec4(1);
     public static final int FONT_SIZE = 128;
     public static final int CURSOR_BLINK_THRESHOLD = 500;
     public static final int CURSOR_BLINK_PERIOD = 1000;
@@ -24,10 +29,17 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private Timer timer = new Timer();
     private AiohRenderer renderer = new AiohRenderer();
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
-    private int cursorLine = 0, cursorCol = 0, maxCursorCol = 0;
+    private int
+            cursorLine = 0,
+            cursorCol = 0,
+            maxCursorCol = 0,
+            selectionStartLine = 0,
+            selectionStartCol = 0,
+            selectionEndLine = 0,
+            selectionEndCol = 0;
+    private boolean selectRight = false, selectLeft = false;
     private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
-    private int cameraScaleUniform, maxLineLen;
-    private float cameraScale = 1;
+    private float cameraScale = 1, fontHeight;
 
     public static boolean isDefaultContext() {
         return GL.getCapabilities().OpenGL32;
@@ -36,26 +48,65 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public void init() {
         lines.add(new StringBuilder(LINE_INITIAL_CAP));
         renderer.init();
-        cameraScaleUniform = AiohRenderer.program.getUniformLocation("cameraScale");
+        fontHeight = renderer.getFont().getFontHeight();
     }
 
     public void loop() {
         updateCameraPos();
         updateCameraScale();
+
+        colorProgram.use();
+        colorProgram.setUniform("cameraScale", cameraScale);
+
+        renderer.begin();
+        drawSelectedText();
+        renderer.end();
+
+        renderer.begin();
+        drawCursor();
+        renderer.end();
+
+        mainProgram.use();
+        mainProgram.setUniform("cameraScale", cameraScale);
+
         renderer.begin();
         drawText();
-        drawCursor();
         renderer.end();
     }
 
+    private int getMaxLineLen() {
+        var line = lines.stream().max(Comparator.comparingInt(a -> a.length()));
+        return line.map(stringBuilder -> stringBuilder.length()).orElse(0);
+    }
+
+    private int getMaxLineLen(int fromIndex, int toIndex) {
+        if (fromIndex >= lines.size())
+            return 0;
+
+        if (fromIndex < 0)
+            fromIndex = 0;
+
+        if (toIndex >= lines.size())
+            toIndex = lines.size() - 1;
+
+        if (toIndex < fromIndex)
+            return 0;
+
+        if (toIndex == fromIndex)
+            return lines.get(fromIndex).length();
+
+        var line = lines.subList(fromIndex, toIndex).stream().max(Comparator.comparingInt(a -> a.length()));
+
+        return line.map(stringBuilder -> stringBuilder.length()).orElse(0);
+    }
 
     private void updateCameraPos() {
 
         cursorPos.setX(
-                (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 4
+                (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 2
         );
         cursorPos.setY(
-                -cursorLine * renderer.getFont().getFontHeight()
+                -cursorLine * fontHeight
         );
 
         cameraCursorDiff = cursorPos.minus(cameraPos);
@@ -67,7 +118,6 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     public void updateCameraScale() {
-        updateMaxLineLen();
 
         var cameraScaleVelocity = getCameraScaleVelocity();
 
@@ -76,24 +126,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (cameraScale < 0.25f)
             cameraScale = 0.25f;
 
-        AiohRenderer.program.setUniform(cameraScaleUniform, cameraScale);
-    }
-
-
-    private void updateMaxLineLen() {
-        maxLineLen = 0;
-
-        int i = cursorLine - LINES_COUNT_CAMERA_SCALE_THRESHOLD / 2;
-
-        if (i < 0) i = 0;
-        for (; i < lines.size() && i <= cursorLine + LINES_COUNT_CAMERA_SCALE_THRESHOLD / 2; i++) {
-            var len = lines.get(i).length();
-            if (maxLineLen < len)
-                maxLineLen = len;
-        }
     }
 
     private float getCameraScaleVelocity() {
+
+        var maxLineLen = getMaxLineLen();
 
         if (maxLineLen > CHARS_COUNT_CAMERA_SCALE_THRESHOLD)
             maxLineLen = CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
@@ -101,6 +138,14 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         var targetCameraScale = 1f - (float) maxLineLen / CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
 
         return (targetCameraScale - cameraScale) / FPS;
+    }
+
+    private void drawText(CharSequence text, float centerX, float centerY) {
+        drawText(text, centerX, centerY, WHITE_COLOR);
+    }
+
+    private void drawText(CharSequence text, float centerX, float centerY, Vec4 color) {
+        renderer.getFont().drawText(renderer, text, centerX - 0.5f * FONT_SIZE, centerY - 0.5f * fontHeight, color);
     }
 
     private void drawText() {
@@ -112,26 +157,83 @@ public class AiohEditor implements AiohWindow.EventsHandler {
                 text.append('\n');
         }
 
-        renderer.getFont().drawText(
-                renderer,
+        drawText(text, -cameraPos.getX(), -cameraPos.getY());
+
+    }
+
+    private void drawSelectedText() {
+
+        if (selectionStartLine >= lines.size() || selectionEndLine >= lines.size())
+            return;
+
+        var text = new StringBuilder(lines.size());
+
+        if (selectionStartLine == selectionEndLine) {
+            text.repeat(" ", selectionEndCol - selectionStartCol);
+
+            drawText(
+                    text,
+                    -cameraPos.getX() + 0.5f * (selectionStartCol * FONT_SIZE),
+                    -cameraPos.getY() - selectionStartLine * fontHeight,
+                    TEXT_SELECTION_COLOR
+            );
+
+            return;
+        }
+
+        var maxLen = getMaxLineLen();
+
+        text.repeat(" ", maxLen - selectionStartCol);
+
+        drawText(
                 text,
-                -cameraPos.getX(),
-                -cameraPos.getY()
+                -cameraPos.getX() + 0.5f * (selectionStartCol * FONT_SIZE),
+                -cameraPos.getY() - selectionStartLine * fontHeight,
+                TEXT_SELECTION_COLOR
         );
+
+        text.setLength(0);
+
+        for (int i = selectionStartLine + 1; i < lines.size() && i < selectionEndLine; i++) {
+
+            text.repeat(" ", maxLen);
+            text.append('\n');
+
+            drawText(
+                    text,
+                    -cameraPos.getX(),
+                    -cameraPos.getY() - i * fontHeight,
+                    TEXT_SELECTION_COLOR
+            );
+
+            text.setLength(0);
+        }
+
+        if (selectionEndLine < lines.size()) {
+            text.repeat(" ", selectionEndCol);
+            drawText(
+                    text,
+                    -cameraPos.getX(),
+                    -cameraPos.getY() - selectionEndLine * fontHeight,
+                    TEXT_SELECTION_COLOR
+            );
+        }
 
     }
 
     private void drawCursor() {
         var t = (timer.getTime() - timer.getLastLoopTime()) * 1000;
 
-        if (t % CURSOR_BLINK_PERIOD < CURSOR_BLINK_THRESHOLD)
-            renderer.getFont().drawText(
-                    renderer,
-                    "|",
-                    cameraCursorDiff.getX(),
-                    cameraCursorDiff.getY(),
-                    GREEN_COLOR
+        if (t % CURSOR_BLINK_PERIOD < CURSOR_BLINK_THRESHOLD) {
+            renderer.drawTextureRegion(
+                    -5 + cameraCursorDiff.getX(),
+                    -0.5f * fontHeight + cameraCursorDiff.getY(),
+                    5 + cameraCursorDiff.getX(),
+                    0.5f * fontHeight + cameraCursorDiff.getY(),
+                    0, 0, 0, 0,
+                    CURSOR_COLOR
             );
+        }
 
     }
 
@@ -157,6 +259,18 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         return cursorLine == lines.size() - 1 && cursorCol == getCurrentLine().length();
     }
 
+    private boolean isEmptySelection() {
+        return selectionStartLine == selectionEndLine && selectionStartCol == selectionEndCol;
+    }
+
+    private int getMinCursorCol() {
+        return Math.min(getCurrentLine().length(), maxCursorCol);
+    }
+
+    private int getMinCursorCol(int index) {
+        return Math.min(lines.get(index).length(), maxCursorCol);
+    }
+
     @Override
     public void onTextInput(char[] newChars) {
 
@@ -172,7 +286,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             }
 
             cursorCol = 0;
-            cursorLine += 1;
+            cursorLine++;
         } else {
             getCurrentLine().insert(cursorCol, newChars);
             cursorCol += newChars.length;
@@ -189,8 +303,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             case GLFW_KEY_BACKSPACE -> onBackspacePressed();
             case GLFW_KEY_UP -> onUpArrowPressed();
             case GLFW_KEY_DOWN -> onDownArrowPressed();
-            case GLFW_KEY_LEFT -> onLeftArrowPressed();
             case GLFW_KEY_RIGHT -> onRightArrowPressed();
+            case GLFW_KEY_LEFT -> onLeftArrowPressed();
         }
     }
 
@@ -201,7 +315,14 @@ public class AiohEditor implements AiohWindow.EventsHandler {
      */
     @Override
     public void onModKeysPressed(int mods, int keyCode) {
-        // TODO
+        if ((mods & GLFW_MOD_SHIFT) != 0) {
+            switch (keyCode) {
+                case GLFW_KEY_UP -> selectToUp();
+                case GLFW_KEY_DOWN -> selectToDown();
+                case GLFW_KEY_RIGHT -> selectCharToRight();
+                case GLFW_KEY_LEFT -> selectCharToLeft();
+            }
+        }
     }
 
     private void onBackspacePressed() {
@@ -212,11 +333,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         if (cursorCol == 0) {
             var lineBelow = getCurrentLine();
             lines.remove(cursorLine);
-            cursorLine -= 1;
+            cursorLine--;
             cursorCol = getCurrentLine().length();
             getCurrentLine().append(lineBelow);
         } else {
-            cursorCol -= 1;
+            cursorCol--;
             getCurrentLine().deleteCharAt(cursorCol);
         }
 
@@ -227,6 +348,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private void onUpArrowPressed() {
 
+        if (selectRight || selectLeft) {
+            clearTextSelection(selectionStartLine, selectionStartCol);
+            return;
+        }
+
         if (isCursorAtStartOfFile())
             return;
 
@@ -235,13 +361,16 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             return;
         }
 
-        cursorLine -= 1;
-        var currentLen = getCurrentLine().length();
-
-        cursorCol = Math.min(currentLen, maxCursorCol);
+        cursorLine--;
+        cursorCol = getMinCursorCol();
     }
 
     private void onDownArrowPressed() {
+
+        if (selectRight || selectLeft) {
+            clearTextSelection(selectionEndLine, selectionEndCol);
+            return;
+        }
 
         if (isCursorAtEndOfFile())
             return;
@@ -251,38 +380,183 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             return;
         }
 
-        cursorLine += 1;
-        var currentLen = getCurrentLine().length();
-
-        cursorCol = Math.min(currentLen, maxCursorCol);
-    }
-
-    private void onLeftArrowPressed() {
-
-        if (isCursorAtStartOfFile())
-            return;
-
-        if (cursorCol == 0) {
-            cursorLine -= 1;
-            maxCursorCol = cursorCol = getCurrentLine().length();
-            return;
-        }
-
-        maxCursorCol = cursorCol -= 1;
-
+        cursorLine++;
+        cursorCol = getMinCursorCol();
     }
 
     private void onRightArrowPressed() {
+
+        if (selectRight || selectLeft) {
+            clearTextSelection(selectionEndLine, selectionEndCol);
+            return;
+        }
 
         if (isCursorAtEndOfFile())
             return;
 
         if (cursorCol == getCurrentLine().length()) {
-            cursorLine += 1;
+            cursorLine++;
             maxCursorCol = cursorCol = 0;
             return;
         }
 
-        maxCursorCol = cursorCol += 1;
+        maxCursorCol = ++cursorCol;
+    }
+
+    private void onLeftArrowPressed() {
+
+        if (selectRight || selectLeft) {
+            clearTextSelection(selectionStartLine, selectionStartCol);
+            return;
+        }
+
+        if (isCursorAtStartOfFile())
+            return;
+
+        if (cursorCol == 0) {
+            cursorLine--;
+            maxCursorCol = cursorCol = getCurrentLine().length();
+            return;
+        }
+
+        maxCursorCol = --cursorCol;
+
+    }
+
+    private void clearTextSelection(int newLine, int newCol) {
+        selectionStartLine = selectionEndLine = cursorLine = newLine;
+        selectionStartCol = selectionEndCol = maxCursorCol = cursorCol = newCol;
+        selectRight = selectLeft = false;
+    }
+
+    private void updateCursorIfEmptyTextSelection() {
+        if (isEmptySelection()) {
+            selectionStartLine = selectionEndLine = cursorLine;
+            selectionStartCol = selectionEndCol = maxCursorCol = cursorCol;
+            selectLeft = selectRight = false;
+        }
+    }
+
+    private void selectToUp() {
+
+        updateCursorIfEmptyTextSelection();
+
+        if (selectRight) {
+
+            if (selectionEndLine > 0) {
+                selectionEndLine--;
+                selectionEndCol = getMinCursorCol(selectionEndLine);
+            }
+
+            cursorLine = selectionEndLine;
+            cursorCol = selectionEndCol;
+
+        } else {
+
+            if (selectionStartLine == 0 && selectionStartCol > 0)
+                selectionStartCol = 0;
+            if (selectionStartLine > 0) {
+                selectionStartLine--;
+                selectionStartCol = getMinCursorCol(selectionStartLine);
+            }
+
+            cursorLine = selectionStartLine;
+            cursorCol = selectionStartCol;
+            selectLeft = true;
+        }
+    }
+
+    private void selectToDown() {
+
+        updateCursorIfEmptyTextSelection();
+
+        if (selectLeft) {
+
+            if (selectionStartLine < lines.size() - 1) {
+                selectionStartLine++;
+                selectionStartCol = getMinCursorCol(selectionStartLine);
+            }
+
+            cursorLine = selectionStartLine;
+            cursorCol = selectionStartCol;
+
+        } else {
+            var endLineLen = lines.get(selectionEndLine).length();
+
+            if (selectionEndLine == lines.size() - 1 && selectionEndCol < endLineLen)
+                selectionEndCol = endLineLen;
+            else if (selectionEndLine < lines.size() - 1) {
+                selectionEndLine++;
+                selectionEndCol = getMinCursorCol(selectionEndLine);
+            }
+
+            cursorLine = selectionEndLine;
+            cursorCol = selectionEndCol;
+            selectRight = true;
+        }
+
+    }
+
+    private void selectCharToRight() {
+
+        updateCursorIfEmptyTextSelection();
+
+        if (selectLeft) {
+
+            if (selectionStartCol < lines.get(selectionStartLine).length())
+                selectionStartCol++;
+            else if (selectionStartCol == lines.get(selectionStartLine).length() && selectionStartLine < lines.size() - 1) {
+                selectionStartLine++;
+                selectionStartCol = 0;
+            }
+
+            cursorLine = selectionStartLine;
+            maxCursorCol = cursorCol = selectionStartCol;
+        } else {
+
+            if (selectionEndCol < lines.get(selectionEndLine).length())
+                selectionEndCol++;
+            else if (selectionEndCol == lines.get(selectionEndLine).length() && selectionEndLine < lines.size() - 1) {
+                selectionEndLine++;
+                selectionEndCol = 0;
+            }
+
+            cursorLine = selectionEndLine;
+            maxCursorCol = cursorCol = selectionEndCol;
+            selectRight = true;
+        }
+
+    }
+
+    private void selectCharToLeft() {
+
+        updateCursorIfEmptyTextSelection();
+
+        if (selectRight) {
+
+            if (selectionEndCol > 0)
+                selectionEndCol--;
+            else if (selectionEndCol == 0 && selectionEndLine > 0) {
+                selectionEndLine--;
+                selectionEndCol = lines.get(selectionEndLine).length();
+            }
+
+            cursorLine = selectionEndLine;
+            maxCursorCol = cursorCol = selectionEndCol;
+
+        } else {
+
+            if (selectionStartCol > 0)
+                selectionStartCol--;
+            else if (selectionStartCol == 0 && selectionStartLine > 0) {
+                selectionStartLine--;
+                selectionStartCol = lines.get(selectionStartLine).length();
+            }
+
+            cursorLine = selectionStartLine;
+            maxCursorCol = cursorCol = selectionStartCol;
+            selectLeft = true;
+        }
+
     }
 }
