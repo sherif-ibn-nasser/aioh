@@ -17,7 +17,9 @@ but it is designed as a general-purpose editor for a wide range of use cases.
 ## TODO
 
 - [X] Text rendering
-- [ ] Text selection
+- [X] Text selection
+- [ ] Text manipulation (Cut, Copy, Paste)
+- [ ] Text searching
 - [ ] Key bindings
 - [ ] Load/Save files
 - [ ] Files browsing
