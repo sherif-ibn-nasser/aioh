@@ -511,7 +511,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             }
 
             cursorLine = selectionStartLine;
-            cursorCol = selectionStartCol;
+            maxCursorCol = cursorCol = selectionStartCol;
         } else {
 
             if (selectionEndCol < lines.get(selectionEndLine).length())
@@ -522,7 +522,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             }
 
             cursorLine = selectionEndLine;
-            cursorCol = selectionEndCol;
+            maxCursorCol = cursorCol = selectionEndCol;
             selectRight = true;
         }
 
@@ -542,7 +542,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             }
 
             cursorLine = selectionEndLine;
-            cursorCol = selectionEndCol;
+            maxCursorCol = cursorCol = selectionEndCol;
 
         } else {
 
@@ -554,7 +554,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             }
 
             cursorLine = selectionStartLine;
-            cursorCol = selectionStartCol;
+            maxCursorCol = cursorCol = selectionStartCol;
             selectLeft = true;
         }
 
