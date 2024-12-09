@@ -85,8 +85,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
         renderer.begin();
         drawSelectedText();
-        drawCursor();
         onDrawColorProgram();
+        drawCursor();
         renderer.end();
 
         mainProgram.use();
@@ -104,7 +104,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     protected void onDrawColorProgram() {
     }
 
-    private int getMaxLineLen() {
+    protected int getMaxLineLen() {
         var line = lines.stream().max(Comparator.comparingInt(a -> a.length()));
         return line.map(stringBuilder -> stringBuilder.length()).orElse(0);
     }
