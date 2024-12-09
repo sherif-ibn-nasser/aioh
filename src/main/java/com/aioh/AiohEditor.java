@@ -30,9 +30,9 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public static final int LINES_COUNT_CAMERA_SCALE_THRESHOLD = 10;
 
     private Timer timer = new Timer();
-    private AiohRenderer renderer = new AiohRenderer();
+    protected AiohRenderer renderer = new AiohRenderer();
     private ArrayList<StringBuilder> lines = new ArrayList<>(32);
-    private int
+    protected int
             cursorLine = 0,
             cursorCol = 0,
             maxCursorCol = 0,
@@ -41,8 +41,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             selectionEndLine = 0,
             selectionEndCol = 0;
     private boolean selectRight = false, selectLeft = false;
-    private Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
-    private float cameraScale = 1, fontHeight;
+    protected Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
+    protected float cameraScale = 1, fontHeight, fontSpacing;
 
     public static boolean isDefaultContext() {
         return GL.getCapabilities().OpenGL32;
@@ -51,7 +51,9 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public void init() {
         lines.add(new StringBuilder(LINE_INITIAL_CAP));
         renderer.init();
+        onInit();
         fontHeight = renderer.getFont().getFontHeight();
+        fontSpacing = renderer.getFont().getFontSpacing();
     }
 
     public void init(String filePath) {
@@ -65,7 +67,13 @@ public class AiohEditor implements AiohWindow.EventsHandler {
             throw new RuntimeException(e);
         }
         renderer.init();
+        onInit();
         fontHeight = renderer.getFont().getFontHeight();
+        fontSpacing = renderer.getFont().getFontSpacing();
+        fontHeight += fontSpacing;
+    }
+
+    public void onInit() {
     }
 
     public void loop() {
@@ -77,10 +85,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
         renderer.begin();
         drawSelectedText();
-        renderer.end();
-
-        renderer.begin();
         drawCursor();
+        onDrawColorProgram();
         renderer.end();
 
         mainProgram.use();
@@ -89,6 +95,13 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.begin();
         drawText();
         renderer.end();
+    }
+
+    protected void onDrawMainProgram() {
+
+    }
+
+    protected void onDrawColorProgram() {
     }
 
     private int getMaxLineLen() {
@@ -165,7 +178,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.getFont().drawText(renderer, text, centerX - 0.5f * FONT_SIZE, centerY - 0.5f * fontHeight, color);
     }
 
-    private void drawText() {
+    protected void drawText() {
         // TODO: Optimize and render only visible lines
         var text = new StringBuilder(lines.size());
         for (int i = 0; i < lines.size(); i++) {
@@ -178,7 +191,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     }
 
-    private void drawSelectedText() {
+    protected void drawSelectedText() {
 
         if (selectionStartLine >= lines.size() || selectionEndLine >= lines.size())
             return;

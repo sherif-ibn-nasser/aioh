@@ -62,6 +62,11 @@ public class Font {
     private int fontHeight;
 
     /**
+     * Spacing between lines.
+     */
+    private int fontSpacing = 0;
+
+    /**
      * Creates a default antialiased font with monospaced glyphs and default
      * size 16.
      */
@@ -329,7 +334,7 @@ public class Font {
             char c = text.charAt(i);
             if (c == '\n') {
                 /* Line end, add line height to stored height */
-                height += lineHeight;
+                height += lineHeight + fontSpacing;
                 lineHeight = 0;
                 continue;
             }
@@ -357,7 +362,8 @@ public class Font {
         int textHeight = getHeight(text);
 
         float drawX = x;
-        float drawY = y;
+        float drawY = y + fontSpacing / 2f;
+        boolean firstSpacing = true;
 //        if (textHeight > fontHeight) {
 //            drawY += textHeight - fontHeight;
 //        }
@@ -368,7 +374,7 @@ public class Font {
 
             if (ch == '\n') {
                 /* Line feed, set x and y to draw at the next line */
-                drawY -= fontHeight;
+                drawY -= fontHeight + fontSpacing;
                 drawX = x;
                 continue;
             }
@@ -403,5 +409,13 @@ public class Font {
 
     public int getFontHeight() {
         return fontHeight;
+    }
+
+    public int getFontSpacing() {
+        return fontSpacing;
+    }
+
+    public void setFontSpacing(int fontSpacing) {
+        this.fontSpacing = fontSpacing;
     }
 }
