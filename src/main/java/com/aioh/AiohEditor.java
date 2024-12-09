@@ -191,79 +191,66 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     }
 
+    private void drawSelectedTextInline(int line, int startCol, int endCol) {
+        renderer.drawSolidRect(
+                -cameraPos.getX() + 0.5f * ((startCol - 1) * FONT_SIZE),
+                -cameraPos.getY() - (line - 0.5f) * fontHeight,
+                -cameraPos.getX() + 0.5f * ((endCol - 1) * FONT_SIZE),
+                -cameraPos.getY() - (line + 0.5f) * fontHeight,
+                TEXT_SELECTION_COLOR
+        );
+    }
+
     protected void drawSelectedText() {
 
         if (selectionStartLine >= lines.size() || selectionEndLine >= lines.size())
             return;
 
-        var text = new StringBuilder(lines.size());
-
         if (selectionStartLine == selectionEndLine) {
-            text.repeat(" ", selectionEndCol - selectionStartCol);
-
-            drawText(
-                    text,
-                    -cameraPos.getX() + 0.5f * (selectionStartCol * FONT_SIZE),
-                    -cameraPos.getY() - selectionStartLine * fontHeight,
-                    TEXT_SELECTION_COLOR
+            drawSelectedTextInline(
+                    selectionStartLine,
+                    selectionStartCol,
+                    selectionEndCol
             );
-
             return;
         }
 
-        var maxLen = getMaxLineLen();
+        var maxLenCol = getMaxLineLen();
 
-        text.repeat(" ", maxLen - selectionStartCol);
+        drawSelectedTextInline(
+                selectionStartLine,
+                selectionStartCol,
+                maxLenCol
+        );
 
-        drawText(
-                text,
-                -cameraPos.getX() + 0.5f * (selectionStartCol * FONT_SIZE),
-                -cameraPos.getY() - selectionStartLine * fontHeight,
+        renderer.drawSolidRect(
+                -cameraPos.getX() - 0.5f * FONT_SIZE,
+                -cameraPos.getY() - (selectionStartLine + 0.5f) * fontHeight,
+                -cameraPos.getX() + 0.5f * ((maxLenCol - 1) * FONT_SIZE),
+                -cameraPos.getY() - (selectionEndLine - 0.5f) * fontHeight,
                 TEXT_SELECTION_COLOR
         );
 
-        text.setLength(0);
-
-        for (int i = selectionStartLine + 1; i < lines.size() && i < selectionEndLine; i++) {
-
-            text.repeat(" ", maxLen);
-            text.append('\n');
-
-            drawText(
-                    text,
-                    -cameraPos.getX(),
-                    -cameraPos.getY() - i * fontHeight,
-                    TEXT_SELECTION_COLOR
+        if (selectionEndLine < lines.size())
+            drawSelectedTextInline(
+                    selectionEndLine,
+                    0,
+                    selectionEndCol
             );
-
-            text.setLength(0);
-        }
-
-        if (selectionEndLine < lines.size()) {
-            text.repeat(" ", selectionEndCol);
-            drawText(
-                    text,
-                    -cameraPos.getX(),
-                    -cameraPos.getY() - selectionEndLine * fontHeight,
-                    TEXT_SELECTION_COLOR
-            );
-        }
 
     }
 
     private void drawCursor() {
         var t = (timer.getTime() - timer.getLastLoopTime()) * 1000;
 
-        if (t % CURSOR_BLINK_PERIOD < CURSOR_BLINK_THRESHOLD) {
-            renderer.drawTextureRegion(
-                    -5 + cameraCursorDiff.getX(),
-                    -0.5f * fontHeight + cameraCursorDiff.getY(),
-                    5 + cameraCursorDiff.getX(),
-                    0.5f * fontHeight + cameraCursorDiff.getY(),
-                    0, 0, 0, 0,
+        if (t % CURSOR_BLINK_PERIOD < CURSOR_BLINK_THRESHOLD)
+            renderer.drawSolidRectCentered(
+                    cameraCursorDiff.getX(),
+                    cameraCursorDiff.getY(),
+                    10,
+                    fontHeight,
                     CURSOR_COLOR
             );
-        }
 
     }
 
