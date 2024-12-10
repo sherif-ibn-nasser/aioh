@@ -31,7 +31,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
     private Timer timer = new Timer();
     protected AiohRenderer renderer = new AiohRenderer();
-    private ArrayList<StringBuilder> lines = new ArrayList<>(32);
+    protected ArrayList<StringBuilder> lines = new ArrayList<>(32);
     protected int
             cursorLine = 0,
             cursorCol = 0,
@@ -77,6 +77,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     public void loop() {
+        onStartLoop();
+
         updateCameraPos();
         updateCameraScale();
 
@@ -95,6 +97,14 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.begin();
         drawText();
         renderer.end();
+
+        onFinishLoop();
+    }
+
+    protected void onStartLoop() {
+    }
+
+    protected void onFinishLoop() {
     }
 
     protected void onDrawMainProgram() {
@@ -170,7 +180,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         return (targetCameraScale - cameraScale) / FPS;
     }
 
-    private void drawText(CharSequence text, float centerX, float centerY) {
+    protected void drawText(CharSequence text, float centerX, float centerY) {
         drawText(text, centerX, centerY, WHITE_COLOR);
     }
 
