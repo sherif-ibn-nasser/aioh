@@ -77,7 +77,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     public void loop() {
-        onStartLoop();
+        onStartRendering();
 
         updateCameraPos();
         updateCameraScale();
@@ -86,32 +86,32 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         colorProgram.setUniform("cameraScale", cameraScale);
 
         renderer.begin();
-        drawSelectedText();
         onDrawColorProgram();
-        drawCursor();
         renderer.end();
 
         mainProgram.use();
         mainProgram.setUniform("cameraScale", cameraScale);
 
         renderer.begin();
-        drawText();
+        onDrawMainProgram();
         renderer.end();
 
-        onFinishLoop();
+        onFinishRendering();
     }
 
-    protected void onStartLoop() {
+    protected void onStartRendering() {
     }
 
-    protected void onFinishLoop() {
+    protected void onFinishRendering() {
     }
 
     protected void onDrawMainProgram() {
-
+        drawText();
     }
 
     protected void onDrawColorProgram() {
+        drawSelectedText();
+        drawCursor();
     }
 
     protected int getMaxLineLen() {
@@ -140,7 +140,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         return line.map(stringBuilder -> stringBuilder.length()).orElse(0);
     }
 
-    private void updateCameraPos() {
+    protected void updateCameraPos() {
 
         cursorPos.setX(
                 (float) (cursorCol * FONT_SIZE) / 2 - (float) FONT_SIZE / 2
@@ -184,11 +184,11 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         drawText(text, centerX, centerY, WHITE_COLOR);
     }
 
-    private void drawText(CharSequence text, float centerX, float centerY, Vec4 color) {
+    protected void drawText(CharSequence text, float centerX, float centerY, Vec4 color) {
         renderer.getFont().drawText(renderer, text, centerX - 0.5f * FONT_SIZE, centerY - 0.5f * fontHeight, color);
     }
 
-    protected void drawText() {
+    private void drawText() {
         // TODO: Optimize and render only visible lines
         var text = new StringBuilder(lines.size());
         for (int i = 0; i < lines.size(); i++) {

@@ -359,11 +359,10 @@ public class Font {
      * @param c        Color to use
      */
     public void drawText(AiohRenderer renderer, CharSequence text, float x, float y, Vec4 c) {
-        int textHeight = getHeight(text);
+//        int textHeight = getHeight(text);
 
         float drawX = x;
         float drawY = y + fontSpacing / 2f;
-        boolean firstSpacing = true;
 //        if (textHeight > fontHeight) {
 //            drawY += textHeight - fontHeight;
 //        }
