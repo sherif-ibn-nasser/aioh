@@ -197,17 +197,17 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void drawColumnsTexts() {
-        var cellStart = 0.0f;
+        var columnStart = 0.0f;
 
         for (int i = 0; i < columns.size(); i++) {
             var columnWidth = columnsWidths.get(i);
-            drawColumnText(i, cellStart + columnWidth / 2);
-            cellStart += columnWidth + CELL_SPACING;
+            drawColumnText(i, columnStart + columnWidth / 2);
+            columnStart += columnWidth + CELL_SPACING;
         }
     }
 
     private void drawColumnText(int columnIdx, float columnCenter) {
-        // TODO: Optimize and render only visible lines
+        // TODO: Optimize and render only visible cells
         var column = columns.get(columnIdx);
         var text = new StringBuilder(column.size());
         for (int i = 0; i < column.size(); i++) {
