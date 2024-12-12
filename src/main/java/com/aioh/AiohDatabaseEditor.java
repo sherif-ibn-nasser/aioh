@@ -13,11 +13,12 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final float CELL_H_PADDING = FONT_SIZE / 2f;
     public static final float CELL_V_PADDING = FONT_SIZE / 2f;
     public static final int CELL_CHARS_THRESHOLD = 16;
+    public static final int CELL_SPACING = 10;
 
     private ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(32);
-    private ArrayList<Float> columnsMaxCells = new ArrayList<>(32), columnsCenters = new ArrayList<>(32);
-    private float maxCellChars = 0;
+    private ArrayList<Integer> columnsLens = new ArrayList<>(32);
     private int databaseCol = 0;
+    private float currentColWidth = 0;
 
     @Override
     public void onInit() {
@@ -32,14 +33,14 @@ public class AiohDatabaseEditor extends AiohEditor {
         col0.add(new StringBuilder("0"));
 
         var col1 = new ArrayList<StringBuilder>();
-        col1.add(new StringBuilder("df5"));
-        col1.add(new StringBuilder("df6"));
+        col1.add(new StringBuilder("d5"));
+        col1.add(new StringBuilder("d6"));
         col1.add(new StringBuilder("99"));
         col1.add(new StringBuilder("00"));
 
         var col2 = new ArrayList<StringBuilder>();
         col2.add(new StringBuilder("aa"));
-        col2.add(new StringBuilder("b"));
+        col2.add(new StringBuilder("bjjj"));
         col2.add(new StringBuilder("c"));
         col2.add(new StringBuilder("d"));
 
@@ -60,45 +61,8 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     @Override
-    public void onDrawColorProgram() {
-        var end = maxCellChars * FONT_SIZE / 2f + CELL_H_PADDING;
-        var start = -end;
-        drawColumn("Name", databaseCol, start, end);
-        drawBorderAroundCurrentCell();
-        columnsCenters.set(databaseCol, (start + end) / 2);
-
-        for (int i = databaseCol + 1; i < columns.size(); i++) {
-            start = end + 10;
-            end = start + getMaxCellChars(i) * FONT_SIZE + 2 * CELL_H_PADDING;
-            drawColumn("Age", i, start, end);
-            columnsCenters.set(i, (start + end) / 2);
-        }
-
-        end = maxCellChars * FONT_SIZE / 2f + CELL_H_PADDING;
-        start = -end;
-
-        for (int i = databaseCol - 1; i >= 0; i--) {
-            end = start - 10;
-            start = end - getMaxCellChars(i) * FONT_SIZE - 2 * CELL_H_PADDING;
-            drawColumn("Age", i, start, end);
-            columnsCenters.set(i, (start + end) / 2);
-        }
-
-    }
-
-    @Override
-    protected void onDrawMainProgram() {
-
-        for (int i = 0; i < columns.size(); i++) {
-            drawText(i, columnsCenters.get(i));
-        }
-
-    }
-
-    @Override
     protected void onStartRendering() {
-        columnsMaxCells.clear();
-        columnsCenters.clear();
+        columnsLens.clear();
         // Compare first line lengths of each cell until certain threshold
         // FIXME: Maybe this is slow?
         for (int i = 0; i < columns.size(); i++) {
@@ -111,49 +75,92 @@ public class AiohDatabaseEditor extends AiohEditor {
                     .orElse(new StringBuilder())
                     .length();
 
-            var width = Math.min(CELL_CHARS_THRESHOLD, len) / 2f;
-            columnsMaxCells.add(width);
-            columnsCenters.add(0.0f);
+            len = Math.min(CELL_CHARS_THRESHOLD, len);
+            columnsLens.add(len);
         }
-        maxCellChars = getMaxCellChars(databaseCol);
     }
 
-    private float getMaxCellChars(int column) {
-        return columnsMaxCells.get(column);
+    @Override
+    protected void updateCameraPos() {
+
+        var centerX = 0.0f;
+
+        for (int i = 0; i < columns.size(); i++) {
+            var textWidth = columnsLens.get(i) * FONT_SIZE / 2f;
+
+            if (i < databaseCol)
+                centerX += textWidth + 2 * CELL_H_PADDING + CELL_SPACING;
+            else if (i == databaseCol) {
+                centerX += textWidth / 2f + CELL_H_PADDING;
+                break;
+            }
+        }
+        cursorPos.setX(centerX);
+        cursorPos.setY(
+                -cursorLine * fontHeight
+        );
+
+        cameraCursorDiff = cursorPos.minus(cameraPos);
+
+        cameraPos = cameraPos.plus(
+                cameraCursorDiff.times((float) CAMERA_VELOCITY / FPS)
+        );
+    }
+
+    @Override
+    public void onDrawColorProgram() {
+        drawColumnsBackgrounds();
+        drawBorderAroundCurrentCell();
+    }
+
+    @Override
+    protected void onDrawMainProgram() {
+        drawColumnsTexts();
     }
 
     @Override
     protected void onFinishRendering() {
     }
 
-    private void drawColumn(String columnName, int columnIdx, float start, float end) {
-        var column = columns.get(columnIdx);
-        for (int i = 0; i < column.size(); i++) {
+    private void drawColumnsBackgrounds() {
 
-            var bottom = -cameraPos.getY() - (i + 0.5f) * fontHeight;
-            // Background
-            renderer.drawSolidRect(
-                    start,
-                    bottom,
-                    end,
-                    bottom + fontHeight,
-                    (i % 2 == 0) ? CELL_COLOR1 : CELL_COLOR2
-            );
+        var start = -cameraPos.getX();
+
+        for (int i = 0; i < columns.size(); i++) {
+            var column = columns.get(i);
+            var end = start + columnsLens.get(i) * FONT_SIZE / 2f + 2 * CELL_H_PADDING;
+
+            for (int j = 0; j < column.size(); j++) {
+                var color = (j % 2 == 0) ? CELL_COLOR1 : CELL_COLOR2;
+                var bottom = -cameraPos.getY() - (j + 0.5f) * fontHeight;
+                // Background
+                renderer.drawSolidRect(
+                        start,
+                        bottom,
+                        end,
+                        bottom + fontHeight,
+                        color
+                );
+            }
+
+            start = end + CELL_SPACING;
 
         }
-
     }
 
     private void drawBorderAroundCurrentCell() {
-        var end = maxCellChars * FONT_SIZE / 2f + CELL_H_PADDING;
-        var start = -end;
+        var targetColWidth = columnsLens.get(databaseCol) * FONT_SIZE / 2f + 2 * CELL_H_PADDING;
+        var diff = targetColWidth - currentColWidth;
+        currentColWidth += diff * (float) CAMERA_VELOCITY / FPS;
+        var start = -currentColWidth / 2;
+        var end = -start;
 
         var bottom = -0.5f * fontHeight;
         var top = 0.5f * fontHeight;
 
         // Start border
         renderer.drawSolidRect(
-                start - 10,
+                start - CELL_SPACING,
                 bottom,
                 start,
                 top,
@@ -164,7 +171,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         renderer.drawSolidRect(
                 end,
                 bottom,
-                end + 10,
+                end + CELL_SPACING,
                 top,
                 WHITE_COLOR
         );
@@ -172,7 +179,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         // Top border
         renderer.drawSolidRect(
                 start,
-                top - 10,
+                top - CELL_SPACING,
                 end,
                 top,
                 WHITE_COLOR
@@ -183,13 +190,22 @@ public class AiohDatabaseEditor extends AiohEditor {
                 start,
                 bottom,
                 end,
-                bottom + 10,
+                bottom + CELL_SPACING,
                 WHITE_COLOR
         );
     }
 
+    private void drawColumnsTexts() {
+        var cellStart = 0.0f;
 
-    protected void drawText(int columnIdx, float centerX) {
+        for (int i = 0; i < columns.size(); i++) {
+            var columnWidth = columnsLens.get(i) * FONT_SIZE / 2f + 2 * CELL_H_PADDING;
+            drawColumnText(i, cellStart + columnWidth / 2);
+            cellStart += columnWidth + CELL_SPACING;
+        }
+    }
+
+    private void drawColumnText(int columnIdx, float columnCenter) {
         // TODO: Optimize and render only visible lines
         var column = columns.get(columnIdx);
         var text = new StringBuilder(column.size());
@@ -208,7 +224,13 @@ public class AiohDatabaseEditor extends AiohEditor {
                 text.append(ch);
             }
 
-            drawText(text, centerX - cameraPos.getX() - text.length() * FONT_SIZE / 4f, -cameraPos.getY() - i * fontHeight);
+            renderer.getFont().drawText(
+                    renderer,
+                    text,
+                    -cameraPos.getX() + columnCenter - text.length() * FONT_SIZE / 4f,
+                    -cameraPos.getY() - (i) * fontHeight - 0.5f * fontHeight,
+                    WHITE_COLOR
+            );
 
             text.setLength(0);
         }
