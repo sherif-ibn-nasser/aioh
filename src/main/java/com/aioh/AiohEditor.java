@@ -17,7 +17,7 @@ import static com.aioh.graphics.AiohRenderer.mainProgram;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class AiohEditor implements AiohWindow.EventsHandler {
-    public static final Vec4 CURSOR_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1);
+    public static final Vec4 AIOH_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1);
     public static final Vec4 TEXT_SELECTION_COLOR = new Vec4(0.5f);
     public static final Vec4 WHITE_COLOR = new Vec4(1);
     public static final int FONT_SIZE = 128;
@@ -259,7 +259,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
                     cameraCursorDiff.getY(),
                     10,
                     fontHeight,
-                    CURSOR_COLOR
+                    AIOH_COLOR
             );
 
     }

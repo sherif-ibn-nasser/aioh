@@ -16,7 +16,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final int CELL_SPACING = 10;
 
     private ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(32);
-    private ArrayList<Integer> columnsLens = new ArrayList<>(32);
+    private ArrayList<Float> columnsWidths = new ArrayList<>(32);
     private int databaseCol = 0;
     private float currentColWidth = 0;
 
@@ -62,7 +62,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     protected void onStartRendering() {
-        columnsLens.clear();
+        columnsWidths.clear();
         // Compare first line lengths of each cell until certain threshold
         // FIXME: Maybe this is slow?
         for (int i = 0; i < columns.size(); i++) {
@@ -76,7 +76,8 @@ public class AiohDatabaseEditor extends AiohEditor {
                     .length();
 
             len = Math.min(CELL_CHARS_THRESHOLD, len);
-            columnsLens.add(len);
+            var columnWidth = 0.5f * len * FONT_SIZE + 2 * CELL_H_PADDING;
+            columnsWidths.add(columnWidth);
         }
     }
 
@@ -86,12 +87,12 @@ public class AiohDatabaseEditor extends AiohEditor {
         var centerX = 0.0f;
 
         for (int i = 0; i < columns.size(); i++) {
-            var textWidth = columnsLens.get(i) * FONT_SIZE / 2f;
+            var columnWidth = columnsWidths.get(i);
 
             if (i < databaseCol)
-                centerX += textWidth + 2 * CELL_H_PADDING + CELL_SPACING;
+                centerX += columnWidth + CELL_SPACING;
             else if (i == databaseCol) {
-                centerX += textWidth / 2f + CELL_H_PADDING;
+                centerX += 0.5f * columnWidth;
                 break;
             }
         }
@@ -128,7 +129,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
         for (int i = 0; i < columns.size(); i++) {
             var column = columns.get(i);
-            var end = start + columnsLens.get(i) * FONT_SIZE / 2f + 2 * CELL_H_PADDING;
+            var end = start + columnsWidths.get(i);
 
             for (int j = 0; j < column.size(); j++) {
                 var color = (j % 2 == 0) ? CELL_COLOR1 : CELL_COLOR2;
@@ -149,7 +150,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void drawBorderAroundCurrentCell() {
-        var targetColWidth = columnsLens.get(databaseCol) * FONT_SIZE / 2f + 2 * CELL_H_PADDING;
+        var targetColWidth = columnsWidths.get(databaseCol);
         var diff = targetColWidth - currentColWidth;
         currentColWidth += diff * (float) CAMERA_VELOCITY / FPS;
         var start = -currentColWidth / 2;
@@ -164,7 +165,7 @@ public class AiohDatabaseEditor extends AiohEditor {
                 bottom,
                 start,
                 top,
-                WHITE_COLOR
+                AIOH_COLOR
         );
 
         // End border
@@ -173,7 +174,7 @@ public class AiohDatabaseEditor extends AiohEditor {
                 bottom,
                 end + CELL_SPACING,
                 top,
-                WHITE_COLOR
+                AIOH_COLOR
         );
 
         // Top border
@@ -182,7 +183,7 @@ public class AiohDatabaseEditor extends AiohEditor {
                 top - CELL_SPACING,
                 end,
                 top,
-                WHITE_COLOR
+                AIOH_COLOR
         );
 
         // Bottom border
@@ -191,7 +192,7 @@ public class AiohDatabaseEditor extends AiohEditor {
                 bottom,
                 end,
                 bottom + CELL_SPACING,
-                WHITE_COLOR
+                AIOH_COLOR
         );
     }
 
@@ -199,7 +200,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         var cellStart = 0.0f;
 
         for (int i = 0; i < columns.size(); i++) {
-            var columnWidth = columnsLens.get(i) * FONT_SIZE / 2f + 2 * CELL_H_PADDING;
+            var columnWidth = columnsWidths.get(i);
             drawColumnText(i, cellStart + columnWidth / 2);
             cellStart += columnWidth + CELL_SPACING;
         }
