@@ -15,8 +15,27 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final int CELL_CHARS_THRESHOLD = 16;
     public static final int CELL_SPACING = 10;
 
-    private ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(32);
-    private ArrayList<Float> columnsWidths = new ArrayList<>(32);
+    public enum DataType {
+        INT,
+        FLOAT,
+        BOOL,
+        STRING;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case INT -> "Int";
+                case FLOAT -> "Float";
+                case BOOL -> "Bool";
+                case STRING -> "String";
+            };
+        }
+    }
+
+    private ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(8);
+    private ArrayList<String> columnsNames = new ArrayList<>(8);
+    private ArrayList<DataType> columnsTypes = new ArrayList<>(8);
+    private ArrayList<Float> columnsWidths = new ArrayList<>(8);
     private int databaseCol = 0;
     private float currentColWidth = 0;
 
@@ -27,33 +46,61 @@ public class AiohDatabaseEditor extends AiohEditor {
         lines.clear();
         lines.add(new StringBuilder());
         var col0 = new ArrayList<StringBuilder>();
-        col0.add(new StringBuilder("000"));
-        col0.add(new StringBuilder("02"));
-        col0.add(new StringBuilder("Md"));
         col0.add(new StringBuilder("0"));
+        col0.add(new StringBuilder("1"));
+        col0.add(new StringBuilder("2"));
+        col0.add(new StringBuilder("3"));
 
         var col1 = new ArrayList<StringBuilder>();
-        col1.add(new StringBuilder("d5"));
-        col1.add(new StringBuilder("d6"));
-        col1.add(new StringBuilder("99"));
-        col1.add(new StringBuilder("00"));
+        col1.add(new StringBuilder("Mahmoud"));
+        col1.add(new StringBuilder("Mohammed"));
+        col1.add(new StringBuilder("Mustafa"));
+        col1.add(new StringBuilder("Sherif"));
 
         var col2 = new ArrayList<StringBuilder>();
-        col2.add(new StringBuilder("aa"));
-        col2.add(new StringBuilder("bjjj"));
-        col2.add(new StringBuilder("c"));
-        col2.add(new StringBuilder("d"));
+        col2.add(new StringBuilder("Mahmoud"));
+        col2.add(new StringBuilder("Ahmed"));
+        col2.add(new StringBuilder("Mohammed"));
+        col2.add(new StringBuilder("Nasser"));
 
         var col3 = new ArrayList<StringBuilder>();
-        col3.add(new StringBuilder("00ffaa"));
-        col3.add(new StringBuilder("11"));
-        col3.add(new StringBuilder("22"));
-        col3.add(new StringBuilder("33"));
+        col3.add(new StringBuilder("21"));
+        col3.add(new StringBuilder("23"));
+        col3.add(new StringBuilder("24"));
+        col3.add(new StringBuilder("21"));
+
+        var col4 = new ArrayList<StringBuilder>();
+        col4.add(new StringBuilder("100000.0"));
+        col4.add(new StringBuilder("10000.0"));
+        col4.add(new StringBuilder("20000.0"));
+        col4.add(new StringBuilder("30000.0"));
+
+        var col5 = new ArrayList<StringBuilder>();
+        col5.add(new StringBuilder("FALSE"));
+        col5.add(new StringBuilder("TRUE"));
+        col5.add(new StringBuilder("TRUE"));
+        col5.add(new StringBuilder("FALSE"));
 
         columns.add(col0);
         columns.add(col1);
         columns.add(col2);
         columns.add(col3);
+        columns.add(col4);
+        columns.add(col5);
+
+        columnsNames.add("Id");
+        columnsNames.add("First Name");
+        columnsNames.add("Last Name");
+        columnsNames.add("Age");
+        columnsNames.add("Salary");
+        columnsNames.add("Married");
+
+        columnsTypes.add(DataType.INT);
+        columnsTypes.add(DataType.STRING);
+        columnsTypes.add(DataType.STRING);
+        columnsTypes.add(DataType.INT);
+        columnsTypes.add(DataType.FLOAT);
+        columnsTypes.add(DataType.BOOL);
     }
 
     private ArrayList<StringBuilder> getCurrentCol() {
@@ -117,6 +164,31 @@ public class AiohDatabaseEditor extends AiohEditor {
     @Override
     protected void onDrawMainProgram() {
         drawColumnsTexts();
+
+//
+//        renderer.end();
+//        AiohRenderer.colorProgram.use();
+//        renderer.begin();
+//        renderer.drawSolidRect(
+//                -AiohWindow.width / 2f,
+//                -AiohWindow.height / 2f,
+//                AiohWindow.width / 2f,
+//                -AiohWindow.height / 2f + renderer.getDebugFont().getFontHeight(),
+//                AIOH_COLOR_DARK
+//        );
+//        renderer.end();
+//        AiohRenderer.mainProgram.use();
+//        renderer.begin();
+//        renderer.getDebugFont().drawText(
+//                renderer,
+//                "Cell No.: " + (cursorLine + 1) +
+//                        ", Column: \"" +
+//                        columnsNames.get(databaseCol) +
+//                        "\" (" + columnsTypes.get(databaseCol) + ")",
+//                -AiohWindow.width / 2f + 10,
+//                -AiohWindow.height / 2f,
+//                WHITE_COLOR
+//        );
     }
 
     @Override

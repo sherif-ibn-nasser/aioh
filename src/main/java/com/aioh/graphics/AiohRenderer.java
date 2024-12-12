@@ -76,7 +76,7 @@ public class AiohRenderer {
 
         /* Create fonts */
         font = new Font(Main.font, true);
-//        debugFont = new Font(12, false);
+        debugFont = new Font(Main.font.deriveFont(20f), false);
     }
 
     /**
@@ -444,5 +444,9 @@ public class AiohRenderer {
 
     public Font getFont() {
         return font;
+    }
+
+    public Font getDebugFont() {
+        return debugFont;
     }
 }
