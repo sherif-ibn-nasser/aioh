@@ -123,6 +123,10 @@ public class AiohDatabaseEditor extends AiohEditor {
         return columns.get(databaseCol);
     }
 
+    private StringBuilder getCurrentCell() {
+        return getCurrentCol().get(databaseRow);
+    }
+
     private void enableTextEditing(CharSequence initialText) {
         lines.clear();
         lines.add(new StringBuilder());
@@ -425,6 +429,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         }
         switch (keyCode) {
             case GLFW_KEY_BACKSPACE -> onBackspacePressed();
+            case GLFW_KEY_DELETE -> onDeletePressed();
             case GLFW_KEY_ENTER -> onEnterPressed();
             case GLFW_KEY_UP -> onUpArrowPressed();
             case GLFW_KEY_DOWN -> onDownArrowPressed();
@@ -434,20 +439,26 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void onBackspacePressed() {
+        if (columnsTypes.get(databaseCol) == DataType.BOOL)
+            return;
+        getCurrentCell().setLength(0);
+    }
+
+    private void onDeletePressed() {
         if (columns.getFirst().size() == 1)
             return;
 
         for (var column : columns) {
             column.remove(databaseRow);
         }
-        
+
         if (databaseRow >= columns.getFirst().size())
             databaseRow = columns.getFirst().size() - 1;
     }
 
     private void onEnterPressed() {
         currentCellType = columnsTypes.get(databaseCol);
-        var cell = columns.get(databaseCol).get(databaseRow);
+        var cell = getCurrentCell();
 
         if (currentCellType == DataType.BOOL) {
             columns.get(databaseCol).set(
@@ -497,7 +508,9 @@ public class AiohDatabaseEditor extends AiohEditor {
             switch (keyCode) {
                 case GLFW_KEY_UP -> addRowAbove();
                 case GLFW_KEY_DOWN -> addRowBelow();
+                case GLFW_KEY_BACKSPACE -> onDeletePressed();
                 case GLFW_KEY_R -> renameCurrentColumn();
+                case GLFW_KEY_D -> duplicateCurrentRow();
             }
         }
     }
@@ -552,6 +565,13 @@ public class AiohDatabaseEditor extends AiohEditor {
         for (int i = 0; i < columns.size(); i++) {
             var column = columns.get(i);
             column.add(databaseRow + 1, columnsTypes.get(i).getDefaultString());
+        }
+        databaseRow++;
+    }
+
+    private void duplicateCurrentRow() {
+        for (var column : columns) {
+            column.add(databaseRow + 1, new StringBuilder(column.get(databaseRow)));
         }
         databaseRow++;
     }
