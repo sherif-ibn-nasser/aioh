@@ -434,7 +434,15 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void onBackspacePressed() {
-        // TODO
+        if (columns.getFirst().size() == 1)
+            return;
+
+        for (var column : columns) {
+            column.remove(databaseRow);
+        }
+        
+        if (databaseRow >= columns.getFirst().size())
+            databaseRow = columns.getFirst().size() - 1;
     }
 
     private void onEnterPressed() {
