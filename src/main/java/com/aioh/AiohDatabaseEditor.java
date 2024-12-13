@@ -32,12 +32,21 @@ public class AiohDatabaseEditor extends AiohEditor {
                 case STRING -> "String";
             };
         }
+
+        public StringBuilder getDefaultString() {
+            return switch (this) {
+                case INT -> new StringBuilder("0");
+                case FLOAT -> new StringBuilder("0.0");
+                case BOOL -> FALSE_STRING;
+                case STRING -> new StringBuilder();
+            };
+        }
     }
 
-    private ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(8);
-    private ArrayList<String> columnsNames = new ArrayList<>(8);
-    private ArrayList<DataType> columnsTypes = new ArrayList<>(8);
-    private ArrayList<Float> columnsWidths = new ArrayList<>(8);
+    private final ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(8);
+    private final ArrayList<String> columnsNames = new ArrayList<>(8);
+    private final ArrayList<DataType> columnsTypes = new ArrayList<>(8);
+    private final ArrayList<Float> columnsWidths = new ArrayList<>(8);
     private int databaseCol = 0, databaseRow = 0;
     private float currentColWidth = 0;
     private boolean cellEditing = false;
@@ -106,11 +115,25 @@ public class AiohDatabaseEditor extends AiohEditor {
         columnsTypes.add(DataType.FLOAT);
         columnsTypes.add(DataType.BOOL);
 
-        currentCellType = columnsTypes.get(0);
+        currentCellType = columnsTypes.getFirst();
     }
 
     private ArrayList<StringBuilder> getCurrentCol() {
         return columns.get(databaseCol);
+    }
+
+    private void enableCellEditing() {
+        cellEditing = true;
+        renderer.getFont().setFontSpacing(0);
+        this.fontSpacing = 0;
+        this.fontHeight = renderer.getFont().getFontHeight();
+    }
+
+    private void disableCellEditing() {
+        cellEditing = false;
+        renderer.getFont().setFontSpacing((int) CELL_V_PADDING);
+        this.fontSpacing = CELL_V_PADDING;
+        this.fontHeight = renderer.getFont().getFontHeight() + fontSpacing;
     }
 
     @Override
@@ -118,9 +141,8 @@ public class AiohDatabaseEditor extends AiohEditor {
         columnsWidths.clear();
         // Compare first line lengths of each cell until certain threshold
         // FIXME: Maybe this is slow?
-        for (int i = 0; i < columns.size(); i++) {
-            var col = columns.get(i);
-            var len = col.stream()
+        for (var column : columns) {
+            var len = column.stream()
                     .max(Comparator.comparingInt(a -> {
                         var idx = a.indexOf("\n");
                         return (idx == -1) ? a.length() : idx;
@@ -365,37 +387,34 @@ public class AiohDatabaseEditor extends AiohEditor {
             return;
         }
         switch (keyCode) {
-            case GLFW_KEY_ENTER -> {
-
-                currentCellType = columnsTypes.get(databaseCol);
-                var cell = columns.get(databaseCol).get(databaseRow);
-
-                if (currentCellType == DataType.BOOL) {
-                    if (cell == TRUE_STRING) {
-                        columns.get(databaseCol).set(databaseRow, FALSE_STRING);
-                    } else {
-                        columns.get(databaseCol).set(databaseRow, TRUE_STRING);
-                    }
-                    return;
-                }
-                // TODO: Show full cell
-                lines.clear();
-                lines.add(new StringBuilder());
-                cursorCol = 0;
-                cursorLine = 0;
-                for (int i = 0; i < cell.length(); i++) {
-                    super.onTextInput(new char[]{cell.charAt(i)});
-                }
-                cellEditing = true;
-                renderer.getFont().setFontSpacing(0);
-                this.fontSpacing = 0;
-                this.fontHeight = renderer.getFont().getFontHeight();
-            }
+            case GLFW_KEY_ENTER -> onEnterPressed();
             case GLFW_KEY_UP -> onUpArrowPressed();
             case GLFW_KEY_DOWN -> onDownArrowPressed();
             case GLFW_KEY_RIGHT -> onRightArrowPressed();
             case GLFW_KEY_LEFT -> onLeftArrowPressed();
         }
+    }
+
+    private void onEnterPressed() {
+        currentCellType = columnsTypes.get(databaseCol);
+        var cell = columns.get(databaseCol).get(databaseRow);
+
+        if (currentCellType == DataType.BOOL) {
+            columns.get(databaseCol).set(
+                    databaseRow,
+                    (cell == TRUE_STRING) ? FALSE_STRING : TRUE_STRING
+            );
+            return;
+        }
+
+        lines.clear();
+        lines.add(new StringBuilder());
+        cursorCol = 0;
+        cursorLine = 0;
+        for (int i = 0; i < cell.length(); i++) {
+            super.onTextInput(new char[]{cell.charAt(i)});
+        }
+        enableCellEditing();
     }
 
     private void onUpArrowPressed() {
@@ -430,31 +449,33 @@ public class AiohDatabaseEditor extends AiohEditor {
             super.onModKeysPressed(mods, keyCode);
             return;
         }
-        // TODO
-    }
 
-    private void disableCellEditing() {
-        cellEditing = false;
-        renderer.getFont().setFontSpacing((int) CELL_V_PADDING);
-        this.fontSpacing = CELL_V_PADDING;
-        this.fontHeight = renderer.getFont().getFontHeight() + fontSpacing;
+        // TODO
     }
 
     private void updateCurrentCell() {
         disableCellEditing();
         var cell = new StringBuilder(lines.size());
-        // FIXME: This might be very slow?
-        if (currentCellType == DataType.FLOAT) {
-            var num = lines.getFirst();
-            if (num.indexOf(".") == -1)
-                num.append(".0");
-            cell.append(num);
-        } else {
-            for (int i = 0; i < lines.size() - 1; i++) {
-                cell.append(lines.get(i));
-                cell.append('\n');
+        switch (currentCellType) {
+            case INT -> {
+                var num = Integer.parseInt(lines.getFirst().toString());
+                cell.append(num);
             }
-            cell.append(lines.getLast());
+            case FLOAT -> {
+                var num = Float.parseFloat(lines.getFirst().toString());
+                cell.append(num);
+            }
+            case STRING -> {
+                // FIXME: This might be very slow?
+                for (int i = 0; i < lines.size() - 1; i++) {
+                    cell.append(lines.get(i));
+                    cell.append('\n');
+                }
+                cell.append(lines.getLast());
+            }
+            case BOOL -> {
+                return;
+            }
         }
         columns.get(databaseCol).set(databaseRow, cell);
     }
