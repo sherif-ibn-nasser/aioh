@@ -11,14 +11,17 @@ repositories {
 }
 
 project.ext.lwjglVersion = "3.3.4"
+project.ext.mariadbVersion = "3.5.1"
 project.ext.lwjglNatives = "natives-linux"
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation 'org.slf4j:slf4j-nop:2.0.16'
     implementation 'io.github.kotlin-graphics:glm:0.9.9.1-12'
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
+    implementation "org.mariadb.jdbc:mariadb-java-client:$mariadbVersion"
     implementation "org.lwjgl:lwjgl"
     implementation "org.lwjgl:lwjgl-assimp"
     implementation "org.lwjgl:lwjgl-bgfx"

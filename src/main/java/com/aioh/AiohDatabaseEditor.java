@@ -1,8 +1,10 @@
 package com.aioh;
 
+import com.aioh.database.DataType;
 import com.aioh.graphics.AiohRenderer;
 import glm_.vec4.Vec4;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -18,32 +20,6 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final StringBuilder FALSE_STRING = new StringBuilder("FALSE");
     public static final StringBuilder TRUE_STRING = new StringBuilder("TRUE");
 
-    public enum DataType {
-        INT,
-        FLOAT,
-        BOOL,
-        STRING;
-
-        @Override
-        public String toString() {
-            return switch (this) {
-                case INT -> "Int";
-                case FLOAT -> "Float";
-                case BOOL -> "Bool";
-                case STRING -> "String";
-            };
-        }
-
-        public StringBuilder getDefaultString() {
-            return switch (this) {
-                case INT -> new StringBuilder("0");
-                case FLOAT -> new StringBuilder("0.0");
-                case BOOL -> FALSE_STRING;
-                case STRING -> new StringBuilder();
-            };
-        }
-    }
-
     private final ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(8);
     private final ArrayList<String> columnsNames = new ArrayList<>(8);
     private final ArrayList<DataType> columnsTypes = new ArrayList<>(8);
@@ -52,6 +28,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     private float currentColWidth = 0, maxColWidth;
     private boolean textEditing = false, columnRenaming = false;
     private DataType currentCellType;
+    private Connection connection;
 
     @Override
     public void onInit() {
@@ -117,6 +94,73 @@ public class AiohDatabaseEditor extends AiohEditor {
         columnsTypes.add(DataType.BOOL);
 
         currentCellType = columnsTypes.getFirst();
+
+        connectToDatabase();
+    }
+
+    private void connectToDatabase() {
+        // Database credentials
+        String url = "jdbc:mariadb://localhost:3306/aioh_test"; // Replace with your database name
+
+        // Connection object
+        connection = null;
+
+        try {
+            // Establishing the connection
+            connection = DriverManager.getConnection(url);
+            System.out.println("Connected to the MariaDB database successfully!");
+            loadDatabase();
+        } catch (SQLException e) {
+            System.out.println("Failed to connect to the MariaDB database.");
+            e.printStackTrace();
+        } finally {
+            // Closing the connection
+            if (connection != null) {
+                try {
+                    connection.close();
+                    System.out.println("Connection closed.");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    private void loadDatabase() throws SQLException {
+
+        // Get DatabaseMetaData
+        DatabaseMetaData metaData = connection.getMetaData();
+
+        // Get list of tables
+        ResultSet tables = metaData.getTables(null, null, "%", new String[]{"TABLE"});
+
+        System.out.println("Tables in the database:");
+
+        // Loop through each table
+        while (tables.next()) {
+            String tableName = tables.getString("TABLE_NAME");
+            System.out.println("Table: " + tableName);
+
+            // Get columns for each table
+            ResultSet columns = metaData.getColumns(null, null, tableName, null);
+            System.out.println("Columns for table: " + tableName);
+
+            // Loop through each column
+            while (columns.next()) {
+                String columnName = columns.getString("COLUMN_NAME");
+                String columnType = columns.getString("TYPE_NAME"); // Get the data type of the column
+                int columnSize = columns.getInt("COLUMN_SIZE"); // Get the size of the column
+
+                // Check if the column is VARCHAR and print size if applicable
+                if (columnType.equalsIgnoreCase("VARCHAR")) {
+                    System.out.println("  Column: " + columnName + " | Type: " + columnType + " | Size: " + columnSize);
+                } else {
+                    System.out.println("  Column: " + columnName + " | Type: " + columnType);
+                }
+            }
+            System.out.println(); // Empty line between tables
+        }
     }
 
     private ArrayList<StringBuilder> getCurrentCol() {
@@ -520,12 +564,18 @@ public class AiohDatabaseEditor extends AiohEditor {
         var cell = new StringBuilder(lines.size());
         switch (currentCellType) {
             case INT -> {
-                var num = Integer.parseInt(lines.getFirst().toString());
-                cell.append(num);
+                var numStr = lines.getFirst().toString();
+                if (numStr.isEmpty())
+                    cell.append(0);
+                else
+                    cell.append(Integer.parseInt(numStr));
             }
             case FLOAT -> {
-                var num = Float.parseFloat(lines.getFirst().toString());
-                cell.append(num);
+                var numStr = lines.getFirst().toString();
+                if (numStr.isEmpty())
+                    cell.append(0.0f);
+                else
+                    cell.append(Float.parseFloat(numStr));
             }
             case STRING -> {
                 // FIXME: This might be very slow?
