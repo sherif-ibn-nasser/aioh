@@ -1,5 +1,6 @@
 package com.aioh;
 
+import com.aioh.graphics.AiohRenderer;
 import glm_.vec4.Vec4;
 
 import java.util.ArrayList;
@@ -48,8 +49,8 @@ public class AiohDatabaseEditor extends AiohEditor {
     private final ArrayList<DataType> columnsTypes = new ArrayList<>(8);
     private final ArrayList<Float> columnsWidths = new ArrayList<>(8);
     private int databaseCol = 0, databaseRow = 0;
-    private float currentColWidth = 0;
-    private boolean cellEditing = false;
+    private float currentColWidth = 0, maxColWidth;
+    private boolean textEditing = false, columnRenaming = false;
     private DataType currentCellType;
 
     @Override
@@ -122,15 +123,26 @@ public class AiohDatabaseEditor extends AiohEditor {
         return columns.get(databaseCol);
     }
 
-    private void enableCellEditing() {
-        cellEditing = true;
+    private void enableTextEditing(CharSequence initialText) {
+        lines.clear();
+        lines.add(new StringBuilder());
+        cursorCol = 0;
+        cursorLine = 0;
+        for (int i = 0; i < initialText.length(); i++) {
+            super.onTextInput(new char[]{initialText.charAt(i)});
+        }
+        enableTextEditing();
+    }
+
+    private void enableTextEditing() {
+        textEditing = true;
         renderer.getFont().setFontSpacing(0);
         this.fontSpacing = 0;
         this.fontHeight = renderer.getFont().getFontHeight();
     }
 
-    private void disableCellEditing() {
-        cellEditing = false;
+    private void disableTextEditing() {
+        textEditing = false;
         renderer.getFont().setFontSpacing((int) CELL_V_PADDING);
         this.fontSpacing = CELL_V_PADDING;
         this.fontHeight = renderer.getFont().getFontHeight() + fontSpacing;
@@ -139,6 +151,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     @Override
     protected void onStartRendering() {
         columnsWidths.clear();
+        maxColWidth = 0;
         // Compare first line lengths of each cell until certain threshold
         // FIXME: Maybe this is slow?
         for (var column : columns) {
@@ -153,13 +166,15 @@ public class AiohDatabaseEditor extends AiohEditor {
             len = Math.min(CELL_CHARS_THRESHOLD, len);
             var columnWidth = 0.5f * len * FONT_SIZE + 2 * CELL_H_PADDING;
             columnsWidths.add(columnWidth);
+            if (columnWidth > maxColWidth)
+                maxColWidth = columnWidth;
         }
     }
 
     @Override
     protected void updateCameraPos() {
 
-        if (cellEditing) {
+        if (textEditing) {
             super.updateCameraPos();
             return;
         }
@@ -189,8 +204,22 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     @Override
+    protected float getCameraScaleVelocity() {
+
+        if (textEditing)
+            return super.getCameraScaleVelocity();
+
+        var normalizedWidthRatio = currentColWidth / maxColWidth;
+
+        var targetCameraScale = Math.max(1f - normalizedWidthRatio, 0.45f);
+
+        return (targetCameraScale - cameraScale) / FPS;
+    }
+
+
+    @Override
     public void onDrawColorProgram() {
-        if (cellEditing) {
+        if (textEditing) {
             super.onDrawColorProgram();
             return;
         }
@@ -200,36 +229,12 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     protected void onDrawMainProgram() {
-        if (cellEditing) {
+        if (textEditing) {
             super.onDrawMainProgram();
             return;
         }
         drawColumnsTexts();
-
-//
-//        renderer.end();
-//        AiohRenderer.colorProgram.use();
-//        renderer.begin();
-//        renderer.drawSolidRect(
-//                -AiohWindow.width / 2f,
-//                -AiohWindow.height / 2f,
-//                AiohWindow.width / 2f,
-//                -AiohWindow.height / 2f + renderer.getDebugFont().getFontHeight(),
-//                AIOH_COLOR_DARK
-//        );
-//        renderer.end();
-//        AiohRenderer.mainProgram.use();
-//        renderer.begin();
-//        renderer.getDebugFont().drawText(
-//                renderer,
-//                "Cell No.: " + (cursorLine + 1) +
-//                        ", Column: \"" +
-//                        columnsNames.get(databaseCol) +
-//                        "\" (" + columnsTypes.get(databaseCol) + ")",
-//                -AiohWindow.width / 2f + 10,
-//                -AiohWindow.height / 2f,
-//                WHITE_COLOR
-//        );
+        drawStatusBar();
     }
 
     @Override
@@ -352,9 +357,41 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     }
 
+    private void drawStatusBar() {
+        renderer.end();
+
+        AiohRenderer.colorProgram.use();
+        AiohRenderer.colorProgram.setUniform("cameraScale", 1.0f);
+
+        renderer.begin();
+        renderer.drawSolidRect(
+                -AiohWindow.width / 2f,
+                -AiohWindow.height / 2f,
+                AiohWindow.width / 2f,
+                -AiohWindow.height / 2f + renderer.getDebugFont().getFontHeight(),
+                AIOH_COLOR_DARK
+        );
+        renderer.end();
+
+        AiohRenderer.mainProgram.use();
+        AiohRenderer.mainProgram.setUniform("cameraScale", 1.0f);
+
+        renderer.begin();
+        renderer.getDebugFont().drawText(
+                renderer,
+                "Cell No.: " + (databaseRow + 1) +
+                        ", Column: \"" +
+                        columnsNames.get(databaseCol) +
+                        "\" (" + columnsTypes.get(databaseCol) + ")",
+                -AiohWindow.width / 2f + 10,
+                -AiohWindow.height / 2f,
+                WHITE_COLOR
+        );
+    }
+
     @Override
     public void onTextInput(char[] newChars) {
-        if (!cellEditing)
+        if (!textEditing)
             return;
 
         var ch = newChars[0];
@@ -379,20 +416,25 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onKeyPressed(int keyCode) {
-        if (cellEditing) {
+        if (textEditing) {
             if (keyCode == GLFW_KEY_ESCAPE)
-                disableCellEditing();
+                disableTextEditing();
             else
                 super.onKeyPressed(keyCode);
             return;
         }
         switch (keyCode) {
+            case GLFW_KEY_BACKSPACE -> onBackspacePressed();
             case GLFW_KEY_ENTER -> onEnterPressed();
             case GLFW_KEY_UP -> onUpArrowPressed();
             case GLFW_KEY_DOWN -> onDownArrowPressed();
             case GLFW_KEY_RIGHT -> onRightArrowPressed();
             case GLFW_KEY_LEFT -> onLeftArrowPressed();
         }
+    }
+
+    private void onBackspacePressed() {
+        // TODO
     }
 
     private void onEnterPressed() {
@@ -407,14 +449,7 @@ public class AiohDatabaseEditor extends AiohEditor {
             return;
         }
 
-        lines.clear();
-        lines.add(new StringBuilder());
-        cursorCol = 0;
-        cursorLine = 0;
-        for (int i = 0; i < cell.length(); i++) {
-            super.onTextInput(new char[]{cell.charAt(i)});
-        }
-        enableCellEditing();
+        enableTextEditing(cell);
     }
 
     private void onUpArrowPressed() {
@@ -439,7 +474,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onModKeysPressed(int mods, int keyCode) {
-        if (cellEditing) {
+        if (textEditing) {
             if ((mods & GLFW_MOD_CONTROL) != 0) {
                 switch (keyCode) {
                     case GLFW_KEY_S -> updateCurrentCell();
@@ -450,11 +485,17 @@ public class AiohDatabaseEditor extends AiohEditor {
             return;
         }
 
-        // TODO
+        if ((mods & GLFW_MOD_CONTROL) != 0) {
+            switch (keyCode) {
+                case GLFW_KEY_UP -> addRowAbove();
+                case GLFW_KEY_DOWN -> addRowBelow();
+                case GLFW_KEY_R -> renameCurrentColumn();
+            }
+        }
     }
 
     private void updateCurrentCell() {
-        disableCellEditing();
+        disableTextEditing();
         var cell = new StringBuilder(lines.size());
         switch (currentCellType) {
             case INT -> {
@@ -477,7 +518,34 @@ public class AiohDatabaseEditor extends AiohEditor {
                 return;
             }
         }
-        columns.get(databaseCol).set(databaseRow, cell);
+
+        if (columnRenaming) {
+            columnsNames.set(databaseCol, cell.toString());
+            columnRenaming = false;
+        } else {
+            columns.get(databaseCol).set(databaseRow, cell);
+        }
+    }
+
+    private void renameCurrentColumn() {
+        enableTextEditing(columnsNames.get(databaseCol));
+        currentCellType = DataType.STRING;
+        columnRenaming = true;
+    }
+
+    private void addRowAbove() {
+        for (int i = 0; i < columns.size(); i++) {
+            var column = columns.get(i);
+            column.add(databaseRow, columnsTypes.get(i).getDefaultString());
+        }
+    }
+
+    private void addRowBelow() {
+        for (int i = 0; i < columns.size(); i++) {
+            var column = columns.get(i);
+            column.add(databaseRow + 1, columnsTypes.get(i).getDefaultString());
+        }
+        databaseRow++;
     }
 
 }

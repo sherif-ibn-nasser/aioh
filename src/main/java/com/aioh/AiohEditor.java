@@ -165,17 +165,13 @@ public class AiohEditor implements AiohWindow.EventsHandler {
 
         cameraScale += cameraScaleVelocity;
 
-        if (cameraScale < 0.25f)
-            cameraScale = 0.25f;
+        cameraScale = Math.max(0.25f, cameraScale);
 
     }
 
-    private float getCameraScaleVelocity() {
+    protected float getCameraScaleVelocity() {
 
-        var maxLineLen = getMaxLineLen();
-
-        if (maxLineLen > CHARS_COUNT_CAMERA_SCALE_THRESHOLD)
-            maxLineLen = CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
+        var maxLineLen = Math.min(getMaxLineLen(), CHARS_COUNT_CAMERA_SCALE_THRESHOLD);
 
         var targetCameraScale = 1f - (float) maxLineLen / CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
 
