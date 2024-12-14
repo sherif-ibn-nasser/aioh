@@ -56,6 +56,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         onInit();
         fontHeight = renderer.getFont().getFontHeight();
         fontSpacing = renderer.getFont().getFontSpacing();
+        fontHeight += fontSpacing;
     }
 
     public void init(String filePath) {

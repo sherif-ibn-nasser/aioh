@@ -66,7 +66,7 @@ public class AiohDB {
 
     public AiohDBTable getTableByName(String tableName) {
 
-        ArrayList<StringBuilder> columnsNames;
+        ArrayList<String> columnsNames;
         ArrayList<DataType> columnsTypes;
         ArrayList<ArrayList<StringBuilder>> columnsCells;
 
@@ -88,7 +88,7 @@ public class AiohDB {
 
                 var type = getDataType(columnType, columnSize);
 
-                columnsNames.add(new StringBuilder(columnName));
+                columnsNames.add(columnName);
                 columnsTypes.add(type);
                 columnsCells.add(new ArrayList<>());
             }
@@ -99,7 +99,7 @@ public class AiohDB {
 
             while (resultSet.next()) {
                 for (int i = 0; i < columnsNames.size(); i++) {
-                    String columnName = columnsNames.get(i).toString();
+                    String columnName = columnsNames.get(i);
                     String value = resultSet.getString(columnName);
 
                     // Add the cell to the corresponding column

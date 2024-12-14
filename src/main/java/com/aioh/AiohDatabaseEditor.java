@@ -1,12 +1,16 @@
 package com.aioh;
 
+import com.aioh.database.AiohDB;
+import com.aioh.database.AiohDBManager;
+import com.aioh.database.AiohDBTable;
 import com.aioh.database.DataType;
 import com.aioh.graphics.AiohRenderer;
 import glm_.vec4.Vec4;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -18,10 +22,9 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final int CELL_CHARS_THRESHOLD = 16;
     public static final int CELL_SPACING = 10;
 
-    private final ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(8);
-    private final ArrayList<String> columnsNames = new ArrayList<>(8);
-    private final ArrayList<DataType> columnsTypes = new ArrayList<>(8);
-    private final ArrayList<Float> columnsWidths = new ArrayList<>(8);
+    private AiohDB db;
+    private AiohDBTable dbTable;
+    private ArrayList<Float> columnsWidths;
     private int databaseCol = 0, databaseRow = 0;
     private float currentColWidth = 0, maxColWidth;
     private boolean textEditing = false, columnRenaming = false;
@@ -34,135 +37,23 @@ public class AiohDatabaseEditor extends AiohEditor {
         renderer.getFont().setFontSpacing((int) CELL_V_PADDING);
         lines.clear();
         lines.add(new StringBuilder());
-        var col0 = new ArrayList<StringBuilder>();
-        col0.add(new StringBuilder("0"));
-        col0.add(new StringBuilder("1"));
-        col0.add(new StringBuilder("2"));
-        col0.add(new StringBuilder("3"));
 
-        var col1 = new ArrayList<StringBuilder>();
-        col1.add(new StringBuilder("Mahmoud"));
-        col1.add(new StringBuilder("Mohammed"));
-        col1.add(new StringBuilder("Mustafa"));
-        col1.add(new StringBuilder("Sherif"));
+        db = AiohDBManager
+                .getAvailableDatabases()
+                .stream()
+                .filter(db -> Objects.equals(db.getName(), "aioh_test"))
+                .findFirst()
+                .get();
 
-        var col2 = new ArrayList<StringBuilder>();
-        col2.add(new StringBuilder("Mahmoud"));
-        col2.add(new StringBuilder("Ahmed"));
-        col2.add(new StringBuilder("Mohammed"));
-        col2.add(new StringBuilder("Nasser"));
-
-        var col3 = new ArrayList<StringBuilder>();
-        col3.add(new StringBuilder("21"));
-        col3.add(new StringBuilder("23"));
-        col3.add(new StringBuilder("24"));
-        col3.add(new StringBuilder("21"));
-
-        var col4 = new ArrayList<StringBuilder>();
-        col4.add(new StringBuilder("100000.0"));
-        col4.add(new StringBuilder("10000.0"));
-        col4.add(new StringBuilder("20000.0"));
-        col4.add(new StringBuilder("30000.0"));
-
-        var col5 = new ArrayList<StringBuilder>();
-        col5.add(new StringBuilder(DataType.FALSE_STRING));
-        col5.add(new StringBuilder(DataType.TRUE_STRING));
-        col5.add(new StringBuilder(DataType.TRUE_STRING));
-        col5.add(new StringBuilder(DataType.FALSE_STRING));
-
-        columns.add(col0);
-        columns.add(col1);
-        columns.add(col2);
-        columns.add(col3);
-        columns.add(col4);
-        columns.add(col5);
-
-        columnsNames.add("Id");
-        columnsNames.add("First Name");
-        columnsNames.add("Last Name");
-        columnsNames.add("Age");
-        columnsNames.add("Salary");
-        columnsNames.add("Married");
-
-        columnsTypes.add(DataType.INT);
-        columnsTypes.add(DataType.VARCHAR);
-        columnsTypes.add(DataType.VARCHAR);
-        columnsTypes.add(DataType.INT);
-        columnsTypes.add(DataType.FLOAT);
-        columnsTypes.add(DataType.BOOL);
-
-        currentCellType = columnsTypes.getFirst();
-
-        connectToDatabase();
-    }
-
-    private void connectToDatabase() {
-        // Database credentials
-        String url = "jdbc:mariadb://localhost:3306/aioh_test"; // Replace with your database name
-
-        // Connection object
-        connection = null;
-
-        try {
-            // Establishing the connection
-            connection = DriverManager.getConnection(url);
-            System.out.println("Connected to the MariaDB database successfully!");
-            loadDatabase();
-        } catch (SQLException e) {
-            System.out.println("Failed to connect to the MariaDB database.");
-            e.printStackTrace();
-        } finally {
-            // Closing the connection
-            if (connection != null) {
-                try {
-                    connection.close();
-                    System.out.println("Connection closed.");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
-
-    private void loadDatabase() throws SQLException {
-
-        // Get DatabaseMetaData
-        DatabaseMetaData metaData = connection.getMetaData();
-
-        // Get list of tables
-        ResultSet tables = metaData.getTables(null, null, "%", new String[]{"TABLE"});
-
-        System.out.println("Tables in the database:");
-
-        // Loop through each table
-        while (tables.next()) {
-            String tableName = tables.getString("TABLE_NAME");
-            System.out.println("Table: " + tableName);
-
-            // Get columns for each table
-            ResultSet columns = metaData.getColumns(null, null, tableName, null);
-            System.out.println("Columns for table: " + tableName);
-
-            // Loop through each column
-            while (columns.next()) {
-                String columnName = columns.getString("COLUMN_NAME");
-                String columnType = columns.getString("TYPE_NAME"); // Get the data type of the column
-                int columnSize = columns.getInt("COLUMN_SIZE"); // Get the size of the column
-
-                // Check if the column is VARCHAR and print size if applicable
-                if (columnType.equalsIgnoreCase("VARCHAR")) {
-                    System.out.println("  Column: " + columnName + " | Type: " + columnType + " | Size: " + columnSize);
-                } else {
-                    System.out.println("  Column: " + columnName + " | Type: " + columnType);
-                }
-            }
-            System.out.println(); // Empty line between tables
-        }
+        db.connect();
+        dbTable = db.getTableByName("test_table");
+        currentCellType = dbTable.columnsTypes().getFirst();
+        columnsWidths = new ArrayList<>(dbTable.size());
+        System.out.println("height: " + fontHeight);
     }
 
     private ArrayList<StringBuilder> getCurrentCol() {
-        return columns.get(databaseCol);
+        return dbTable.columnsCells().get(databaseCol);
     }
 
     private StringBuilder getCurrentCell() {
@@ -172,8 +63,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     private void enableTextEditing(CharSequence initialText) {
         lines.clear();
         lines.add(new StringBuilder());
-        cursorCol = 0;
-        cursorLine = 0;
+        selectionStartCol = selectionEndCol = selectionStartLine = selectionEndLine = cursorCol = cursorLine = 0;
         for (int i = 0; i < initialText.length(); i++) {
             super.onTextInput(new char[]{initialText.charAt(i)});
         }
@@ -200,8 +90,8 @@ public class AiohDatabaseEditor extends AiohEditor {
         maxColWidth = 0;
         // Compare first line lengths of each cell until certain threshold
         // FIXME: Maybe this is slow?
-        for (var column : columns) {
-            var len = column.stream()
+        for (var columnCells : dbTable.columnsCells()) {
+            var len = columnCells.stream()
                     .max(Comparator.comparingInt(a -> {
                         var idx = a.indexOf("\n");
                         return (idx == -1) ? a.length() : idx;
@@ -227,7 +117,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
         var centerX = 0.0f;
 
-        for (int i = 0; i < columns.size(); i++) {
+        for (int i = 0; i < dbTable.size(); i++) {
             var columnWidth = columnsWidths.get(i);
 
             if (i < databaseCol)
@@ -291,11 +181,11 @@ public class AiohDatabaseEditor extends AiohEditor {
 
         var start = -cameraPos.getX();
 
-        for (int i = 0; i < columns.size(); i++) {
-            var column = columns.get(i);
+        for (int i = 0; i < dbTable.size(); i++) {
+            var columnCells = dbTable.columnsCells().get(i);
             var end = start + columnsWidths.get(i);
 
-            for (int j = 0; j < column.size(); j++) {
+            for (int j = 0; j < columnCells.size(); j++) {
                 var color = (j % 2 == 0) ? CELL_COLOR1 : CELL_COLOR2;
                 var bottom = -cameraPos.getY() - (j + 0.5f) * fontHeight;
                 // Background
@@ -364,7 +254,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     private void drawColumnsTexts() {
         var columnStart = 0.0f;
 
-        for (int i = 0; i < columns.size(); i++) {
+        for (int i = 0; i < dbTable.size(); i++) {
             var columnWidth = columnsWidths.get(i);
             drawColumnText(i, columnStart + columnWidth / 2);
             columnStart += columnWidth + CELL_SPACING;
@@ -373,10 +263,10 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     private void drawColumnText(int columnIdx, float columnCenter) {
         // TODO: Optimize and render only visible cells
-        var column = columns.get(columnIdx);
-        var text = new StringBuilder(column.size());
-        for (int i = 0; i < column.size(); i++) {
-            var cell = column.get(i);
+        var columnCells = dbTable.columnsCells().get(columnIdx);
+        var text = new StringBuilder(columnCells.size());
+        for (int i = 0; i < columnCells.size(); i++) {
+            var cell = columnCells.get(i);
 
             for (int j = 0; j < cell.length() && j < CELL_CHARS_THRESHOLD; j++) {
                 var ch = cell.charAt(j);
@@ -394,7 +284,7 @@ public class AiohDatabaseEditor extends AiohEditor {
                     renderer,
                     text,
                     -cameraPos.getX() + columnCenter - text.length() * FONT_SIZE / 4f,
-                    -cameraPos.getY() - (i) * fontHeight - 0.5f * fontHeight,
+                    -cameraPos.getY() - i * fontHeight - 0.5f * fontHeight,
                     WHITE_COLOR
             );
 
@@ -425,10 +315,10 @@ public class AiohDatabaseEditor extends AiohEditor {
         renderer.begin();
         renderer.getDebugFont().drawText(
                 renderer,
-                "Cell No.: " + (databaseRow + 1) +
+                "Row No.: " + (databaseRow + 1) +
                         ", Column: \"" +
-                        columnsNames.get(databaseCol) +
-                        "\" (" + columnsTypes.get(databaseCol) + ")",
+                        dbTable.columnsNames().get(databaseCol) +
+                        "\" (" + dbTable.columnsTypes().get(databaseCol) + ")",
                 -AiohWindow.width / 2f + 10,
                 -AiohWindow.height / 2f,
                 WHITE_COLOR
@@ -481,29 +371,29 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void onBackspacePressed() {
-        if (columnsTypes.get(databaseCol) == DataType.BOOL)
+        if (dbTable.columnsTypes().get(databaseCol) == DataType.BOOL)
             return;
         getCurrentCell().setLength(0);
     }
 
     private void onDeletePressed() {
-        if (columns.getFirst().size() == 1)
+        if (dbTable.columnsCells().getFirst().size() == 1)
             return;
 
-        for (var column : columns) {
-            column.remove(databaseRow);
+        for (var columnCells : dbTable.columnsCells()) {
+            columnCells.remove(databaseRow);
         }
 
-        if (databaseRow >= columns.getFirst().size())
-            databaseRow = columns.getFirst().size() - 1;
+        if (databaseRow >= dbTable.columnsCells().getFirst().size())
+            databaseRow = dbTable.columnsCells().getFirst().size() - 1;
     }
 
     private void onEnterPressed() {
-        currentCellType = columnsTypes.get(databaseCol);
+        currentCellType = dbTable.columnsTypes().get(databaseCol);
         var cell = getCurrentCell();
 
         if (currentCellType == DataType.BOOL) {
-            columns.get(databaseCol).set(
+            dbTable.columnsCells().get(databaseCol).set(
                     databaseRow,
                     (cell == DataType.TRUE_STRING) ? DataType.FALSE_STRING : DataType.TRUE_STRING
             );
@@ -524,7 +414,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void onRightArrowPressed() {
-        if (databaseCol < columns.size() - 1)
+        if (databaseCol < dbTable.size() - 1)
             databaseCol++;
     }
 
@@ -589,37 +479,37 @@ public class AiohDatabaseEditor extends AiohEditor {
         }
 
         if (columnRenaming) {
-            columnsNames.set(databaseCol, cell.toString());
+            dbTable.columnsNames().set(databaseCol, cell.toString());
             columnRenaming = false;
         } else {
-            columns.get(databaseCol).set(databaseRow, cell);
+            dbTable.columnsCells().get(databaseCol).set(databaseRow, cell);
         }
     }
 
     private void renameCurrentColumn() {
-        enableTextEditing(columnsNames.get(databaseCol));
+        enableTextEditing(dbTable.columnsNames().get(databaseCol));
         currentCellType = DataType.VARCHAR;
         columnRenaming = true;
     }
 
     private void addRowAbove() {
-        for (int i = 0; i < columns.size(); i++) {
-            var column = columns.get(i);
-            column.add(databaseRow, columnsTypes.get(i).getDefaultCellValue());
+        for (int i = 0; i < dbTable.size(); i++) {
+            var columnCells = dbTable.columnsCells().get(i);
+            columnCells.add(databaseRow, dbTable.columnsTypes().get(i).getDefaultCellValue());
         }
     }
 
     private void addRowBelow() {
-        for (int i = 0; i < columns.size(); i++) {
-            var column = columns.get(i);
-            column.add(databaseRow + 1, columnsTypes.get(i).getDefaultCellValue());
+        for (int i = 0; i < dbTable.size(); i++) {
+            var columnCells = dbTable.columnsCells().get(i);
+            columnCells.add(databaseRow + 1, dbTable.columnsTypes().get(i).getDefaultCellValue());
         }
         databaseRow++;
     }
 
     private void duplicateCurrentRow() {
-        for (var column : columns) {
-            column.add(databaseRow + 1, new StringBuilder(column.get(databaseRow)));
+        for (var columnCells : dbTable.columnsCells()) {
+            columnCells.add(databaseRow + 1, new StringBuilder(columnCells.get(databaseRow)));
         }
         databaseRow++;
     }
