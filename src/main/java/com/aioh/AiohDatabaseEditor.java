@@ -17,8 +17,6 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final float CELL_V_PADDING = FONT_SIZE / 2f;
     public static final int CELL_CHARS_THRESHOLD = 16;
     public static final int CELL_SPACING = 10;
-    public static final StringBuilder FALSE_STRING = new StringBuilder("FALSE");
-    public static final StringBuilder TRUE_STRING = new StringBuilder("TRUE");
 
     private final ArrayList<ArrayList<StringBuilder>> columns = new ArrayList<>(8);
     private final ArrayList<String> columnsNames = new ArrayList<>(8);
@@ -67,10 +65,10 @@ public class AiohDatabaseEditor extends AiohEditor {
         col4.add(new StringBuilder("30000.0"));
 
         var col5 = new ArrayList<StringBuilder>();
-        col5.add(new StringBuilder(FALSE_STRING));
-        col5.add(new StringBuilder(TRUE_STRING));
-        col5.add(new StringBuilder(TRUE_STRING));
-        col5.add(new StringBuilder(FALSE_STRING));
+        col5.add(new StringBuilder(DataType.FALSE_STRING));
+        col5.add(new StringBuilder(DataType.TRUE_STRING));
+        col5.add(new StringBuilder(DataType.TRUE_STRING));
+        col5.add(new StringBuilder(DataType.FALSE_STRING));
 
         columns.add(col0);
         columns.add(col1);
@@ -87,8 +85,8 @@ public class AiohDatabaseEditor extends AiohEditor {
         columnsNames.add("Married");
 
         columnsTypes.add(DataType.INT);
-        columnsTypes.add(DataType.STRING);
-        columnsTypes.add(DataType.STRING);
+        columnsTypes.add(DataType.VARCHAR);
+        columnsTypes.add(DataType.VARCHAR);
         columnsTypes.add(DataType.INT);
         columnsTypes.add(DataType.FLOAT);
         columnsTypes.add(DataType.BOOL);
@@ -452,7 +450,7 @@ public class AiohDatabaseEditor extends AiohEditor {
                 if (ch == '.' && lines.getFirst().indexOf(".") != -1 || ch != '.' && !Character.isDigit(ch))
                     return;
             }
-            case STRING -> {
+            case VARCHAR -> {
             }
             default -> {
                 return;
@@ -507,7 +505,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         if (currentCellType == DataType.BOOL) {
             columns.get(databaseCol).set(
                     databaseRow,
-                    (cell == TRUE_STRING) ? FALSE_STRING : TRUE_STRING
+                    (cell == DataType.TRUE_STRING) ? DataType.FALSE_STRING : DataType.TRUE_STRING
             );
             return;
         }
@@ -577,7 +575,7 @@ public class AiohDatabaseEditor extends AiohEditor {
                 else
                     cell.append(Float.parseFloat(numStr));
             }
-            case STRING -> {
+            case VARCHAR -> {
                 // FIXME: This might be very slow?
                 for (int i = 0; i < lines.size() - 1; i++) {
                     cell.append(lines.get(i));
@@ -600,21 +598,21 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     private void renameCurrentColumn() {
         enableTextEditing(columnsNames.get(databaseCol));
-        currentCellType = DataType.STRING;
+        currentCellType = DataType.VARCHAR;
         columnRenaming = true;
     }
 
     private void addRowAbove() {
         for (int i = 0; i < columns.size(); i++) {
             var column = columns.get(i);
-            column.add(databaseRow, columnsTypes.get(i).getDefaultString());
+            column.add(databaseRow, columnsTypes.get(i).getDefaultCellValue());
         }
     }
 
     private void addRowBelow() {
         for (int i = 0; i < columns.size(); i++) {
             var column = columns.get(i);
-            column.add(databaseRow + 1, columnsTypes.get(i).getDefaultString());
+            column.add(databaseRow + 1, columnsTypes.get(i).getDefaultCellValue());
         }
         databaseRow++;
     }
