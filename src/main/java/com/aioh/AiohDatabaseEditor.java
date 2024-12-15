@@ -9,6 +9,7 @@ import glm_.vec4.Vec4;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -20,12 +21,14 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final int CELL_CHARS_THRESHOLD = 16;
     public static final int CELL_SPACING = 10;
 
+    private AiohButtonsSelector buttonsSelector;
+    private List<String> dbs;
     private AiohDB db;
     private AiohDBTable dbTable;
     private ArrayList<Float> columnsWidths;
     private int databaseCol = 0, databaseRow = 0;
     private float currentColWidth = 0, maxColWidth;
-    private AiohDatabaseEditorState state = AiohDatabaseEditorState.COLUMNS_DISPLAY;
+    private AiohDatabaseEditorState state = AiohDatabaseEditorState.DATABASES_DISPLAY;
     private DataType currentCellType;
 
     @Override
@@ -34,11 +37,23 @@ public class AiohDatabaseEditor extends AiohEditor {
         renderer.getFont().setFontSpacing((int) CELL_V_PADDING);
         lines.clear();
         lines.add(new StringBuilder());
+        dbs = AiohDBManager.getAvailableDatabases();
+        buttonsSelector = new AiohButtonsSelector();
+        buttonsSelector.init();
+        buttonsSelector.setLines(dbs);
 
-        db = AiohDBManager.connectToDBByName("aioh_test");
-        dbTable = db.getTableByName("test_table");
-        currentCellType = dbTable.columnsTypes().getFirst();
-        columnsWidths = new ArrayList<>(dbTable.size());
+    }
+
+    @Override
+    public void loop() {
+        if (isButtonsSelectorState())
+            buttonsSelector.loop();
+        else
+            super.loop();
+    }
+
+    private boolean isButtonsSelectorState() {
+        return state == AiohDatabaseEditorState.DATABASES_DISPLAY || state == AiohDatabaseEditorState.TABLES_DISPLAY;
     }
 
     private boolean isTextEditingState() {
@@ -318,6 +333,11 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onTextInput(char[] newChars) {
+
+        if (isButtonsSelectorState()) {
+            buttonsSelector.onTextInput(newChars);
+            return;
+        }
         if (!isTextEditingState())
             return;
 
@@ -343,6 +363,28 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onKeyPressed(int keyCode) {
+
+        if (isButtonsSelectorState()) {
+            if (keyCode == GLFW_KEY_ESCAPE && state == AiohDatabaseEditorState.TABLES_DISPLAY) {
+                buttonsSelector.setLines(dbs);
+                state = AiohDatabaseEditorState.DATABASES_DISPLAY;
+            } else if (keyCode != GLFW_KEY_ENTER)
+                buttonsSelector.onKeyPressed(keyCode);
+            else if (state == AiohDatabaseEditorState.DATABASES_DISPLAY) {
+                db = AiohDBManager.connectToDBByName(buttonsSelector.getSelected());
+                buttonsSelector.setLines(db.getTablesNames());
+                state = AiohDatabaseEditorState.TABLES_DISPLAY;
+            } else {
+                // state is AiohDatabaseEditorState.TABLES_DISPLAY
+                dbTable = db.getTableByName(buttonsSelector.getSelected());
+                currentCellType = dbTable.columnsTypes().getFirst();
+                columnsWidths = new ArrayList<>(dbTable.size());
+                state = AiohDatabaseEditorState.COLUMNS_DISPLAY;
+            }
+
+            return;
+        }
+
         if (isTextEditingState()) {
             if (keyCode == GLFW_KEY_ESCAPE)
                 disableTextEditing();
@@ -351,6 +393,7 @@ public class AiohDatabaseEditor extends AiohEditor {
             return;
         }
         switch (keyCode) {
+            case GLFW_KEY_ESCAPE -> state = AiohDatabaseEditorState.TABLES_DISPLAY;
             case GLFW_KEY_BACKSPACE -> onBackspacePressed();
             case GLFW_KEY_DELETE -> onDeletePressed();
             case GLFW_KEY_ENTER -> onEnterPressed();
@@ -416,6 +459,12 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onModKeysPressed(int mods, int keyCode) {
+
+        if (isButtonsSelectorState()) {
+            buttonsSelector.onModKeysPressed(mods, keyCode);
+            return;
+        }
+
         if (isTextEditingState()) {
             if ((mods & GLFW_MOD_CONTROL) != 0) {
                 switch (keyCode) {

@@ -2,6 +2,8 @@ package com.aioh;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.aioh.AiohDatabaseEditor.CELL_H_PADDING;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
@@ -11,9 +13,21 @@ public class AiohButtonsSelector extends AiohEditor {
 
     private int maxLen;
 
+    public void setLines(List<String> lines) {
+        setLines(
+                lines.stream().map(StringBuilder::new)
+                        .collect(Collectors.toCollection(ArrayList::new))
+        );
+    }
+
     public void setLines(ArrayList<StringBuilder> lines) {
+        cursorLine = 0;
         this.lines = lines;
         maxLen = lines.stream().max(Comparator.comparingInt(a -> a.length())).get().length() / 2;
+    }
+
+    public String getSelected() {
+        return lines.get(cursorLine).toString();
     }
 
     @Override

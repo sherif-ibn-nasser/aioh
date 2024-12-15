@@ -18,7 +18,7 @@ public class AiohDBManager {
                 databasesArrayList.add(databasesRS.getString("TABLE_CAT"));
             }
         } catch (SQLException e) {
-            System.err.println("Failed to retrieve databases on this machine. Try again later.");
+            System.err.println("Failed to retrieve databases on this machine. Try again later.\n" + "Cause: " + e);
         }
         return databasesArrayList;
     }
