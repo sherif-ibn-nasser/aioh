@@ -21,7 +21,7 @@ public class Main {
         vertexShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.vert");
         defaultFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.frag");
         colorFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/color.frag");
-        var editor = new AiohDatabaseEditor();
+        var editor = new AiohButtonsSelector();
 
         var window = new AiohWindow("Aioh", 1280, 720, editor);
 
