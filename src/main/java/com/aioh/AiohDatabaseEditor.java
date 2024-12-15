@@ -7,7 +7,6 @@ import com.aioh.database.DataType;
 import com.aioh.graphics.AiohRenderer;
 import glm_.vec4.Vec4;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -26,9 +25,8 @@ public class AiohDatabaseEditor extends AiohEditor {
     private ArrayList<Float> columnsWidths;
     private int databaseCol = 0, databaseRow = 0;
     private float currentColWidth = 0, maxColWidth;
-    private boolean textEditing = false, columnRenaming = false;
+    private AiohDatabaseEditorState state = AiohDatabaseEditorState.COLUMNS_DISPLAY;
     private DataType currentCellType;
-    private Connection connection;
 
     @Override
     public void onInit() {
@@ -41,7 +39,10 @@ public class AiohDatabaseEditor extends AiohEditor {
         dbTable = db.getTableByName("test_table");
         currentCellType = dbTable.columnsTypes().getFirst();
         columnsWidths = new ArrayList<>(dbTable.size());
-        System.out.println("height: " + fontHeight);
+    }
+
+    private boolean isTextEditingState() {
+        return state == AiohDatabaseEditorState.CELL_UPDATE || state == AiohDatabaseEditorState.COLUMN_RENAME;
     }
 
     private ArrayList<StringBuilder> getCurrentCol() {
@@ -63,14 +64,12 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void enableTextEditing() {
-        textEditing = true;
         renderer.getFont().setFontSpacing(0);
         this.fontSpacing = 0;
         this.fontHeight = renderer.getFont().getFontHeight();
     }
 
     private void disableTextEditing() {
-        textEditing = false;
         renderer.getFont().setFontSpacing((int) CELL_V_PADDING);
         this.fontSpacing = CELL_V_PADDING;
         this.fontHeight = renderer.getFont().getFontHeight() + fontSpacing;
@@ -102,7 +101,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     @Override
     protected void updateCameraPos() {
 
-        if (textEditing) {
+        if (isTextEditingState()) {
             super.updateCameraPos();
             return;
         }
@@ -134,7 +133,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     @Override
     protected float getCameraScaleVelocity() {
 
-        if (textEditing)
+        if (isTextEditingState())
             return super.getCameraScaleVelocity();
 
         var normalizedWidthRatio = currentColWidth / maxColWidth;
@@ -147,7 +146,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onDrawColorProgram() {
-        if (textEditing) {
+        if (isTextEditingState()) {
             super.onDrawColorProgram();
             return;
         }
@@ -157,7 +156,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     protected void onDrawMainProgram() {
-        if (textEditing) {
+        if (isTextEditingState()) {
             super.onDrawMainProgram();
             return;
         }
@@ -319,7 +318,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onTextInput(char[] newChars) {
-        if (!textEditing)
+        if (!isTextEditingState())
             return;
 
         var ch = newChars[0];
@@ -344,7 +343,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onKeyPressed(int keyCode) {
-        if (textEditing) {
+        if (isTextEditingState()) {
             if (keyCode == GLFW_KEY_ESCAPE)
                 disableTextEditing();
             else
@@ -391,7 +390,7 @@ public class AiohDatabaseEditor extends AiohEditor {
             );
             return;
         }
-
+        state = AiohDatabaseEditorState.CELL_UPDATE;
         enableTextEditing(cell);
     }
 
@@ -417,10 +416,10 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     @Override
     public void onModKeysPressed(int mods, int keyCode) {
-        if (textEditing) {
+        if (isTextEditingState()) {
             if ((mods & GLFW_MOD_CONTROL) != 0) {
                 switch (keyCode) {
-                    case GLFW_KEY_S -> updateCurrentCell();
+                    case GLFW_KEY_S -> saveInputText();
                 }
                 return;
             }
@@ -439,7 +438,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         }
     }
 
-    private void updateCurrentCell() {
+    private void saveInputText() {
         disableTextEditing();
         var cell = new StringBuilder(lines.size());
         switch (currentCellType) {
@@ -470,18 +469,18 @@ public class AiohDatabaseEditor extends AiohEditor {
             }
         }
 
-        if (columnRenaming) {
+        if (state == AiohDatabaseEditorState.COLUMN_RENAME) {
             dbTable.columnsNames().set(databaseCol, cell.toString());
-            columnRenaming = false;
         } else {
             dbTable.columnsCells().get(databaseCol).set(databaseRow, cell);
         }
+        state = AiohDatabaseEditorState.COLUMNS_DISPLAY;
     }
 
     private void renameCurrentColumn() {
         enableTextEditing(dbTable.columnsNames().get(databaseCol));
+        state = AiohDatabaseEditorState.COLUMN_RENAME;
         currentCellType = DataType.VARCHAR;
-        columnRenaming = true;
     }
 
     private void addRowAbove() {
