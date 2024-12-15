@@ -7,25 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AiohDB {
-    private String name;
     private List<String> tablesNames;
     private Connection connection;
 
-    public AiohDB(String name) {
-        this.name = name;
-    }
-
-    public void connect() {
-        if (connection != null)
-            return;
-
-        try {
-            connection = DriverManager.getConnection(
-                    AiohDBManager.URL + name
-            );
-        } catch (SQLException e) {
-            System.err.println("Cannot connect to \"" + name + "\" database.");
-        }
+    public AiohDB(Connection connection) {
+        this.connection = connection;
     }
 
     public void disconnect() {
@@ -33,14 +19,10 @@ public class AiohDB {
             connection.close();
         } catch (Exception e) {
             System.err.println(
-                    "Cannot close \"" + name + "\" database." +
+                    "Cannot close this database." +
                             "It might be disconnected already or is no connection established at all."
             );
         }
-    }
-
-    public String getName() {
-        return name;
     }
 
     public List<String> getTablesNames() {

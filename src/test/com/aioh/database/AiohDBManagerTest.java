@@ -14,8 +14,10 @@ class AiohDBManagerTest {
     void testGetAllDatabases() {
         var dbs = AiohDBManager.getAvailableDatabases();
         for (var db : dbs) {
-            System.out.println(db.getName());
+            System.out.println(db);
         }
-        assertThat(dbs).anyMatch((db) -> db.getName().equals(TEST_DB));
+        assertThat(dbs).anyMatch((db) -> db.equals(TEST_DB));
     }
+
+    
 }

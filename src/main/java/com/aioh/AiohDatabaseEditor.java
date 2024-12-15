@@ -10,7 +10,6 @@ import glm_.vec4.Vec4;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -38,14 +37,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         lines.clear();
         lines.add(new StringBuilder());
 
-        db = AiohDBManager
-                .getAvailableDatabases()
-                .stream()
-                .filter(db -> Objects.equals(db.getName(), "aioh_test"))
-                .findFirst()
-                .get();
-
-        db.connect();
+        db = AiohDBManager.connectToDBByName("aioh_test");
         dbTable = db.getTableByName("test_table");
         currentCellType = dbTable.columnsTypes().getFirst();
         columnsWidths = new ArrayList<>(dbTable.size());
