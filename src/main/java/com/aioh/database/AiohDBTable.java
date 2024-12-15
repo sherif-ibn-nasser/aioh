@@ -11,7 +11,11 @@ public record AiohDBTable(
         ArrayList<ArrayList<StringBuilder>> columnsCells
 ) {
 
-    public int size() {
+    public int columnsSize() {
         return columnsNames.size();
+    }
+
+    public int rowsSize() {
+        return columnsCells.getFirst().size();
     }
 }

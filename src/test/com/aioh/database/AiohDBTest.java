@@ -29,7 +29,7 @@ class AiohDBTest {
     @Test
     void getTableByName() {
         var table = db.getTableByName(TEST_TABLE);
-        for (int i = 0; i < table.size(); i++) {
+        for (int i = 0; i < table.columnsSize(); i++) {
             System.out.println(
                     "Column: \"" + table.columnsNames().get(i) + "\", type: "
                             + table.columnsTypes().get(i)

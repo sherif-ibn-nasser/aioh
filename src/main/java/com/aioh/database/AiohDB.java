@@ -177,4 +177,53 @@ public class AiohDB {
 //        return new AiohDBTable(columnsNames, columnsTypes, columnsCells);
 //    }
 
+    public void updateTable(String tableName, AiohDBTable tableRecords) {
+        try {
+            var truncateStmt = connection.prepareStatement("TRUNCATE TABLE " + tableName);
+            truncateStmt.executeUpdate();
+            truncateStmt.close();
+
+            StringBuilder queryBuilder = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
+
+            // Append column names
+            for (int i = 0; i < tableRecords.columnsSize(); i++) {
+                queryBuilder.append(tableRecords.columnsNames().get(i));
+                if (i < tableRecords.columnsSize() - 1) {
+                    queryBuilder.append(", ");
+                }
+            }
+            queryBuilder.append(") VALUES (");
+
+            // Append placeholders for parameterized query
+            for (int i = 0; i < tableRecords.columnsSize(); i++) {
+                queryBuilder.append("?");
+                if (i < tableRecords.columnsSize() - 1) {
+                    queryBuilder.append(", ");
+                }
+            }
+            queryBuilder.append(")");
+
+            // Prepare the insert statement
+            String insertQuery = queryBuilder.toString();
+            PreparedStatement insertStm = connection.prepareStatement(insertQuery);
+
+            // Insert each row into the table
+            for (int row = 0; row < tableRecords.rowsSize(); row++) {
+                for (int col = 0; col < tableRecords.columnsSize(); col++) {
+                    String cellValue = tableRecords.columnsCells().get(col).get(row).toString();
+
+                    // Set the parameter in the prepared statement
+                    insertStm.setString(col + 1, cellValue);
+                }
+                insertStm.addBatch(); // Add to batch for efficiency
+            }
+
+            // Execute the batch insert
+            insertStm.executeBatch();
+            insertStm.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
