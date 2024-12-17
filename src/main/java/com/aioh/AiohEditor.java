@@ -45,6 +45,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     private boolean selectRight = false, selectLeft = false;
     protected Vec2 cameraPos = new Vec2(), cursorPos = new Vec2(), cameraCursorDiff = new Vec2();
     protected float cameraScale = 1, fontHeight, fontSpacing;
+    protected String title = null;
+    protected float titlePosX = 0, titlePosY = 0;
 
     public static boolean isDefaultContext() {
         return GL.getCapabilities().OpenGL32;
@@ -109,6 +111,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     protected void onDrawMainProgram() {
+        drawTitle();
         drawText();
     }
 
@@ -177,6 +180,19 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         var targetCameraScale = 1f - (float) maxLineLen / CHARS_COUNT_CAMERA_SCALE_THRESHOLD;
 
         return (targetCameraScale - cameraScale) / FPS;
+    }
+
+    protected void drawTitle() {
+        if (title == null)
+            return;
+
+        renderer.getDebugFont().drawText(
+                renderer,
+                title,
+                -cameraPos.getX() - 0.5f * FONT_SIZE + titlePosX,
+                -cameraPos.getY() + 0.5f * fontHeight + titlePosY,
+                WHITE_COLOR
+        );
     }
 
     protected void drawText(CharSequence text, float centerX, float centerY) {

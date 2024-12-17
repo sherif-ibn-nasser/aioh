@@ -100,7 +100,7 @@ public class AiohDB {
     private static DataType getDataType(int columnType, int columnSize) {
         var type = switch (columnType) {
             case Types.INTEGER -> DataType.INT;
-            case Types.FLOAT -> DataType.FLOAT;
+            case Types.FLOAT, Types.REAL -> DataType.FLOAT;
             case Types.DOUBLE -> DataType.DOUBLE;
             case Types.BOOLEAN -> DataType.BOOL;
             case Types.CHAR -> DataType.CHAR;

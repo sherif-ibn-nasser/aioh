@@ -12,6 +12,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 public class AiohButtonsSelector extends AiohEditor {
 
     private int maxLen;
+    private float titlePosX = super.titlePosX = -CELL_H_PADDING;
 
     public void setLines(List<String> lines) {
         setLines(
