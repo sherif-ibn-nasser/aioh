@@ -61,7 +61,7 @@ public class AiohDatabaseEditor extends AiohEditor {
         title =
                 """
                         Enter database name
-                        Continue (Enter)
+                        Create (Enter)
                         Cancel (Esc)""";
         titlePosY = 2 * renderer.getDebugFont().getFontHeight();
         state = AiohDatabaseEditorState.NEW_DATABASE;
@@ -84,6 +84,21 @@ public class AiohDatabaseEditor extends AiohEditor {
                         Back (Esc)""";
         buttonsSelector.titlePosY = 3 * renderer.getDebugFont().getFontHeight();
         state = AiohDatabaseEditorState.TABLES_DISPLAY;
+    }
+
+    private void goToNewTableNameState() {
+        enableTextEditing("");
+        title =
+                """
+                        Enter table name
+                        Continue (Enter)
+                        Cancel (Esc)""";
+        titlePosY = 2 * renderer.getDebugFont().getFontHeight();
+        state = AiohDatabaseEditorState.NEW_TABLE_NAME;
+    }
+
+    private void goToNewTableColumnsState() {
+        state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
     }
 
     private void goToDeleteTableState() {
@@ -143,7 +158,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     private boolean isTextEditingState() {
         return switch (state) {
-            case NEW_DATABASE, CELL_UPDATE, COLUMN_RENAME -> true;
+            case NEW_DATABASE, NEW_TABLE_NAME, CELL_UPDATE, COLUMN_RENAME -> true;
             default -> false;
         };
     }
@@ -427,7 +442,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     public void onTextInput(char[] newChars) {
         switch (state) {
             case DATABASES_DISPLAY, TABLES_DISPLAY -> buttonsSelector.onTextInput(newChars);
-            case NEW_DATABASE, NEW_TABLE -> super.onTextInput(newChars);
+            case NEW_DATABASE, NEW_TABLE_NAME -> super.onTextInput(newChars);
             case COLUMNS_DISPLAY -> {
             }
             case COLUMN_RENAME, CELL_UPDATE -> {
@@ -461,6 +476,7 @@ public class AiohDatabaseEditor extends AiohEditor {
             case NEW_DATABASE -> handleNewDatabaseOnKeyPressed(keyCode);
             case DELETE_DATABASE -> handleDeleteDatabaseOnKeyPressed(keyCode);
             case TABLES_DISPLAY -> handleTablesDisplayOnKeyPressed(keyCode);
+            case NEW_TABLE_NAME -> handleNewTableNameOnKeyPressed(keyCode);
             case DELETE_TABLE -> handleDeleteTableOnKeyPressed(keyCode);
             case COLUMNS_DISPLAY -> handleColumnsDisplayOnKeyPressed(keyCode);
             case COLUMN_RENAME -> handleColumnRenameOnKeyPressed(keyCode);
@@ -490,7 +506,7 @@ public class AiohDatabaseEditor extends AiohEditor {
             goToDatabasesDisplayState();
         } else if (keyCode == GLFW_KEY_ENTER) {
             var dbName = lines.getFirst().toString();
-            if (dbs.contains(dbName)) {
+            if (dbName.isEmpty() || dbs.contains(dbName)) {
                 // TODO: Display the error
                 return;
             }
@@ -536,6 +552,22 @@ public class AiohDatabaseEditor extends AiohEditor {
             }
             default -> buttonsSelector.onKeyPressed(keyCode);
         }
+    }
+
+    private void handleNewTableNameOnKeyPressed(int keyCode) {
+        if (keyCode == GLFW_KEY_ESCAPE) {
+            disableTextEditing();
+            goToTablesDisplayState();
+        } else if (keyCode == GLFW_KEY_ENTER) {
+            dbTableName = lines.getFirst();
+            if (dbTableName.isEmpty() || buttonsSelector.lines.contains(dbTableName)) {
+                // TODO: Display the error
+                return;
+            }
+            disableTextEditing();
+            goToNewTableColumnsState();
+        } else
+            super.onKeyPressed(keyCode);
     }
 
     private void handleDeleteTableOnKeyPressed(int keyCode) {
@@ -631,8 +663,13 @@ public class AiohDatabaseEditor extends AiohEditor {
             case NEW_DATABASE -> {
             }
             case TABLES_DISPLAY -> {
+                if ((mods & GLFW_MOD_CONTROL) != 0) {
+                    switch (keyCode) {
+                        case GLFW_KEY_N -> goToNewTableNameState();
+                    }
+                }
             }
-            case NEW_TABLE -> {
+            case NEW_TABLE_NAME -> {
             }
             case COLUMNS_DISPLAY -> {
                 if ((mods & GLFW_MOD_CONTROL) != 0) {

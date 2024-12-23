@@ -41,7 +41,7 @@ public class AiohDB {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             // Get list of tables
-            ResultSet tables = metaData.getTables(null, null, "%", new String[]{"TABLE"});
+            ResultSet tables = metaData.getTables(dbName, null, "%", new String[]{"TABLE"});
 
             // Loop through each table
             while (tables.next()) {
