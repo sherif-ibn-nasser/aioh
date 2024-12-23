@@ -8,18 +8,72 @@ import com.aioh.graphics.AiohRenderer;
 import glm_.vec4.Vec4;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class AiohDatabaseEditor extends AiohEditor {
+    public static final Vec4 COLUMNS_NAMES_ROW_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, .5f);
     public static final Vec4 CELL_COLOR1 = new Vec4(0.4f);
     public static final Vec4 CELL_COLOR2 = new Vec4(0.5f);
     public static final float CELL_H_PADDING = FONT_SIZE / 2f;
     public static final float CELL_V_PADDING = FONT_SIZE / 2f;
     public static final int CELL_CHARS_THRESHOLD = 16;
     public static final int CELL_SPACING = 10;
+
+    enum ColumnInfo {
+        NAME,
+        DATATYPE,
+        PK, NN, UQ, B, UN, ZF, AI, G;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case NAME -> "Name";
+                case DATATYPE -> "Datatype";
+                case PK -> "PK";
+                case NN -> "NN";
+                case UQ -> "UQ";
+                case B -> "B";
+                case UN -> "UN";
+                case ZF -> "ZF";
+                case AI -> "AI";
+                case G -> "G";
+            };
+        }
+    }
+
+    public static final AiohDBTable COLUMNS_INFO_TABLE = new AiohDBTable(
+            new ArrayList<>(
+                    Arrays.asList(
+                            ColumnInfo.NAME.toString(),
+                            ColumnInfo.DATATYPE.toString(),
+                            ColumnInfo.PK.toString(),
+                            ColumnInfo.NN.toString(),
+                            ColumnInfo.UQ.toString(),
+                            ColumnInfo.B.toString(),
+                            ColumnInfo.UN.toString(),
+                            ColumnInfo.ZF.toString(),
+                            ColumnInfo.AI.toString(),
+                            ColumnInfo.G.toString()
+                    )
+            ),
+            new ArrayList<>(),
+            new ArrayList<>()
+    );
+    private static final ArrayList<StringBuilder> COLUMN_TYPES = new ArrayList<>(DataType.values().length);
+
+    static {
+        COLUMNS_INFO_TABLE.columnsNames().forEach((n) -> {
+            COLUMNS_INFO_TABLE.columnsCells().add(new ArrayList<>(List.of(new StringBuilder(n))));
+        });
+
+        for (int i = 0; i < DataType.values().length; i++) {
+            COLUMN_TYPES.add(new StringBuilder(DataType.values()[i].toString()));
+        }
+    }
 
     private AiohButtonsSelector buttonsSelector;
     private List<String> dbs;
@@ -45,6 +99,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void goToDatabasesDisplayState() {
+        buttonsSelector.cursorLine = 0;
         buttonsSelector.setLines(dbs);
         buttonsSelector.title =
                 """
@@ -68,6 +123,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void goToDeleteDatabaseState() {
+        buttonsSelector.cursorLine = 0;
         buttonsSelector.displayNoAndYesButtons();
         buttonsSelector.title = "Are you sure you wanna delete the database `" + dbName + "`?";
         buttonsSelector.titlePosY = 0;
@@ -76,6 +132,8 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     private void goToTablesDisplayState() {
         databaseCol = databaseRow = 0;
+        buttonsSelector.cursorLine = 0;
+        buttonsSelector.setLines(db.getTablesNames());
         buttonsSelector.title =
                 """
                         Select a table (Enter). Use up and down arrows to switch
@@ -87,7 +145,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void goToNewTableNameState() {
-        enableTextEditing("");
+        enableTextEditing(dbTableName);
         title =
                 """
                         Enter table name
@@ -97,8 +155,37 @@ public class AiohDatabaseEditor extends AiohEditor {
         state = AiohDatabaseEditorState.NEW_TABLE_NAME;
     }
 
-    private void goToNewTableColumnsState() {
-        state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
+    private void goToNewTableColumnNameState() {
+        enableTextEditing(getCurrentCell());
+        title =
+                """
+                        Enter column name
+                        Save (Enter)
+                        Cancel (Esc)""";
+        titlePosY = 2 * renderer.getDebugFont().getFontHeight();
+        state = AiohDatabaseEditorState.NEW_TABLE_COLUMN_NAME;
+    }
+
+    private void goToNewTableColumnTypeState() {
+        buttonsSelector.cursorLine = 0;
+        buttonsSelector.lines = COLUMN_TYPES;
+        buttonsSelector.title =
+                """
+                        Select column type (Enter). Use up and down arrows to switch
+                        Cancel (Esc)""";
+        buttonsSelector.titlePosY = renderer.getDebugFont().getFontHeight();
+        state = AiohDatabaseEditorState.NEW_TABLE_COLUMN_TYPE;
+    }
+
+    private void goToNewTableVarcharSizeState() {
+        enableTextEditing("55");
+        title =
+                """
+                        Enter varchar size
+                        Save (Enter)
+                        Cancel (Esc)""";
+        titlePosY = 2 * renderer.getDebugFont().getFontHeight();
+        state = AiohDatabaseEditorState.NEW_TABLE_VARCHAR_SIZE;
     }
 
     private void goToDeleteTableState() {
@@ -151,14 +238,15 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     private boolean isButtonsSelectorState() {
         return switch (state) {
-            case DATABASES_DISPLAY, DELETE_DATABASE, TABLES_DISPLAY, DELETE_TABLE -> true;
+            case DATABASES_DISPLAY, DELETE_DATABASE, TABLES_DISPLAY, NEW_TABLE_COLUMN_TYPE, DELETE_TABLE -> true;
             default -> false;
         };
     }
 
     private boolean isTextEditingState() {
         return switch (state) {
-            case NEW_DATABASE, NEW_TABLE_NAME, CELL_UPDATE, COLUMN_RENAME -> true;
+            case NEW_DATABASE, NEW_TABLE_NAME, NEW_TABLE_COLUMN_NAME, NEW_TABLE_VARCHAR_SIZE, CELL_UPDATE,
+                 COLUMN_RENAME -> true;
             default -> false;
         };
     }
@@ -196,7 +284,7 @@ public class AiohDatabaseEditor extends AiohEditor {
     @Override
     protected void onStartRendering() {
 
-        if (state != AiohDatabaseEditorState.COLUMNS_DISPLAY)
+        if (state != AiohDatabaseEditorState.COLUMNS_DISPLAY && state != AiohDatabaseEditorState.NEW_TABLE_COLUMNS)
             return;
 
         columnsWidths.clear();
@@ -299,7 +387,10 @@ public class AiohDatabaseEditor extends AiohEditor {
             var end = start + columnsWidths.get(i);
 
             for (int j = 0; j < columnCells.size(); j++) {
-                var color = (j % 2 == 0) ? CELL_COLOR1 : CELL_COLOR2;
+                var color =
+                        (state == AiohDatabaseEditorState.NEW_TABLE_COLUMNS && j == 0) ? COLUMNS_NAMES_ROW_COLOR
+                                : (j % 2 == 0) ? CELL_COLOR1
+                                : CELL_COLOR2;
                 var bottom = -cameraPos.getY() - (j + 0.5f) * fontHeight;
                 // Background
                 renderer.drawSolidRect(
@@ -317,6 +408,9 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void drawBorderAroundCurrentCell() {
+        if (dbTable.rowsSize() == 0) {
+            return;
+        }
 
         var targetColWidth = columnsWidths.get(databaseCol);
         var diff = targetColWidth - currentColWidth;
@@ -407,6 +501,10 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void drawStatusBar() {
+
+        if (state != AiohDatabaseEditorState.COLUMNS_DISPLAY)
+            return;
+
         renderer.end();
 
         AiohRenderer.colorProgram.use();
@@ -442,7 +540,11 @@ public class AiohDatabaseEditor extends AiohEditor {
     public void onTextInput(char[] newChars) {
         switch (state) {
             case DATABASES_DISPLAY, TABLES_DISPLAY -> buttonsSelector.onTextInput(newChars);
-            case NEW_DATABASE, NEW_TABLE_NAME -> super.onTextInput(newChars);
+            case NEW_DATABASE, NEW_TABLE_NAME, NEW_TABLE_COLUMN_NAME -> super.onTextInput(newChars);
+            case NEW_TABLE_VARCHAR_SIZE -> {
+                if (Character.isDigit(newChars[0]))
+                    super.onTextInput(newChars);
+            }
             case COLUMNS_DISPLAY -> {
             }
             case COLUMN_RENAME, CELL_UPDATE -> {
@@ -477,6 +579,10 @@ public class AiohDatabaseEditor extends AiohEditor {
             case DELETE_DATABASE -> handleDeleteDatabaseOnKeyPressed(keyCode);
             case TABLES_DISPLAY -> handleTablesDisplayOnKeyPressed(keyCode);
             case NEW_TABLE_NAME -> handleNewTableNameOnKeyPressed(keyCode);
+            case NEW_TABLE_COLUMNS -> handleNewTableColumnsOnKeyPressed(keyCode);
+            case NEW_TABLE_COLUMN_NAME -> handleNewTableColumnNameOnKeyPressed(keyCode);
+            case NEW_TABLE_COLUMN_TYPE -> handleNewTableColumnTypeOnKeyPressed(keyCode);
+            case NEW_TABLE_VARCHAR_SIZE -> handleNewTableVarcharSizeOnKeyPressed(keyCode);
             case DELETE_TABLE -> handleDeleteTableOnKeyPressed(keyCode);
             case COLUMNS_DISPLAY -> handleColumnsDisplayOnKeyPressed(keyCode);
             case COLUMN_RENAME -> handleColumnRenameOnKeyPressed(keyCode);
@@ -489,7 +595,6 @@ public class AiohDatabaseEditor extends AiohEditor {
             case GLFW_KEY_ENTER -> {
                 dbName = buttonsSelector.getSelected();
                 db = AiohDBManager.connectToDBByName(dbName);
-                buttonsSelector.setLines(db.getTablesNames());
                 goToTablesDisplayState();
             }
             case GLFW_KEY_DELETE -> {
@@ -514,7 +619,7 @@ public class AiohDatabaseEditor extends AiohEditor {
             db = AiohDBManager.createDatabase(dbName);
             dbs = AiohDBManager.getAvailableDatabases();
             buttonsSelector.setLines(dbs);
-            goToTablesDisplayState();
+            goToDatabasesDisplayState();
         } else
             super.onKeyPressed(keyCode);
     }
@@ -560,24 +665,125 @@ public class AiohDatabaseEditor extends AiohEditor {
             goToTablesDisplayState();
         } else if (keyCode == GLFW_KEY_ENTER) {
             dbTableName = lines.getFirst();
-            if (dbTableName.isEmpty() || buttonsSelector.lines.contains(dbTableName)) {
+            var dbTableNameStr = dbTableName.toString();
+            if (dbTableName.isEmpty() || buttonsSelector.lines.stream().anyMatch(dbTableNameStr::contentEquals)) {
                 // TODO: Display the error
                 return;
             }
             disableTextEditing();
-            goToNewTableColumnsState();
+            if (columnsWidths == null) {
+                columnsWidths = new ArrayList<>(COLUMNS_INFO_TABLE.columnsNames().size());
+            }
+            dbTable = COLUMNS_INFO_TABLE;
+            dbTable.columnsCells().forEach((columnCells) -> {
+                var n = columnCells.getFirst();
+                columnCells.clear();
+                columnCells.add(n);
+            });
+            databaseRow = 1;
+            addRowAboveColumnInfo();
+            state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
         } else
             super.onKeyPressed(keyCode);
     }
 
+    private void handleNewTableColumnsOnKeyPressed(int keyCode) {
+        switch (keyCode) {
+            case GLFW_KEY_ESCAPE -> goToNewTableNameState();
+            case GLFW_KEY_DELETE -> onDeletePressedColumnInfo();
+            case GLFW_KEY_ENTER -> {
+                if (databaseCol == 0)
+                    goToNewTableColumnNameState();
+                else if (databaseCol == 1)
+                    goToNewTableColumnTypeState();
+                else {
+                    var cell = getCurrentCell();
+                    getCurrentCol().set(
+                            databaseRow,
+                            (cell == DataType.TRUE_STRING) ? DataType.FALSE_STRING : DataType.TRUE_STRING
+                    );
+                }
+            }
+            case GLFW_KEY_UP -> {
+                if (databaseRow > 1)
+                    databaseRow--;
+            }
+            case GLFW_KEY_DOWN -> onDownArrowPressed();
+            case GLFW_KEY_RIGHT -> onRightArrowPressed();
+            case GLFW_KEY_LEFT -> onLeftArrowPressed();
+        }
+    }
+
+
+    private void handleNewTableColumnNameOnKeyPressed(int keyCode) {
+        if (keyCode == GLFW_KEY_ESCAPE) {
+            disableTextEditing();
+            state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
+        } else if (keyCode == GLFW_KEY_ENTER) {
+            var createdColumnsNames = COLUMNS_INFO_TABLE.columnsCells().getFirst();
+            var createdColumnName = lines.getFirst();
+            var createdColumnNameStr = createdColumnName.toString();
+            if (
+                    !createdColumnNameStr.contentEquals(createdColumnsNames.get(databaseRow))
+                            &&
+                            (
+                                    createdColumnName.isEmpty() ||
+                                            createdColumnsNames.stream().anyMatch(createdColumnNameStr::contentEquals)
+                            )
+            ) {
+                // TODO: Display the error
+                return;
+            }
+            createdColumnsNames.set(databaseRow, createdColumnName);
+            disableTextEditing();
+            state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
+        } else
+            super.onKeyPressed(keyCode);
+    }
+
+
+    private void handleNewTableColumnTypeOnKeyPressed(int keyCode) {
+        switch (keyCode) {
+            case GLFW_KEY_ESCAPE -> state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
+            case GLFW_KEY_ENTER -> {
+                if (buttonsSelector.cursorLine == DataType.VARCHAR.ordinal())
+                    goToNewTableVarcharSizeState();
+                else {
+                    var selectedType = buttonsSelector.getSelected();
+                    COLUMNS_INFO_TABLE.columnsCells().get(1).set(databaseRow, selectedType);
+                    state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
+                }
+            }
+            default -> buttonsSelector.onKeyPressed(keyCode);
+        }
+    }
+
+    private void handleNewTableVarcharSizeOnKeyPressed(int keyCode) {
+        switch (keyCode) {
+            case GLFW_KEY_ESCAPE -> {
+                disableTextEditing();
+                state = AiohDatabaseEditorState.NEW_TABLE_COLUMN_TYPE;
+            }
+            case GLFW_KEY_ENTER -> {
+                var numStr = lines.getFirst().toString();
+                if (numStr.isEmpty())
+                    return;
+                var type = DataType.VARCHAR;
+                type.setSize(Integer.parseInt(numStr));
+                COLUMNS_INFO_TABLE.columnsCells().get(1).set(databaseRow, new StringBuilder(type.toString()));
+                disableTextEditing();
+                state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
+            }
+            default -> super.onKeyPressed(keyCode);
+        }
+    }
+
     private void handleDeleteTableOnKeyPressed(int keyCode) {
         if (keyCode == GLFW_KEY_ESCAPE) {
-            buttonsSelector.setLines(db.getTablesNames());
             goToTablesDisplayState();
         } else if (keyCode == GLFW_KEY_ENTER) {
             if (buttonsSelector.getSelected() == AiohButtonsSelector.YES_BUTTON)
                 db.deleteTableByName(dbTableName);
-            buttonsSelector.setLines(db.getTablesNames());
             goToTablesDisplayState();
         } else
             buttonsSelector.onKeyPressed(keyCode);
@@ -665,11 +871,24 @@ public class AiohDatabaseEditor extends AiohEditor {
             case TABLES_DISPLAY -> {
                 if ((mods & GLFW_MOD_CONTROL) != 0) {
                     switch (keyCode) {
-                        case GLFW_KEY_N -> goToNewTableNameState();
+                        case GLFW_KEY_N -> {
+                            dbTableName = new StringBuilder();
+                            goToNewTableNameState();
+                        }
                     }
                 }
             }
             case NEW_TABLE_NAME -> {
+            }
+            case NEW_TABLE_COLUMNS -> {
+                if ((mods & GLFW_MOD_CONTROL) != 0) {
+                    switch (keyCode) {
+                        case GLFW_KEY_UP -> addRowAboveColumnInfo();
+                        case GLFW_KEY_DOWN -> addRowBelowColumnInfo();
+                        case GLFW_KEY_BACKSPACE -> onDeletePressed();
+                        case GLFW_KEY_S -> createTable();
+                    }
+                }
             }
             case COLUMNS_DISPLAY -> {
                 if ((mods & GLFW_MOD_CONTROL) != 0) {
@@ -743,11 +962,8 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void addRowBelow() {
-        for (int i = 0; i < dbTable.columnsSize(); i++) {
-            var columnCells = dbTable.columnsCells().get(i);
-            columnCells.add(databaseRow + 1, dbTable.columnsTypes().get(i).getDefaultCellValue());
-        }
         databaseRow++;
+        addRowAbove();
     }
 
     private void duplicateCurrentRow() {
@@ -759,6 +975,45 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     private void saveTable() {
         db.updateTable(dbTableName, dbTable);
+    }
+
+    private void onDeletePressedColumnInfo() {
+        if (dbTable.rowsSize() == 2)
+            return;
+
+        for (var columnCells : dbTable.columnsCells()) {
+            columnCells.remove(databaseRow);
+        }
+
+        if (databaseRow >= dbTable.rowsSize())
+            databaseRow = dbTable.rowsSize() - 1;
+    }
+
+    private void addRowAboveColumnInfo() {
+        var createdColumnsNames = COLUMNS_INFO_TABLE.columnsCells().getFirst();
+        var baseName = "Column";
+        var columnName = baseName;
+        int index = 1;
+        while (createdColumnsNames.stream().anyMatch(columnName::contentEquals)) {
+            columnName = baseName + "(" + index + ")";
+            index++;
+        }
+
+        dbTable.columnsCells().getFirst().add(databaseRow, new StringBuilder(columnName));
+        dbTable.columnsCells().get(1).add(databaseRow, new StringBuilder(DataType.INT.toString()));
+        for (int i = 2; i < dbTable.columnsSize(); i++) {
+            var columnCells = dbTable.columnsCells().get(i);
+            columnCells.add(databaseRow, DataType.FALSE_STRING);
+        }
+    }
+
+    private void addRowBelowColumnInfo() {
+        databaseRow++;
+        addRowAboveColumnInfo();
+    }
+
+    private void createTable() {
+        // TODO
     }
 
 }

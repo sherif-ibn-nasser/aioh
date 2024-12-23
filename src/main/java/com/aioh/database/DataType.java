@@ -11,7 +11,7 @@ public enum DataType {
     public static final StringBuilder FALSE_STRING = new StringBuilder("FALSE");
     public static final StringBuilder TRUE_STRING = new StringBuilder("TRUE");
 
-    private int size;
+    private int size = 55;
 
     @Override
     public String toString() {
