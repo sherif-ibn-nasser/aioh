@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.aioh.AiohDatabaseEditor.ColumnInfo.*;
+import static com.aioh.database.DataType.FALSE_STRING;
 import static com.aioh.database.DataType.TRUE_STRING;
 
 public class AiohDB {
@@ -147,8 +148,10 @@ public class AiohDB {
                     String columnName = columnsNames.get(i);
                     String value = resultSet.getString(columnName);
 
-                    // Add the cell to the corresponding column
-                    columnsCells.get(i).add(value != null ? new StringBuilder(value) : new StringBuilder("NULL"));
+                    if (columnsTypes.get(i) == DataType.BOOL)
+                        columnsCells.get(i).add(value.equals("1") ? TRUE_STRING : FALSE_STRING);
+                    else
+                        columnsCells.get(i).add(value != null ? new StringBuilder(value) : new StringBuilder("NULL"));
                 }
             }
 
@@ -206,10 +209,14 @@ public class AiohDB {
             // Insert each row into the table
             for (int row = 0; row < tableRecords.rowsSize(); row++) {
                 for (int col = 0; col < tableRecords.columnsSize(); col++) {
-                    String cellValue = tableRecords.columnsCells().get(col).get(row).toString();
-
-                    // Set the parameter in the prepared statement
-                    insertStm.setString(col + 1, cellValue);
+                    var cellValue = tableRecords.columnsCells().get(col).get(row);
+                    switch (tableRecords.columnsTypes().get(col)) {
+                        case INT -> insertStm.setInt(col + 1, Integer.parseInt(cellValue.toString()));
+                        case FLOAT -> insertStm.setFloat(col + 1, Float.parseFloat(cellValue.toString()));
+                        case DOUBLE -> insertStm.setDouble(col + 1, Double.parseDouble(cellValue.toString()));
+                        case BOOL -> insertStm.setBoolean(col + 1, cellValue == TRUE_STRING);
+                        case CHAR, VARCHAR -> insertStm.setString(col + 1, cellValue.toString());
+                    }
                 }
                 insertStm.addBatch(); // Add to batch for efficiency
             }
