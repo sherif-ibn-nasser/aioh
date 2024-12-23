@@ -33,7 +33,7 @@ public class AiohButtonsSelector extends AiohEditor {
     public void setLines(ArrayList<StringBuilder> lines) {
         cursorLine = 0;
         this.lines = lines;
-        maxLen = lines.stream().max(Comparator.comparingInt(a -> a.length())).get().length() / 2;
+        maxLen = lines.stream().max(Comparator.comparingInt(a -> a.length())).orElse(new StringBuilder()).length() / 2;
     }
 
     public void displayNoAndYesButtons() {
@@ -47,11 +47,6 @@ public class AiohButtonsSelector extends AiohEditor {
     @Override
     public void onInit() {
         lines.clear();
-        lines.add(new StringBuilder("."));
-        lines.add(new StringBuilder(".."));
-        lines.add(new StringBuilder("Hello"));
-        lines.add(new StringBuilder("Hello Guys  ksjhg "));
-        lines.add(new StringBuilder("Hello"));
         setLines(lines);
     }
 
@@ -71,6 +66,8 @@ public class AiohButtonsSelector extends AiohEditor {
 
     @Override
     protected void onDrawColorProgram() {
+        if (lines.isEmpty())
+            return;
         renderer.drawSolidRect(
                 -cameraPos.getX() - 0.5f * FONT_SIZE - CELL_H_PADDING,
                 -cameraPos.getY() - (cursorLine - 0.5f) * fontHeight,

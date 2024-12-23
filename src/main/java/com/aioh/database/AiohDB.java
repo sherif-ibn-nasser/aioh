@@ -6,6 +6,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.aioh.AiohDatabaseEditor.ColumnInfo.*;
+import static com.aioh.database.DataType.TRUE_STRING;
+
 public class AiohDB {
     private String dbName;
     private List<String> tablesNames;
@@ -36,8 +39,8 @@ public class AiohDB {
         return tablesNames;
     }
 
-    private void fetchTablesNames() {
-
+    public void fetchTablesNames() {
+        tablesNames.clear();
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             // Get list of tables
@@ -51,6 +54,59 @@ public class AiohDB {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public void createTable(CharSequence tableName, AiohDBTable table) {
+
+        var primaryKeys = new ArrayList<Integer>(table.rowsSize());
+        StringBuilder createQuery = new StringBuilder("CREATE TABLE " + tableName + " (");
+        // Skip the titles row
+        for (int i = 1; i < table.rowsSize(); i++) {
+            var colName = table.columnsCells().get(NAME.ordinal()).get(i);
+            var colType = table.columnsCells().get(DATATYPE.ordinal()).get(i);
+
+            var pk = table.columnsCells().get(PK.ordinal()).get(i);
+            var ai = table.columnsCells().get(AI.ordinal()).get(i);
+            var nn = table.columnsCells().get(NN.ordinal()).get(i);
+            var uq = table.columnsCells().get(UQ.ordinal()).get(i);
+            var un = table.columnsCells().get(UN.ordinal()).get(i);
+            var b = table.columnsCells().get(B.ordinal()).get(i);
+            var zf = table.columnsCells().get(ZF.ordinal()).get(i);
+            var g = table.columnsCells().get(G.ordinal()).get(i);
+
+            createQuery.append('`').append(colName).append("` ").append(colType);
+
+            if (pk == TRUE_STRING)
+                primaryKeys.add(i);
+            if (ai == TRUE_STRING)
+                createQuery.append(" AUTO_INCREMENT");
+            if (nn == TRUE_STRING)
+                createQuery.append(" NOT NULL");
+            if (uq == TRUE_STRING)
+                createQuery.append(" UNIQUE");
+            if (un == TRUE_STRING)
+                createQuery.append(" UNSIGNED");
+            // TODO: B, ZF and G flags
+            // Add comma if not the last column
+            if (i < table.rowsSize() - 1)
+                createQuery.append(", ");
+        }
+
+        if (!primaryKeys.isEmpty()) {
+            createQuery.append(", PRIMARY KEY (");
+            primaryKeys.forEach((pkIdx) -> createQuery.append(table.columnsCells().get(NAME.ordinal()).get(pkIdx)));
+            createQuery.append(")");
+        }
+
+        // End the query
+        createQuery.append(");");
+
+        // Execute the query
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate(createQuery.toString());
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create table: " + e.getMessage(), e);
+        }
     }
 
     public AiohDBTable getTableByName(CharSequence tableName) {

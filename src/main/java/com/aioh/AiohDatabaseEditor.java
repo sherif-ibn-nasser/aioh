@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -23,10 +24,10 @@ public class AiohDatabaseEditor extends AiohEditor {
     public static final int CELL_CHARS_THRESHOLD = 16;
     public static final int CELL_SPACING = 10;
 
-    enum ColumnInfo {
+    public enum ColumnInfo {
         NAME,
         DATATYPE,
-        PK, NN, UQ, B, UN, ZF, AI, G;
+        PK, AI, NN, UQ, UN, B, ZF, G;
 
         @Override
         public String toString() {
@@ -34,32 +35,21 @@ public class AiohDatabaseEditor extends AiohEditor {
                 case NAME -> "Name";
                 case DATATYPE -> "Datatype";
                 case PK -> "PK";
+                case AI -> "AI";
                 case NN -> "NN";
                 case UQ -> "UQ";
-                case B -> "B";
                 case UN -> "UN";
+                case B -> "B";
                 case ZF -> "ZF";
-                case AI -> "AI";
                 case G -> "G";
             };
         }
     }
 
     public static final AiohDBTable COLUMNS_INFO_TABLE = new AiohDBTable(
-            new ArrayList<>(
-                    Arrays.asList(
-                            ColumnInfo.NAME.toString(),
-                            ColumnInfo.DATATYPE.toString(),
-                            ColumnInfo.PK.toString(),
-                            ColumnInfo.NN.toString(),
-                            ColumnInfo.UQ.toString(),
-                            ColumnInfo.B.toString(),
-                            ColumnInfo.UN.toString(),
-                            ColumnInfo.ZF.toString(),
-                            ColumnInfo.AI.toString(),
-                            ColumnInfo.G.toString()
-                    )
-            ),
+            Arrays.stream(ColumnInfo.values())
+                    .map(ColumnInfo::toString)
+                    .collect(Collectors.toCollection(ArrayList::new)),
             new ArrayList<>(),
             new ArrayList<>()
     );
@@ -714,26 +704,39 @@ public class AiohDatabaseEditor extends AiohEditor {
         }
     }
 
-
     private void handleNewTableColumnNameOnKeyPressed(int keyCode) {
         if (keyCode == GLFW_KEY_ESCAPE) {
             disableTextEditing();
             state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
         } else if (keyCode == GLFW_KEY_ENTER) {
             var createdColumnsNames = COLUMNS_INFO_TABLE.columnsCells().getFirst();
+
+
             var createdColumnName = lines.getFirst();
-            var createdColumnNameStr = createdColumnName.toString();
-            if (
-                    !createdColumnNameStr.contentEquals(createdColumnsNames.get(databaseRow))
-                            &&
-                            (
-                                    createdColumnName.isEmpty() ||
-                                            createdColumnsNames.stream().anyMatch(createdColumnNameStr::contentEquals)
-                            )
-            ) {
+            if (createdColumnName.isEmpty()) {
                 // TODO: Display the error
                 return;
+            } else {
+
+                var oldTitle = createdColumnsNames.get(0);
+                var oldColName = createdColumnsNames.get(databaseRow);
+                // Set the column name and the title row cell to empty to not conflict with the new value
+                createdColumnsNames.set(0, new StringBuilder());
+                createdColumnsNames.set(databaseRow, new StringBuilder());
+                var createdColumnNameStr = createdColumnName.toString();
+                if (
+                        createdColumnsNames.stream().anyMatch(createdColumnNameStr::contentEquals)
+                ) {
+                    // TODO: Display the error
+                    // Restore the column name value
+                    createdColumnsNames.set(0, oldColName);
+                    return;
+                }
+
+                // Restore the title row cell
+                createdColumnsNames.set(0, oldTitle);
             }
+
             createdColumnsNames.set(databaseRow, createdColumnName);
             disableTextEditing();
             state = AiohDatabaseEditorState.NEW_TABLE_COLUMNS;
@@ -962,7 +965,8 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void addRowBelow() {
-        databaseRow++;
+        if (dbTable.rowsSize() > 0)
+            databaseRow++;
         addRowAbove();
     }
 
@@ -991,7 +995,7 @@ public class AiohDatabaseEditor extends AiohEditor {
 
     private void addRowAboveColumnInfo() {
         var createdColumnsNames = COLUMNS_INFO_TABLE.columnsCells().getFirst();
-        var baseName = "Column";
+        var baseName = "New Column";
         var columnName = baseName;
         int index = 1;
         while (createdColumnsNames.stream().anyMatch(columnName::contentEquals)) {
@@ -1013,7 +1017,9 @@ public class AiohDatabaseEditor extends AiohEditor {
     }
 
     private void createTable() {
-        // TODO
+        db.createTable(dbTableName, COLUMNS_INFO_TABLE);
+        db.fetchTablesNames();
+        goToTablesDisplayState();
     }
 
 }
