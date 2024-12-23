@@ -161,7 +161,7 @@ public class AiohDB {
 
     public void deleteTableByName(CharSequence tableName) {
 
-        String query = "DROP TABLE " + tableName;
+        String query = "DROP TABLE `" + tableName + "`";
 
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate(query);
@@ -175,15 +175,15 @@ public class AiohDB {
 
     public void updateTable(CharSequence tableName, AiohDBTable tableRecords) {
         try {
-            var truncateStmt = connection.prepareStatement("TRUNCATE TABLE " + tableName);
+            var truncateStmt = connection.prepareStatement("TRUNCATE TABLE `" + tableName + "`");
             truncateStmt.executeUpdate();
             truncateStmt.close();
 
-            StringBuilder queryBuilder = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
+            StringBuilder queryBuilder = new StringBuilder("INSERT INTO `").append(tableName).append("` (");
 
             // Append column names
             for (int i = 0; i < tableRecords.columnsSize(); i++) {
-                queryBuilder.append(tableRecords.columnsNames().get(i));
+                queryBuilder.append('`').append(tableRecords.columnsNames().get(i)).append('`');
                 if (i < tableRecords.columnsSize() - 1) {
                     queryBuilder.append(", ");
                 }

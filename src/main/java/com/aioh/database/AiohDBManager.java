@@ -57,7 +57,7 @@ public class AiohDBManager {
             Statement statement = connection.createStatement();
 
             // Execute the SQL command to create the database
-            String createDBSQL = "CREATE DATABASE " + dbName;
+            String createDBSQL = "CREATE DATABASE `" + dbName + "`";
             statement.executeUpdate(createDBSQL);
 
             // Connect to the newly created database
@@ -87,7 +87,7 @@ public class AiohDBManager {
             statement = connection.createStatement();
 
             // Execute the SQL to drop the database
-            statement.executeUpdate("DROP DATABASE " + dbName);
+            statement.executeUpdate("DROP DATABASE `" + dbName + "`");
             return true;
         } catch (SQLException e) {
             System.err.println("Failed to delete database \"" + dbName + "\".\nCause: " + e.getMessage());
