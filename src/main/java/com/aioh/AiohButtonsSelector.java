@@ -11,6 +11,15 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 
 public class AiohButtonsSelector extends AiohEditor {
 
+    public static final StringBuilder NO_BUTTON = new StringBuilder("No");
+    public static final StringBuilder YES_BUTTON = new StringBuilder("Yes");
+    private static final ArrayList<StringBuilder> NO_YES_BUTTONS = new ArrayList<>(2);
+
+    static {
+        NO_YES_BUTTONS.add(NO_BUTTON);
+        NO_YES_BUTTONS.add(YES_BUTTON);
+    }
+
     private int maxLen;
     private float titlePosX = super.titlePosX = -CELL_H_PADDING;
 
@@ -27,8 +36,12 @@ public class AiohButtonsSelector extends AiohEditor {
         maxLen = lines.stream().max(Comparator.comparingInt(a -> a.length())).get().length() / 2;
     }
 
-    public String getSelected() {
-        return lines.get(cursorLine).toString();
+    public void displayNoAndYesButtons() {
+        setLines(NO_YES_BUTTONS);
+    }
+
+    public StringBuilder getSelected() {
+        return lines.get(cursorLine);
     }
 
     @Override
@@ -78,10 +91,14 @@ public class AiohButtonsSelector extends AiohEditor {
             case GLFW_KEY_UP -> {
                 if (cursorLine > 0)
                     cursorLine--;
+                else if (cursorLine == 0)
+                    cursorLine = lines.size() - 1;
             }
             case GLFW_KEY_DOWN -> {
                 if (cursorLine < lines.size() - 1)
                     cursorLine++;
+                else if (cursorLine == lines.size() - 1)
+                    cursorLine = 0;
             }
         }
     }

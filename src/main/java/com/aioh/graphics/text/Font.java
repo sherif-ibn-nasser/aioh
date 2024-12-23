@@ -147,6 +147,13 @@ public class Font {
      */
     public Font(java.awt.Font font, boolean antiAlias) {
         glyphs = new HashMap<>();
+        for (int i = 32; i < 256; i++) {
+            if (i == 127) {
+                /* ASCII 127 is the DEL control code, so we can skip it */
+                continue;
+            }
+            glyphs.put((char) i, null);
+        }
         texture = createFontTexture(font, antiAlias);
     }
 
@@ -159,57 +166,47 @@ public class Font {
      */
     private Texture createFontTexture(java.awt.Font font, boolean antiAlias) {
         /* Loop through the characters to get charWidth and charHeight */
-        int imageWidth = 0;
-        int imageHeight = 0;
+        final int[] imageWidth = {0};
+        final int[] imageHeight = {0};
 
-        /* Start at char #32, because ASCII 0 to 31 are just control codes */
-        for (int i = 32; i < 256; i++) {
-            if (i == 127) {
-                /* ASCII 127 is the DEL control code, so we can skip it */
-                continue;
-            }
-            char c = (char) i;
+        glyphs.forEach((c, g) -> {
             BufferedImage ch = createCharImage(font, c, antiAlias);
             if (ch == null) {
                 /* If char image is null that font does not contain the char */
-                continue;
+                return;
             }
 
-            imageWidth += ch.getWidth();
-            imageHeight = Math.max(imageHeight, ch.getHeight());
-        }
+            imageWidth[0] += ch.getWidth();
+            imageHeight[0] = Math.max(imageHeight[0], ch.getHeight());
+        });
 
-        fontHeight = imageHeight;
+        fontHeight = imageHeight[0];
 
         /* Image for the texture */
-        BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(imageWidth[0], imageHeight[0], BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
 
-        int x = 0;
+        final int[] x = {0};
 
-        /* Create image for the standard chars, again we omit ASCII 0 to 31
-         * because they are just control codes */
-        for (int i = 32; i < 256; i++) {
-            if (i == 127) {
-                /* ASCII 127 is the DEL control code, so we can skip it */
-                continue;
-            }
-            char c = (char) i;
+        /* Create image for the standard chars */
+
+        BufferedImage finalImage = image;
+        glyphs.forEach((c, _g) -> {
             BufferedImage charImage = createCharImage(font, c, antiAlias);
             if (charImage == null) {
                 /* If char image is null that font does not contain the char */
-                continue;
+                return;
             }
 
             int charWidth = charImage.getWidth();
             int charHeight = charImage.getHeight();
 
             /* Create glyph and draw char on image */
-            Glyph ch = new Glyph(charWidth, charHeight, x, image.getHeight() - charHeight, 0f);
-            g.drawImage(charImage, x, 0, null);
-            x += ch.width;
+            Glyph ch = new Glyph(charWidth, charHeight, x[0], finalImage.getHeight() - charHeight, 0f);
+            g.drawImage(charImage, x[0], 0, null);
+            x[0] += ch.width;
             glyphs.put(c, ch);
-        }
+        });
 
         /* Flip image Horizontal to get the origin to bottom left */
         AffineTransform transform = AffineTransform.getScaleInstance(1f, -1f);

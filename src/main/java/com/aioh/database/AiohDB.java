@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AiohDB {
+    private String dbName;
     private List<String> tablesNames;
     private Connection connection;
 
-    public AiohDB(Connection connection) {
+    public AiohDB(String dbName, Connection connection) {
+        this.dbName = dbName;
         this.connection = connection;
     }
 
@@ -30,6 +32,11 @@ public class AiohDB {
             return tablesNames;
 
         tablesNames = new ArrayList<>();
+        fetchTablesNames();
+        return tablesNames;
+    }
+
+    private void fetchTablesNames() {
 
         try {
             DatabaseMetaData metaData = connection.getMetaData();
@@ -43,10 +50,10 @@ public class AiohDB {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return tablesNames;
+
     }
 
-    public AiohDBTable getTableByName(String tableName) {
+    public AiohDBTable getTableByName(CharSequence tableName) {
 
         ArrayList<String> columnsNames;
         ArrayList<DataType> columnsTypes;
@@ -56,7 +63,7 @@ public class AiohDB {
             DatabaseMetaData metaData = connection.getMetaData();
 
             // Get columns for each table
-            var columns = metaData.getColumns(null, null, tableName, null);
+            var columns = metaData.getColumns(dbName, null, tableName.toString(), null);
 
             columnsNames = new ArrayList<>();
             columnsTypes = new ArrayList<>();
@@ -96,88 +103,21 @@ public class AiohDB {
         return new AiohDBTable(columnsNames, columnsTypes, columnsCells);
     }
 
-    @NotNull
-    private static DataType getDataType(int columnType, int columnSize) {
-        var type = switch (columnType) {
-            case Types.INTEGER -> DataType.INT;
-            case Types.FLOAT, Types.REAL -> DataType.FLOAT;
-            case Types.DOUBLE -> DataType.DOUBLE;
-            case Types.BOOLEAN -> DataType.BOOL;
-            case Types.CHAR -> DataType.CHAR;
-            case Types.VARCHAR -> DataType.VARCHAR;
-            default -> throw new IllegalStateException("Unsupported data type: " + columnType);
-        };
+    public void deleteTableByName(CharSequence tableName) {
 
-        type.setSize(columnSize);
-        return type;
+        String query = "DROP TABLE " + tableName;
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete table: " + tableName, e);
+        }
+
+        tablesNames.clear();
+        fetchTablesNames();
     }
 
-//
-//    public AiohDBTable getTableByName(String tableName) {
-//
-//        ArrayList<StringBuilder> columnsNames;
-//        ArrayList<DataType> columnsTypes;
-//        ArrayList<ArrayList<StringBuilder>> columnsCells;
-//
-//        try {
-//            DatabaseMetaData metaData = connection.getMetaData();
-//
-//            // Get columns for each table
-//            var columns = metaData.getColumns(null, null, tableName, null);
-//            var metadata = columns.getMetaData();
-//            var count = metadata.getColumnCount();
-//
-//            columnsNames = new ArrayList<>(count);
-//            columnsTypes = new ArrayList<>(count);
-//            columnsCells = new ArrayList<>(count);
-//
-//            System.out.println("Count: " + count);
-//
-//            for (int i = 0; i < count; i++) {
-//                var columnName = metadata.getColumnName(i);
-//                var columnType = metadata.getColumnType(i);
-//
-//                var type = switch (columnType) {
-//                    case Types.INTEGER -> DataType.INT;
-//                    case Types.FLOAT -> DataType.FLOAT;
-//                    case Types.DOUBLE -> DataType.DOUBLE;
-//                    case Types.BOOLEAN -> DataType.BOOL;
-//                    case Types.CHAR -> DataType.CHAR;
-//                    case Types.VARCHAR -> DataType.VARCHAR;
-//                    default -> throw new IllegalStateException("Unsupported data type: " + columnType);
-//                };
-//
-//                type.setSize(metadata.getColumnDisplaySize(i));
-//
-//                columnsNames.add(new StringBuilder(columnName));
-//                columnsTypes.add(type);
-//                columnsCells.add(new ArrayList<>());
-//            }
-//
-//            String query = "SELECT * FROM " + tableName;
-//            PreparedStatement statement = connection.prepareStatement(query);
-//            ResultSet resultSet = statement.executeQuery();
-//
-//            while (resultSet.next()) {
-//                for (int i = 0; i < count; i++) {
-//                    String columnName = metadata.getColumnName(i);
-//                    String value = resultSet.getString(columnName);
-//
-//                    // Add the cell to the corresponding column
-//                    columnsCells.get(i).add(value != null ? new StringBuilder(value) : new StringBuilder("NULL"));
-//                }
-//            }
-//
-//            columns.close();
-//
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return new AiohDBTable(columnsNames, columnsTypes, columnsCells);
-//    }
-
-    public void updateTable(String tableName, AiohDBTable tableRecords) {
+    public void updateTable(CharSequence tableName, AiohDBTable tableRecords) {
         try {
             var truncateStmt = connection.prepareStatement("TRUNCATE TABLE " + tableName);
             truncateStmt.executeUpdate();
@@ -224,6 +164,22 @@ public class AiohDB {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @NotNull
+    private static DataType getDataType(int columnType, int columnSize) {
+        var type = switch (columnType) {
+            case Types.INTEGER -> DataType.INT;
+            case Types.FLOAT, Types.REAL -> DataType.FLOAT;
+            case Types.DOUBLE -> DataType.DOUBLE;
+            case Types.BOOLEAN -> DataType.BOOL;
+            case Types.CHAR -> DataType.CHAR;
+            case Types.VARCHAR -> DataType.VARCHAR;
+            default -> throw new IllegalStateException("Unsupported data type: " + columnType);
+        };
+
+        type.setSize(columnSize);
+        return type;
     }
 
 }
