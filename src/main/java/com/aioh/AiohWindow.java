@@ -98,10 +98,10 @@ public class AiohWindow {
 
         glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {
 
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                glfwSetWindowShouldClose(window, true);
-                return;
-            }
+//            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+//                glfwSetWindowShouldClose(window, true);
+//                return;
+//            }
 
             if (action == GLFW_PRESS) {
                 if (mods != 0)

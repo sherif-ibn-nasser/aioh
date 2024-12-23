@@ -76,7 +76,7 @@ public class AiohRenderer {
 
         /* Create fonts */
         font = new Font(Main.font, true);
-//        debugFont = new Font(12, false);
+        debugFont = new Font(Main.font.deriveFont(24f), false);
     }
 
     /**
@@ -270,6 +270,28 @@ public class AiohRenderer {
         numVertices += 6;
     }
 
+    public void drawSolidRect(float x1, float y1, float x2, float y2, Vec4 c) {
+        drawTextureRegion(
+                x1,
+                y1,
+                x2,
+                y2,
+                0, 0, 0, 0,
+                c
+        );
+    }
+
+    public void drawSolidRectCentered(float centerX, float centerY, float width, float height, Vec4 c) {
+        drawTextureRegion(
+                -width / 2f + centerX,
+                -height / 2f + centerY,
+                width / 2f + centerX,
+                height / 2f + centerY,
+                0, 0, 0, 0,
+                c
+        );
+    }
+
     /**
      * Dispose renderer and clean up its used data.
      */
@@ -422,5 +444,9 @@ public class AiohRenderer {
 
     public Font getFont() {
         return font;
+    }
+
+    public Font getDebugFont() {
+        return debugFont;
     }
 }
