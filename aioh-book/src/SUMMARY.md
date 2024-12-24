@@ -8,13 +8,15 @@
     - [DoD vs OOP]()
     - [Window setup]()
 
-- [Graphics]()
-    - [The vertex buffer]()
-    - [Shaders]()
-    - [Texts]()
-    - [Timer]()
-    - [The renderer]()
-    - [Graphics pipeline]()
+- [Graphics](./graphics.md)
+    - [The vertex buffer](./graphics/vbo.md)
+    - [Shaders](./graphics/shaders.md)
+    - [Uniforms](./graphics/uniforms.md)
+    - [Shader programs](./graphics/shader_programs.md)
+    - [Texts](./graphics/texts.md)
+    - [Timer](./graphics/timer.md)
+    - [The renderer](./graphics/renderer.md)
+    - [Graphics pipeline](./graphics/rendering_pipeline.md)
 
 - [The core editor]()
 

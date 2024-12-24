@@ -3,6 +3,8 @@
  *
  * Copyright © 2014-2017, Heiko Brumme
  *
+ * Modified by Sherif Nasser, 2024
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -43,6 +45,7 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
  * This class represents a shader program.
  *
  * @author Heiko Brumme
+ * @author Sherif Nasser
  */
 public class ShaderProgram {
 

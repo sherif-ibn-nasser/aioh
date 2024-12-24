@@ -1,7 +1,9 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright © 2015-2017, Heiko Brumme
+ * Copyright © 2014-2017, Heiko Brumme
+ *
+ * Modified by Sherif Nasser, 2024
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +46,7 @@ import static java.awt.Font.*;
  * This class contains a font texture for drawing text.
  *
  * @author Heiko Brumme
+ * @author Sherif Nasser
  */
 public class Font {
 
