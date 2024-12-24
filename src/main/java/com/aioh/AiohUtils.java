@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+/**
+ * Good helper functions
+ *
+ * @author Sherif Nasser
+ */
 public class AiohUtils {
 
     public static final String RESOURCES_PATH = "src/main/resources";
@@ -16,7 +21,7 @@ public class AiohUtils {
             var scanner = new Scanner(new File(filePath));
             while (scanner.hasNextLine()) {
                 var line = scanner.nextLine();
-                content.append(line + "\n");
+                content.append(line).append("\n");
             }
             return content.toString();
         } catch (FileNotFoundException e) {

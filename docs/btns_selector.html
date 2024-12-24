@@ -1,0 +1,410 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The buttons selector - Aioh technical guide</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting started</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">2.</strong> Installation</a></li><li class="chapter-item expanded "><a href="dod_vs_oop.html"><strong aria-hidden="true">3.</strong> DoD vs OOP</a></li><li class="chapter-item expanded "><a href="window_setup.html"><strong aria-hidden="true">4.</strong> Window setup</a></li><li class="chapter-item expanded affix "><li class="part-title">Base Development</li><li class="chapter-item expanded "><a href="utils.html"><strong aria-hidden="true">5.</strong> Utils</a></li><li class="chapter-item expanded "><a href="graphics.html"><strong aria-hidden="true">6.</strong> Graphics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graphics/vbo.html"><strong aria-hidden="true">6.1.</strong> The vertex buffer</a></li><li class="chapter-item expanded "><a href="graphics/shaders.html"><strong aria-hidden="true">6.2.</strong> Shaders</a></li><li class="chapter-item expanded "><a href="graphics/uniforms.html"><strong aria-hidden="true">6.3.</strong> Uniforms</a></li><li class="chapter-item expanded "><a href="graphics/shader_programs.html"><strong aria-hidden="true">6.4.</strong> Shader programs</a></li><li class="chapter-item expanded "><a href="graphics/textures.html"><strong aria-hidden="true">6.5.</strong> Textures</a></li><li class="chapter-item expanded "><a href="graphics/timer.html"><strong aria-hidden="true">6.6.</strong> Timer</a></li><li class="chapter-item expanded "><a href="graphics/renderer.html"><strong aria-hidden="true">6.7.</strong> The renderer</a></li><li class="chapter-item expanded "><a href="graphics/graphics_pipeline.html"><strong aria-hidden="true">6.8.</strong> Graphics pipeline</a></li><li class="chapter-item expanded "><a href="graphics/text_rendering.html"><strong aria-hidden="true">6.9.</strong> Text rendering</a></li></ol></li><li class="chapter-item expanded "><a href="aioh_dbms.html"><strong aria-hidden="true">7.</strong> AiohDBMS</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="database/aioh_db_manager.html"><strong aria-hidden="true">7.1.</strong> AiohDBManager</a></li><li class="chapter-item expanded "><a href="database/aioh_db.html"><strong aria-hidden="true">7.2.</strong> AiohDB</a></li><li class="chapter-item expanded "><a href="database/aioh_db_table.html"><strong aria-hidden="true">7.3.</strong> AiohDBTable</a></li><li class="chapter-item expanded "><a href="database/datatypes.html"><strong aria-hidden="true">7.4.</strong> Datatypes</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">UI</li><li class="chapter-item expanded "><a href="editor.html"><strong aria-hidden="true">8.</strong> The core editor</a></li><li class="chapter-item expanded "><a href="btns_selector.html" class="active"><strong aria-hidden="true">9.</strong> The buttons selector</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> The file browser</div></li><li class="chapter-item expanded "><a href="database_editor.html"><strong aria-hidden="true">11.</strong> The database editor</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Aioh technical guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="the-buttons-selector"><a class="header" href="#the-buttons-selector">The Buttons Selector</a></h2>
+<p>The <strong>Buttons Selector</strong> is a screen in the Aioh text editor designed to facilitate navigation and selection among
+predefined options. It can dynamically display a list of selectable lines and provides functionality for highlighting
+and navigating between these options. The component is particularly useful for scenarios like confirmation dialogs
+with "Yes" and "No" buttons.</p>
+<h3 id="core-features"><a class="header" href="#core-features">Core Features</a></h3>
+<ol>
+<li>
+<p><strong>Static Button Initialization</strong></p>
+<ul>
+<li>The Buttons Selector includes predefined "Yes" and "No" options, stored as static <code>StringBuilder</code> instances.</li>
+<li>These buttons are managed through a static list (<code>NO_YES_BUTTONS</code>) to allow quick and efficient reuse.</li>
+</ul>
+</li>
+<li>
+<p><strong>Dynamic Line Management</strong></p>
+<ul>
+<li>The selector can dynamically load and display any list of options:
+<ul>
+<li><code>setLines(List&lt;String&gt;)</code>: Converts a <code>List&lt;String&gt;</code> into a list of <code>StringBuilder</code> objects.</li>
+<li><code>setLines(ArrayList&lt;StringBuilder&gt;)</code>: Directly assigns a list of <code>StringBuilder</code> objects to the selector and
+computes the maximum length of the options for rendering.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Selection Handling</strong></p>
+<ul>
+<li>The currently selected option is tracked using the <code>cursorLine</code> variable.</li>
+<li><code>getSelected()</code>: Retrieves the currently highlighted option, allowing integration with other components.</li>
+</ul>
+</li>
+<li>
+<p><strong>User Interaction</strong></p>
+<ul>
+<li>Supports navigation using keyboard input:
+<ul>
+<li><strong>Up Arrow (↑)</strong>: Moves the selection upwards. Wraps to the last option if the first option is reached.</li>
+<li><strong>Down Arrow (↓)</strong>: Moves the selection downwards. Wraps to the first option if the last option is reached.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Rendering</strong></p>
+<ul>
+<li>The selector highlights the current option with a rectangular overlay for visual feedback.</li>
+<li>Automatically adjusts the camera position and alignment based on the longest line.</li>
+</ul>
+</li>
+</ol>
+<h3 id="full-code"><a class="header" href="#full-code">Full code</a></h3>
+<p>src/main/java/com/aioh/AiohButtonsSelector.java:</p>
+<pre><code class="language-java">package com.aioh;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.aioh.AiohDatabaseEditor.CELL_H_PADDING;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+
+/**
+ * Select a button from a multiple
+ *
+ * @author Sherif Nasser
+ */
+public class AiohButtonsSelector extends AiohEditor {
+
+    public static final StringBuilder NO_BUTTON = new StringBuilder("No");
+    public static final StringBuilder YES_BUTTON = new StringBuilder("Yes");
+    private static final ArrayList&lt;StringBuilder&gt; NO_YES_BUTTONS = new ArrayList&lt;&gt;(2);
+
+    static {
+        NO_YES_BUTTONS.add(NO_BUTTON);
+        NO_YES_BUTTONS.add(YES_BUTTON);
+    }
+
+    private int maxLen;
+    private float titlePosX = super.titlePosX = -CELL_H_PADDING;
+
+    public void setLines(List&lt;String&gt; lines) {
+        setLines(
+                lines.stream().map(StringBuilder::new)
+                        .collect(Collectors.toCollection(ArrayList::new))
+        );
+    }
+
+    public void setLines(ArrayList&lt;StringBuilder&gt; lines) {
+        cursorLine = 0;
+        this.lines = lines;
+        maxLen = lines.stream().max(Comparator.comparingInt(a -&gt; a.length())).orElse(new StringBuilder()).length() / 2;
+    }
+
+    public void displayNoAndYesButtons() {
+        setLines(NO_YES_BUTTONS);
+    }
+
+    public StringBuilder getSelected() {
+        return lines.get(cursorLine);
+    }
+
+    @Override
+    public void onInit() {
+        lines.clear();
+        setLines(lines);
+    }
+
+    @Override
+    protected void updateCameraPos() {
+
+        var centerLen = maxLen;
+
+        if (centerLen * FONT_SIZE * cameraScale &gt; 0.97 * AiohWindow.width) {
+            centerLen = (int) (0.97 * AiohWindow.width / FONT_SIZE / cameraScale);
+        }
+
+        cursorCol = centerLen;
+
+        super.updateCameraPos();
+    }
+
+    @Override
+    protected void onDrawColorProgram() {
+        if (lines.isEmpty())
+            return;
+        renderer.drawSolidRect(
+                -cameraPos.getX() - 0.5f * FONT_SIZE - CELL_H_PADDING,
+                -cameraPos.getY() - (cursorLine - 0.5f) * fontHeight,
+                -cameraPos.getX() + 0.5f * ((lines.get(cursorLine).length() - 1) * FONT_SIZE) + CELL_H_PADDING,
+                -cameraPos.getY() - (cursorLine + 0.5f) * fontHeight,
+                TEXT_SELECTION_COLOR
+        );
+    }
+
+    @Override
+    public void onTextInput(char[] newChars) {
+
+    }
+
+    @Override
+    public void onKeyPressed(int keyCode) {
+        switch (keyCode) {
+            case GLFW_KEY_UP -&gt; {
+                if (cursorLine &gt; 0)
+                    cursorLine--;
+                else if (cursorLine == 0)
+                    cursorLine = lines.size() - 1;
+            }
+            case GLFW_KEY_DOWN -&gt; {
+                if (cursorLine &lt; lines.size() - 1)
+                    cursorLine++;
+                else if (cursorLine == lines.size() - 1)
+                    cursorLine = 0;
+            }
+        }
+    }
+
+    @Override
+    public void onModKeysPressed(int mods, int keyCode) {
+
+    }
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="editor.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="database_editor.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="editor.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="database_editor.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

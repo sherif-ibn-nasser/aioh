@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+/**
+ * A database version from the core editor
+ *
+ * @author Sherif Nasser
+ */
 public class AiohDatabaseEditor extends AiohEditor {
     public static final Vec4 COLUMNS_NAMES_ROW_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, .5f);
     public static final Vec4 CELL_COLOR1 = new Vec4(0.4f);

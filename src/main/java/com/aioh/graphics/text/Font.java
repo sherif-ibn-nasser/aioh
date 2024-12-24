@@ -1,7 +1,9 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright © 2015-2017, Heiko Brumme
+ * Copyright © 2014-2017, Heiko Brumme
+ *
+ * Modified by Sherif Nasser, 2024
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +46,7 @@ import static java.awt.Font.*;
  * This class contains a font texture for drawing text.
  *
  * @author Heiko Brumme
+ * @author Sherif Nasser
  */
 public class Font {
 
@@ -204,7 +207,7 @@ public class Font {
             /* Create glyph and draw char on image */
             Glyph ch = new Glyph(charWidth, charHeight, x[0], finalImage.getHeight() - charHeight, 0f);
             g.drawImage(charImage, x[0], 0, null);
-            x[0] += ch.width;
+            x[0] += ch.width();
             glyphs.put(c, ch);
         });
 
@@ -312,7 +315,7 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(c);
-            lineWidth += g.width;
+            lineWidth += g.width();
         }
         width = Math.max(width, lineWidth);
         return width;
@@ -340,7 +343,7 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(c);
-            lineHeight = Math.max(lineHeight, g.height);
+            lineHeight = Math.max(lineHeight, g.height());
         }
         height += lineHeight;
         return height;
@@ -379,8 +382,8 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(ch);
-            renderer.drawTextureRegion(texture, drawX, drawY, g.x, g.y, g.width, g.height, c);
-            drawX += g.width;
+            renderer.drawTextureRegion(texture, drawX, drawY, g.x(), g.y(), g.width(), g.height(), c);
+            drawX += g.width();
         }
     }
 

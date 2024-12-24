@@ -3,6 +3,8 @@
  *
  * Copyright © 2014-2018, Heiko Brumme
  *
+ * Modified by Sherif Nasser, 2024
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -47,13 +49,26 @@ import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
  * This class is performing the rendering process.
  *
  * @author Heiko Brumme
+ * @author Sherif Nasser
  */
 public class AiohRenderer {
 
     private VertexArrayObject vao;
     private VertexBufferObject vbo;
+
+    /**
+     * Determines the currently used program
+     */
     public static ShaderProgram currentProgram;
+
+    /**
+     * Used to render texts
+     */
     public static ShaderProgram mainProgram;
+
+    /**
+     * Used to render identity colored elements (The cursor, the status bar, text selection, etc.)
+     */
     public static ShaderProgram colorProgram;
 
     private FloatBuffer vertices;

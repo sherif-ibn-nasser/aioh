@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 
 import static java.awt.Font.PLAIN;
 import static java.awt.Font.TRUETYPE_FONT;
+import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL46.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL46.glClear;
 
@@ -21,7 +22,7 @@ public class Main {
         vertexShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.vert");
         defaultFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.frag");
         colorFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/color.frag");
-        var editor = new AiohDatabaseEditor();
+        var editor = new AiohEditor();
 
         var window = new AiohWindow("Aioh", 1280, 720, editor);
 
@@ -32,6 +33,7 @@ public class Main {
 
         while (!window.shouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT);
+            glClearColor(0x2a / 256f, 0x2a / 256f, 0x2a / 256f, 1);
             editor.loop();
             window.update();
         }

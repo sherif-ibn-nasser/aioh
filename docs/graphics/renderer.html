@@ -1,0 +1,723 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The renderer - Aioh technical guide</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting started</li><li class="chapter-item expanded "><a href="../installation.html"><strong aria-hidden="true">2.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../dod_vs_oop.html"><strong aria-hidden="true">3.</strong> DoD vs OOP</a></li><li class="chapter-item expanded "><a href="../window_setup.html"><strong aria-hidden="true">4.</strong> Window setup</a></li><li class="chapter-item expanded affix "><li class="part-title">Base Development</li><li class="chapter-item expanded "><a href="../utils.html"><strong aria-hidden="true">5.</strong> Utils</a></li><li class="chapter-item expanded "><a href="../graphics.html"><strong aria-hidden="true">6.</strong> Graphics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphics/vbo.html"><strong aria-hidden="true">6.1.</strong> The vertex buffer</a></li><li class="chapter-item expanded "><a href="../graphics/shaders.html"><strong aria-hidden="true">6.2.</strong> Shaders</a></li><li class="chapter-item expanded "><a href="../graphics/uniforms.html"><strong aria-hidden="true">6.3.</strong> Uniforms</a></li><li class="chapter-item expanded "><a href="../graphics/shader_programs.html"><strong aria-hidden="true">6.4.</strong> Shader programs</a></li><li class="chapter-item expanded "><a href="../graphics/textures.html"><strong aria-hidden="true">6.5.</strong> Textures</a></li><li class="chapter-item expanded "><a href="../graphics/timer.html"><strong aria-hidden="true">6.6.</strong> Timer</a></li><li class="chapter-item expanded "><a href="../graphics/renderer.html" class="active"><strong aria-hidden="true">6.7.</strong> The renderer</a></li><li class="chapter-item expanded "><a href="../graphics/graphics_pipeline.html"><strong aria-hidden="true">6.8.</strong> Graphics pipeline</a></li><li class="chapter-item expanded "><a href="../graphics/text_rendering.html"><strong aria-hidden="true">6.9.</strong> Text rendering</a></li></ol></li><li class="chapter-item expanded "><a href="../aioh_dbms.html"><strong aria-hidden="true">7.</strong> AiohDBMS</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../database/aioh_db_manager.html"><strong aria-hidden="true">7.1.</strong> AiohDBManager</a></li><li class="chapter-item expanded "><a href="../database/aioh_db.html"><strong aria-hidden="true">7.2.</strong> AiohDB</a></li><li class="chapter-item expanded "><a href="../database/aioh_db_table.html"><strong aria-hidden="true">7.3.</strong> AiohDBTable</a></li><li class="chapter-item expanded "><a href="../database/datatypes.html"><strong aria-hidden="true">7.4.</strong> Datatypes</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">UI</li><li class="chapter-item expanded "><a href="../editor.html"><strong aria-hidden="true">8.</strong> The core editor</a></li><li class="chapter-item expanded "><a href="../btns_selector.html"><strong aria-hidden="true">9.</strong> The buttons selector</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> The file browser</div></li><li class="chapter-item expanded "><a href="../database_editor.html"><strong aria-hidden="true">11.</strong> The database editor</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Aioh technical guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="the-renderer"><a class="header" href="#the-renderer">The Renderer</a></h2>
+<h3 id="role"><a class="header" href="#role">Role</a></h3>
+<p>The Renderer is the central component responsible for drawing all graphical elements. It manages the shaders, vertex
+buffers, and textures to ensure efficient rendering.</p>
+<h3 id="workflow"><a class="header" href="#workflow">Workflow</a></h3>
+<ol>
+<li><strong>Initialize Graphics Pipeline</strong>: Set up shaders, vertex buffers, and textures.</li>
+<li><strong>Draw Elements</strong>: Use OpenGL’s draw commands to render objects.</li>
+<li><strong>Swap Buffers</strong>: Display the rendered frame on the screen.</li>
+</ol>
+<h3 id="implementation"><a class="header" href="#implementation">Implementation</a></h3>
+<p>src/main/java/com/aioh/graphics/AiohRenderer.java:</p>
+<pre><code class="language-java">/*
+ * The MIT License (MIT)
+ *
+ * Copyright © 2014-2018, Heiko Brumme
+ *
+ * Modified by Sherif Nasser, 2024
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.aioh.graphics;
+
+import com.aioh.AiohEditor;
+import com.aioh.Main;
+import com.aioh.graphics.text.Font;
+import glm_.mat4x4.Mat4;
+import glm_.vec4.Vec4;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+import static com.aioh.Main.*;
+import static glm_.Java.glm;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
+
+/**
+ * This class is performing the rendering process.
+ *
+ * @author Heiko Brumme
+ * @author Sherif Nasser
+ */
+public class AiohRenderer {
+
+    private VertexArrayObject vao;
+    private VertexBufferObject vbo;
+
+    /**
+     * Determines the currently used program
+     */
+    public static ShaderProgram currentProgram;
+
+    /**
+     * Used to render texts
+     */
+    public static ShaderProgram mainProgram;
+
+    /**
+     * Used to render identity colored elements (The cursor, the status bar, text selection, etc.)
+     */
+    public static ShaderProgram colorProgram;
+
+    private FloatBuffer vertices;
+    private int numVertices;
+    private boolean drawing;
+
+    private Font font;
+    private Font debugFont;
+
+    /**
+     * Initializes the renderer.
+     */
+    public void init() {
+        /* Setup shader programs */
+        setupShaderProgram();
+
+        /* Enable blending */
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        /* Create fonts */
+        font = new Font(Main.font, true);
+        debugFont = new Font(Main.font.deriveFont(24f), false);
+    }
+
+    /**
+     * Clears the drawing area.
+     */
+    public void clear() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    /**
+     * Begin rendering.
+     */
+    public void begin() {
+        if (drawing) {
+            throw new IllegalStateException("Renderer is already drawing!");
+        }
+        drawing = true;
+        numVertices = 0;
+    }
+
+    /**
+     * End rendering.
+     */
+    public void end() {
+        if (!drawing) {
+            throw new IllegalStateException("Renderer isn't drawing!");
+        }
+        drawing = false;
+        flush();
+    }
+
+    /**
+     * Flushes the data to the GPU to let it get rendered.
+     */
+    public void flush() {
+        if (numVertices &gt; 0) {
+            vertices.flip();
+
+            if (vao != null) {
+                vao.bind();
+            } else {
+                vbo.bind(GL_ARRAY_BUFFER);
+                specifyVertexAttributes(currentProgram);
+            }
+            currentProgram.use();
+
+            /* Upload the new vertex data */
+            vbo.bind(GL_ARRAY_BUFFER);
+            vbo.uploadSubData(GL_ARRAY_BUFFER, 0, vertices);
+
+            /* Draw batch */
+            glDrawArrays(GL_TRIANGLES, 0, numVertices);
+
+            /* Clear vertex data for next batch */
+            vertices.clear();
+            numVertices = 0;
+        }
+    }
+
+    /**
+     * Draws the currently bound texture on specified coordinates.
+     *
+     * @param texture Used for getting width and height of the texture
+     * @param x       X position of the texture
+     * @param y       Y position of the texture
+     */
+    public void drawTexture(Texture texture, float x, float y) {
+        drawTexture(texture, x, y, new Vec4(1));
+    }
+
+    /**
+     * Draws the currently bound texture on specified coordinates and with
+     * specified color.
+     *
+     * @param texture Used for getting width and height of the texture
+     * @param x       X position of the texture
+     * @param y       Y position of the texture
+     * @param c       The color to use
+     */
+    public void drawTexture(Texture texture, float x, float y, Vec4 c) {
+        /* Vertex positions */
+        float x1 = x;
+        float y1 = y;
+        float x2 = x1 + texture.getWidth();
+        float y2 = y1 + texture.getHeight();
+
+        /* Texture coordinates */
+        float s1 = 0f;
+        float t1 = 0f;
+        float s2 = 1f;
+        float t2 = 1f;
+
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
+    }
+
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param texture   Used for getting width and height of the texture
+     * @param x         X position of the texture
+     * @param y         Y position of the texture
+     * @param regX      X position of the texture region
+     * @param regY      Y position of the texture region
+     * @param regWidth  Width of the texture region
+     * @param regHeight Height of the texture region
+     */
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight) {
+        drawTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, new Vec4(1));
+    }
+
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param texture   Used for getting width and height of the texture
+     * @param x         X position of the texture
+     * @param y         Y position of the texture
+     * @param regX      X position of the texture region
+     * @param regY      Y position of the texture region
+     * @param regWidth  Width of the texture region
+     * @param regHeight Height of the texture region
+     * @param c         The color to use
+     */
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, Vec4 c) {
+        /* Vertex positions */
+        float x1 = x;
+        float y1 = y;
+        float x2 = x + regWidth;
+        float y2 = y + regHeight;
+
+        /* Texture coordinates */
+        float s1 = regX / texture.getWidth();
+        float t1 = regY / texture.getHeight();
+        float s2 = (regX + regWidth) / texture.getWidth();
+        float t2 = (regY + regHeight) / texture.getHeight();
+
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
+    }
+
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param x1 Bottom left x position
+     * @param y1 Bottom left y position
+     * @param x2 Top right x position
+     * @param y2 Top right y position
+     * @param s1 Bottom left s coordinate
+     * @param t1 Bottom left t coordinate
+     * @param s2 Top right s coordinate
+     * @param t2 Top right t coordinate
+     */
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2) {
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, new Vec4(1));
+    }
+
+    /**
+     * Draws a texture region with the currently bound texture on specified
+     * coordinates.
+     *
+     * @param x1 Bottom left x position
+     * @param y1 Bottom left y position
+     * @param x2 Top right x position
+     * @param y2 Top right y position
+     * @param s1 Bottom left s coordinate
+     * @param t1 Bottom left t coordinate
+     * @param s2 Top right s coordinate
+     * @param t2 Top right t coordinate
+     * @param c  The color to use
+     */
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, Vec4 c) {
+        if (vertices.remaining() &lt; 8 * 6) {
+            /* We need more space in the buffer, so flush it */
+            flush();
+        }
+
+        float r = c.getR();
+        float g = c.getG();
+        float b = c.getB();
+        float a = c.getA();
+
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
+        vertices.put(x1).put(y2).put(r).put(g).put(b).put(a).put(s1).put(t2);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
+
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
+        vertices.put(x2).put(y1).put(r).put(g).put(b).put(a).put(s2).put(t1);
+
+        numVertices += 6;
+    }
+
+    public void drawSolidRect(float x1, float y1, float x2, float y2, Vec4 c) {
+        drawTextureRegion(
+                x1,
+                y1,
+                x2,
+                y2,
+                0, 0, 0, 0,
+                c
+        );
+    }
+
+    public void drawSolidRectCentered(float centerX, float centerY, float width, float height, Vec4 c) {
+        drawTextureRegion(
+                -width / 2f + centerX,
+                -height / 2f + centerY,
+                width / 2f + centerX,
+                height / 2f + centerY,
+                0, 0, 0, 0,
+                c
+        );
+    }
+
+    /**
+     * Dispose renderer and clean up its used data.
+     */
+    public void dispose() {
+        MemoryUtil.memFree(vertices);
+
+        if (vao != null) {
+            vao.delete();
+        }
+        vbo.delete();
+        mainProgram.delete();
+        colorProgram.delete();
+
+        font.dispose();
+        debugFont.dispose();
+    }
+
+    /**
+     * Setups the default shader program.
+     */
+    private void setupShaderProgram() {
+        if (AiohEditor.isDefaultContext()) {
+            /* Generate Vertex Array Object */
+            vao = new VertexArrayObject();
+            vao.bind();
+        } else {
+            vao = null;
+        }
+
+        /* Generate Vertex Buffer Object */
+        vbo = new VertexBufferObject();
+        vbo.bind(GL_ARRAY_BUFFER);
+
+        /* Create FloatBuffer */
+        vertices = MemoryUtil.memAllocFloat(4096);
+
+        /* Upload null data to allocate storage for the VBO */
+        long size = (long) vertices.capacity() * Float.BYTES;
+        vbo.uploadData(GL_ARRAY_BUFFER, size, GL_DYNAMIC_DRAW);
+
+        /* Initialize variables */
+        numVertices = 0;
+        drawing = false;
+
+        /* Load shaders */
+        Shader vertexShader, defaultFragmentShader, colorFragmentShader;
+        if (AiohEditor.isDefaultContext()) {
+            vertexShader = Shader.createShader(GL_VERTEX_SHADER, vertexShaderSource);
+            defaultFragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, defaultFragmentShaderSource);
+            colorFragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, colorFragmentShaderSource);
+        } else {
+            throw new RuntimeException("Minimum supported OpenGL version is 3.2. Try to upgrade your drivers.");
+        }
+
+
+        /* Create shader program */
+        colorProgram = new ShaderProgram();
+        colorProgram.attachShader(vertexShader);
+        colorProgram.attachShader(colorFragmentShader);
+        colorProgram.link();
+        specifyVertexAttributes(colorProgram);
+        colorFragmentShader.delete();
+
+        /* Create shader program */
+        mainProgram = new ShaderProgram();
+        mainProgram.attachShader(vertexShader);
+        mainProgram.attachShader(defaultFragmentShader);
+        if (AiohEditor.isDefaultContext()) {
+            mainProgram.bindFragmentDataLocation(0, "fragColor");
+        }
+        mainProgram.link();
+        mainProgram.use();
+
+        /* Delete linked shaders */
+        defaultFragmentShader.delete();
+        vertexShader.delete();
+
+        /* Get width and height of framebuffer */
+        long window = GLFW.glfwGetCurrentContext();
+        int width, height;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer widthBuffer = stack.mallocInt(1);
+            IntBuffer heightBuffer = stack.mallocInt(1);
+            GLFW.glfwGetFramebufferSize(window, widthBuffer, heightBuffer);
+            width = widthBuffer.get();
+            height = heightBuffer.get();
+        }
+
+        /* Specify Vertex Pointers */
+        specifyVertexAttributes(mainProgram);
+
+        /* Set texture uniform */
+        int uniTex = mainProgram.getUniformLocation("texImage");
+        mainProgram.setUniform(uniTex, 0);
+
+//        updateModelMatrix(new Mat4());
+//        updateViewMatrix(new Mat4());
+        colorProgram.use();
+        updateMVPMatrix(colorProgram, width, height);
+        mainProgram.use();
+        updateMVPMatrix(mainProgram, width, height);
+
+    }
+
+    public static void updateModelMatrix(ShaderProgram program, Mat4 model) {
+        /* Set model matrix to identity matrix */
+        int uniModel = program.getUniformLocation("model");
+        program.setUniform(uniModel, model);
+    }
+
+    public static void updateViewMatrix(ShaderProgram program, Mat4 view) {
+        /* Set view matrix to identity matrix */
+        int uniView = program.getUniformLocation("view");
+        program.setUniform(uniView, view);
+    }
+
+    public static void updateProjectionMatrix(ShaderProgram program, float width, float height) {
+        /* Set projection matrix to an orthographic projection */
+        var projection = glm.ortho(-width / 2, width / 2, -height / 2, height / 2, -1f, 1f);
+        int uniProjection = program.getUniformLocation("projection");
+        program.setUniform(uniProjection, projection);
+    }
+
+    public static void updateMVPMatrix(ShaderProgram program, float width, float height) {
+        /* Set projection matrix to an orthographic projection */
+        var projection = glm.ortho(-width / 2, width / 2, -height / 2, height / 2, -1f, 1f);
+        int uniProjection = program.getUniformLocation("mvp");
+        program.setUniform(uniProjection, projection);
+    }
+
+    /**
+     * Specifies the vertex pointers.
+     */
+    private void specifyVertexAttributes(ShaderProgram program) {
+        /* Specify Vertex Pointer */
+        int posAttrib = program.getAttributeLocation("position");
+        program.enableVertexAttribute(posAttrib);
+        program.pointVertexAttribute(posAttrib, 2, 8 * Float.BYTES, 0);
+
+        /* Specify Color Pointer */
+        int colAttrib = program.getAttributeLocation("color");
+        program.enableVertexAttribute(colAttrib);
+        program.pointVertexAttribute(colAttrib, 4, 8 * Float.BYTES, 2 * Float.BYTES);
+
+        /* Specify Texture Pointer */
+        int texAttrib = program.getAttributeLocation("texcoord");
+        program.enableVertexAttribute(texAttrib);
+        program.pointVertexAttribute(texAttrib, 2, 8 * Float.BYTES, 6 * Float.BYTES);
+    }
+
+    public Font getFont() {
+        return font;
+    }
+
+    public Font getDebugFont() {
+        return debugFont;
+    }
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../graphics/timer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../graphics/graphics_pipeline.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../graphics/timer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../graphics/graphics_pipeline.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

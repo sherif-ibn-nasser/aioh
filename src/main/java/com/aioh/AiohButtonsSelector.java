@@ -9,6 +9,11 @@ import static com.aioh.AiohDatabaseEditor.CELL_H_PADDING;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 
+/**
+ * Select a button from a multiple
+ *
+ * @author Sherif Nasser
+ */
 public class AiohButtonsSelector extends AiohEditor {
 
     public static final StringBuilder NO_BUTTON = new StringBuilder("No");
