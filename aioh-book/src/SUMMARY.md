@@ -2,11 +2,13 @@
 
 - [Introduction](./introduction.md)
 
-- [Getting started]()
-    - [Installation]()
-    - [OpenGL]()
-    - [DoD vs OOP]()
-    - [Window setup]()
+# Getting started
+
+- [Installation](./installation.md)
+- [DoD vs OOP](./dod_vs_oop.md)
+- [Window setup](./window_setup.md)
+
+# Base Development
 
 - [Utils](./utils.md)
 
@@ -26,6 +28,8 @@
     - [AiohDB](./database/aioh_db.md)
     - [AiohDBTable](./database/aioh_db_table.md)
     - [Datatypes](./database/datatypes.md)
+
+# UI
 
 - [The core editor](./editor.md)
 

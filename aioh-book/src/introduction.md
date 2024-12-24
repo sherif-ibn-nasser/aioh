@@ -38,3 +38,11 @@ This book aims to guide users and developers through:
 1. **Getting Started**: Installing and configuring Aioh.
 2. **Features**: Exploring its capabilities.
 3. **Development**: Insights into its architecture and contributing to the project.
+   Here’s the updated **Getting Started** section with a "GitHub" heading:
+
+### GitHub
+
+You can find the source code and contribute to the project on
+GitHub: [Aioh GitHub Repository](https://github.com/sherif-ibn-nasser/aioh).
+
+Let’s get started!
