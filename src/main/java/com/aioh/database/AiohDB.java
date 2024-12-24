@@ -65,7 +65,7 @@ public class AiohDB {
     public void createTable(CharSequence tableName, AiohDBTable table) {
 
         var primaryKeys = new ArrayList<Integer>(table.rowsSize());
-        StringBuilder createQuery = new StringBuilder("CREATE TABLE " + tableName + " (");
+        StringBuilder createQuery = new StringBuilder("CREATE TABLE `" + tableName + "` (");
         // Skip the titles row
         for (int i = 1; i < table.rowsSize(); i++) {
             var colName = table.columnsCells().get(NAME.ordinal()).get(i);
@@ -144,7 +144,7 @@ public class AiohDB {
                 columnsCells.add(new ArrayList<>());
             }
 
-            String query = "SELECT * FROM " + tableName;
+            String query = "SELECT * FROM `" + tableName + "`";
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
 

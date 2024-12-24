@@ -26,9 +26,9 @@ public class AiohWindow {
     }
 
     public static int width, height;
+    public static long windowId;
 
     private String title;
-    private long window;
     private boolean resize;
 
     public AiohWindow(String title, int width, int height, EventsHandler handler) {
@@ -38,8 +38,8 @@ public class AiohWindow {
 
         init(handler);
 
-        int major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
-        int minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
+        int major = glfwGetWindowAttrib(windowId, GLFW_CONTEXT_VERSION_MAJOR);
+        int minor = glfwGetWindowAttrib(windowId, GLFW_CONTEXT_VERSION_MINOR);
         System.out.println("OpenGL version: " + major + "." + minor);
     }
 
@@ -84,13 +84,13 @@ public class AiohWindow {
             maximized = true;
         }
 
-        window = glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
+        windowId = glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
 
-        if (window == MemoryUtil.NULL)
+        if (windowId == MemoryUtil.NULL)
             throw new RuntimeException("Failed to create a GLFW window");
 
 
-        glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
+        glfwSetFramebufferSizeCallback(windowId, (window, width, height) -> {
             AiohWindow.width = width;
             AiohWindow.height = height;
             this.resize = true;
@@ -101,12 +101,7 @@ public class AiohWindow {
             AiohRenderer.updateMVPMatrix(colorProgram, width, height);
         });
 
-        glfwSetKeyCallback(window, (window, key, scanCode, action, mods) -> {
-
-//            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-//                glfwSetWindowShouldClose(window, true);
-//                return;
-//            }
+        glfwSetKeyCallback(windowId, (window, key, scanCode, action, mods) -> {
 
             if (action == GLFW_PRESS) {
                 if (mods != 0)
@@ -117,36 +112,36 @@ public class AiohWindow {
 
         });
 
-        glfwSetCharCallback(window, (window, codePoint) -> {
+        glfwSetCharCallback(windowId, (window, codePoint) -> {
             var newChars = Character.toChars(codePoint);
             handler.onTextInput(newChars);
         });
 
         if (maximized)
-            glfwMaximizeWindow(window);
+            glfwMaximizeWindow(windowId);
         else {
             var vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-            glfwSetWindowPos(window, (vidMode.width() - width) / 2, (vidMode.height() - height) / 2);
+            glfwSetWindowPos(windowId, (vidMode.width() - width) / 2, (vidMode.height() - height) / 2);
         }
 
-        glfwMakeContextCurrent(window);
-        glfwShowWindow(window);
+        glfwMakeContextCurrent(windowId);
+        glfwShowWindow(windowId);
 
         GL.createCapabilities();
 
     }
 
     public void update() {
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(windowId);
         glfwPollEvents();
     }
 
     public void destroy() {
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(windowId);
     }
 
     public boolean shouldClose() {
-        return glfwWindowShouldClose(window);
+        return glfwWindowShouldClose(windowId);
     }
 
     public int getWidth() {
