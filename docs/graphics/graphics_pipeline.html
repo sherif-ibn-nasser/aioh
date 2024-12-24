@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>The vertex buffer - Aioh technical guide</title>
+        <title>Graphics pipeline - Aioh technical guide</title>
 
 
         <!-- Custom HTML head -->
@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> OpenGL</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.3.</strong> DoD vs OOP</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.4.</strong> Window setup</div></li></ol></li><li class="chapter-item expanded "><a href="../utils.html"><strong aria-hidden="true">3.</strong> Utils</a></li><li class="chapter-item expanded "><a href="../graphics.html"><strong aria-hidden="true">4.</strong> Graphics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphics/vbo.html" class="active"><strong aria-hidden="true">4.1.</strong> The vertex buffer</a></li><li class="chapter-item expanded "><a href="../graphics/shaders.html"><strong aria-hidden="true">4.2.</strong> Shaders</a></li><li class="chapter-item expanded "><a href="../graphics/uniforms.html"><strong aria-hidden="true">4.3.</strong> Uniforms</a></li><li class="chapter-item expanded "><a href="../graphics/shader_programs.html"><strong aria-hidden="true">4.4.</strong> Shader programs</a></li><li class="chapter-item expanded "><a href="../graphics/textures.html"><strong aria-hidden="true">4.5.</strong> Textures</a></li><li class="chapter-item expanded "><a href="../graphics/timer.html"><strong aria-hidden="true">4.6.</strong> Timer</a></li><li class="chapter-item expanded "><a href="../graphics/renderer.html"><strong aria-hidden="true">4.7.</strong> The renderer</a></li><li class="chapter-item expanded "><a href="../graphics/graphics_pipeline.html"><strong aria-hidden="true">4.8.</strong> Graphics pipeline</a></li><li class="chapter-item expanded "><a href="../graphics/text_rendering.html"><strong aria-hidden="true">4.9.</strong> Text rendering</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> The core editor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> The buttons selector</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> The file browser</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> The database editor</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">8.1.</strong> The database manager</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.2.</strong> Datatypes</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.3.</strong> Database editor states</div></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> OpenGL</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.3.</strong> DoD vs OOP</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.4.</strong> Window setup</div></li></ol></li><li class="chapter-item expanded "><a href="../utils.html"><strong aria-hidden="true">3.</strong> Utils</a></li><li class="chapter-item expanded "><a href="../graphics.html"><strong aria-hidden="true">4.</strong> Graphics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphics/vbo.html"><strong aria-hidden="true">4.1.</strong> The vertex buffer</a></li><li class="chapter-item expanded "><a href="../graphics/shaders.html"><strong aria-hidden="true">4.2.</strong> Shaders</a></li><li class="chapter-item expanded "><a href="../graphics/uniforms.html"><strong aria-hidden="true">4.3.</strong> Uniforms</a></li><li class="chapter-item expanded "><a href="../graphics/shader_programs.html"><strong aria-hidden="true">4.4.</strong> Shader programs</a></li><li class="chapter-item expanded "><a href="../graphics/textures.html"><strong aria-hidden="true">4.5.</strong> Textures</a></li><li class="chapter-item expanded "><a href="../graphics/timer.html"><strong aria-hidden="true">4.6.</strong> Timer</a></li><li class="chapter-item expanded "><a href="../graphics/renderer.html"><strong aria-hidden="true">4.7.</strong> The renderer</a></li><li class="chapter-item expanded "><a href="../graphics/graphics_pipeline.html" class="active"><strong aria-hidden="true">4.8.</strong> Graphics pipeline</a></li><li class="chapter-item expanded "><a href="../graphics/text_rendering.html"><strong aria-hidden="true">4.9.</strong> Text rendering</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> The core editor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> The buttons selector</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> The file browser</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> The database editor</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">8.1.</strong> The database manager</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.2.</strong> Datatypes</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.3.</strong> Database editor states</div></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -173,171 +173,30 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="the-vertex-buffer"><a class="header" href="#the-vertex-buffer">The Vertex Buffer</a></h2>
-<h3 id="what-is-a-vertex-buffer"><a class="header" href="#what-is-a-vertex-buffer">What is a Vertex Buffer?</a></h3>
-<p>A <strong>Vertex Buffer</strong> is a memory structure that stores vertex data for rendering graphics. In Aioh, the vertex buffer is
-a critical component of the graphics pipeline, as it manages the data needed to render geometric shapes and objects
-efficiently.</p>
-<h3 id="key-components"><a class="header" href="#key-components">Key Components</a></h3>
-<ul>
-<li><strong>Vertices</strong>: Points in 3D or 2D space that define the shape of graphical objects.</li>
-<li><strong>Attributes</strong>: Data associated with vertices, such as position, color, and texture coordinates.</li>
-</ul>
-<h3 id="implementation-in-aioh"><a class="header" href="#implementation-in-aioh">Implementation in Aioh</a></h3>
-<p>Aioh uses OpenGL’s Vertex Buffer Object (VBO) to store vertex data. The VBO is created and managed as follows:</p>
-<pre><code class="language-java">int vbo = glGenBuffers();
-
-glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-glBufferData(GL_ARRAY_BUFFER, vertexData, GL_STATIC_DRAW);
-</code></pre>
-<ul>
-<li><strong><code>glGenBuffers</code></strong>: Generates a new buffer object.</li>
-<li><strong><code>glBindBuffer</code></strong>: Binds the buffer to the target (e.g., <code>GL_ARRAY_BUFFER</code>).</li>
-<li><strong><code>glBufferData</code></strong>: Allocates and initializes the buffer’s data.</li>
-</ul>
-<p>These core OpenGL functions could be abstracted like this
-(See <a href="https://github.com/SilverTiger/lwjgl3-tutorial">LWJGL tutorial</a>):</p>
-<p>src/main/java/com/aioh/graphics/VertexBufferObject.java:</p>
-<pre><code class="language-java">/*
- * The MIT License (MIT)
- *
- * Copyright © 2014-2015, Heiko Brumme
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-package com.aioh.graphics;
-
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
-import static org.lwjgl.opengl.GL15.*;
-
-/**
- * This class represents a Vertex Buffer Object (VBO).
- *
- * @author Heiko Brumme
- */
-public class VertexBufferObject {
-
-    /**
-     * Stores the handle of the VBO.
-     */
-    private final int id;
-
-    /**
-     * Creates a Vertex Buffer Object (VBO).
-     */
-    public VertexBufferObject() {
-        id = glGenBuffers();
-    }
-
-    /**
-     * Binds this VBO with specified target. The target in the tutorial should
-     * be &lt;code&gt;GL_ARRAY_BUFFER&lt;/code&gt; most of the time.
-     *
-     * @param target Target to bind
-     */
-    public void bind(int target) {
-        glBindBuffer(target, id);
-    }
-
-    /**
-     * Upload vertex data to this VBO with specified target, data and usage. The
-     * target in the tutorial should be &lt;code&gt;GL_ARRAY_BUFFER&lt;/code&gt; and usage
-     * should be &lt;code&gt;GL_STATIC_DRAW&lt;/code&gt; most of the time.
-     *
-     * @param target Target to upload
-     * @param data   Buffer with the data to upload
-     * @param usage  Usage of the data
-     */
-    public void uploadData(int target, FloatBuffer data, int usage) {
-        glBufferData(target, data, usage);
-    }
-
-    /**
-     * Upload null data to this VBO with specified target, size and usage. The
-     * target in the tutorial should be &lt;code&gt;GL_ARRAY_BUFFER&lt;/code&gt; and usage
-     * should be &lt;code&gt;GL_STATIC_DRAW&lt;/code&gt; most of the time.
-     *
-     * @param target Target to upload
-     * @param size   Size in bytes of the VBO data store
-     * @param usage  Usage of the data
-     */
-    public void uploadData(int target, long size, int usage) {
-        glBufferData(target, size, usage);
-    }
-
-    /**
-     * Upload sub data to this VBO with specified target, offset and data. The
-     * target in the tutorial should be &lt;code&gt;GL_ARRAY_BUFFER&lt;/code&gt; most of the
-     * time.
-     *
-     * @param target Target to upload
-     * @param offset Offset where the data should go in bytes
-     * @param data   Buffer with the data to upload
-     */
-    public void uploadSubData(int target, long offset, FloatBuffer data) {
-        glBufferSubData(target, offset, data);
-    }
-
-    /**
-     * Upload element data to this EBO with specified target, data and usage.
-     * The target in the tutorial should be &lt;code&gt;GL_ELEMENT_ARRAY_BUFFER&lt;/code&gt;
-     * and usage should be &lt;code&gt;GL_STATIC_DRAW&lt;/code&gt; most of the time.
-     *
-     * @param target Target to upload
-     * @param data   Buffer with the data to upload
-     * @param usage  Usage of the data
-     */
-    public void uploadData(int target, IntBuffer data, int usage) {
-        glBufferData(target, data, usage);
-    }
-
-    /**
-     * Deletes this VBO.
-     */
-    public void delete() {
-        glDeleteBuffers(id);
-    }
-
-    /**
-     * Getter for the Vertex Buffer Object ID.
-     *
-     * @return Handle of the VBO
-     */
-    public int getID() {
-        return id;
-    }
-
-}
-</code></pre>
+                        <h2 id="graphics-pipeline"><a class="header" href="#graphics-pipeline">Graphics Pipeline</a></h2>
+<h3 id="overview"><a class="header" href="#overview">Overview</a></h3>
+<p>The Graphics Pipeline describes the rendering stages in Aioh, from processing vertices to displaying pixels on the
+screen.</p>
+<h3 id="stages"><a class="header" href="#stages">Stages</a></h3>
+<ol>
+<li><strong>Input Assembly</strong>: Collect vertex data.</li>
+<li><strong>Vertex Processing</strong>: Transform vertices using the Vertex Shader.</li>
+<li><strong>Rasterization</strong>: Convert primitives into fragments.</li>
+<li><strong>Fragment Processing</strong>: Determine the final color of each pixel.</li>
+<li><strong>Output Merging</strong>: Display the final image.</li>
+</ol>
+<p>Each stage is optimized for performance and designed to support Aioh’s editing features.</p>
+<p>See also this OpenGL <a href="https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Introduction">tutorial</a>.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../graphics.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../graphics/renderer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../graphics/shaders.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../graphics/text_rendering.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -347,11 +206,11 @@ public class VertexBufferObject {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../graphics.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../graphics/renderer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../graphics/shaders.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../graphics/text_rendering.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

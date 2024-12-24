@@ -15,3 +15,4 @@ screen.
 
 Each stage is optimized for performance and designed to support Aioh’s editing features.
 
+See also this OpenGL [tutorial](https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Introduction).

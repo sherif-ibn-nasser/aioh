@@ -5,7 +5,6 @@ GPU. In Aioh, a shader program typically combines a **vertex shader** and a **fr
 rendering pipelines. Each shader must be compiled separately before linking them into a program.
 
 ```java
-
 int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 glShaderSource(vertexShader, vertexShaderCode);
@@ -40,7 +39,20 @@ In Aioh, there are two shader programs in the renderer:
 src/main/java/com/aioh/graphics/AiohRenderer.java:
 
 ```java
-{{#include ../../../src/main/java/com/aioh/graphics/AiohRenderer.java:59:72}}
+/**
+ * Determines the currently used program
+ */
+public static ShaderProgram currentProgram;
+
+/**
+ * Used to render texts
+ */
+public static ShaderProgram mainProgram;
+
+/**
+ * Used to render identity colored elements (The cursor, the status bar, text selection, etc.)
+ */
+public static ShaderProgram colorProgram;
 ```
 
 ### Full shader program

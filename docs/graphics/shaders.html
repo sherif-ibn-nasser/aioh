@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> OpenGL</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.3.</strong> DoD vs OOP</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.4.</strong> Window setup</div></li></ol></li><li class="chapter-item expanded "><a href="../graphics.html"><strong aria-hidden="true">3.</strong> Graphics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphics/vbo.html"><strong aria-hidden="true">3.1.</strong> The vertex buffer</a></li><li class="chapter-item expanded "><a href="../graphics/shaders.html" class="active"><strong aria-hidden="true">3.2.</strong> Shaders</a></li><li class="chapter-item expanded "><a href="../graphics/uniforms.html"><strong aria-hidden="true">3.3.</strong> Uniforms</a></li><li class="chapter-item expanded "><a href="../graphics/shader_programs.html"><strong aria-hidden="true">3.4.</strong> Shader programs</a></li><li class="chapter-item expanded "><a href="../graphics/texts.html"><strong aria-hidden="true">3.5.</strong> Texts</a></li><li class="chapter-item expanded "><a href="../graphics/timer.html"><strong aria-hidden="true">3.6.</strong> Timer</a></li><li class="chapter-item expanded "><a href="../graphics/renderer.html"><strong aria-hidden="true">3.7.</strong> The renderer</a></li><li class="chapter-item expanded "><a href="../graphics/rendering_pipeline.html"><strong aria-hidden="true">3.8.</strong> Graphics pipeline</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.</strong> The core editor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> The buttons selector</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> The file browser</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> The database editor</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">7.1.</strong> The database manager</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.2.</strong> Datatypes</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.3.</strong> Database editor states</div></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> OpenGL</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.3.</strong> DoD vs OOP</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.4.</strong> Window setup</div></li></ol></li><li class="chapter-item expanded "><a href="../utils.html"><strong aria-hidden="true">3.</strong> Utils</a></li><li class="chapter-item expanded "><a href="../graphics.html"><strong aria-hidden="true">4.</strong> Graphics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphics/vbo.html"><strong aria-hidden="true">4.1.</strong> The vertex buffer</a></li><li class="chapter-item expanded "><a href="../graphics/shaders.html" class="active"><strong aria-hidden="true">4.2.</strong> Shaders</a></li><li class="chapter-item expanded "><a href="../graphics/uniforms.html"><strong aria-hidden="true">4.3.</strong> Uniforms</a></li><li class="chapter-item expanded "><a href="../graphics/shader_programs.html"><strong aria-hidden="true">4.4.</strong> Shader programs</a></li><li class="chapter-item expanded "><a href="../graphics/textures.html"><strong aria-hidden="true">4.5.</strong> Textures</a></li><li class="chapter-item expanded "><a href="../graphics/timer.html"><strong aria-hidden="true">4.6.</strong> Timer</a></li><li class="chapter-item expanded "><a href="../graphics/renderer.html"><strong aria-hidden="true">4.7.</strong> The renderer</a></li><li class="chapter-item expanded "><a href="../graphics/graphics_pipeline.html"><strong aria-hidden="true">4.8.</strong> Graphics pipeline</a></li><li class="chapter-item expanded "><a href="../graphics/text_rendering.html"><strong aria-hidden="true">4.9.</strong> Text rendering</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> The core editor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> The buttons selector</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> The file browser</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> The database editor</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">8.1.</strong> The database manager</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.2.</strong> Datatypes</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.3.</strong> Database editor states</div></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -174,7 +174,6 @@
                 <div id="content" class="content">
                     <main>
                         <h2 id="shaders"><a class="header" href="#shaders">Shaders</a></h2>
-<h3 id="what-are-shaders"><a class="header" href="#what-are-shaders">What are Shaders?</a></h3>
 <p>Shaders are programs executed on the GPU to control the rendering process. Aioh utilizes two primary types of
 shaders:</p>
 <ol>
@@ -184,15 +183,54 @@ shaders:</p>
 <h3 id="writing-shaders-in-aioh"><a class="header" href="#writing-shaders-in-aioh">Writing Shaders in Aioh</a></h3>
 <p>Aioh shaders are written in GLSL (OpenGL Shading Language). Below is an example of a basic vertex shader:</p>
 <p>src/main/resources/shaders/default.vert:</p>
-<pre><code class="language-glsl">{ { #include ../../../src/main/resources/shaders/ default .vert } }
+<pre><code class="language-glsl">#version 150 core
+
+in vec2 position;
+in vec4 color;
+in vec2 texcoord;
+
+out vec4 vertexColor;
+out vec2 textureCoord;
+
+//uniform mat4 model;
+//uniform mat4 view;
+//uniform mat4 projection;
+uniform mat4 mvp;
+uniform float cameraScale;
+
+void main() {
+    vertexColor = color;
+    textureCoord = texcoord;
+    //    mat4 mvp = projection * view * model;
+    gl_Position = mvp * vec4(cameraScale * position, 0.0, 1.0);
+}
 </code></pre>
 <p>And the text fragment shader:</p>
 <p>src/main/resources/shaders/default.frag:</p>
-<pre><code class="language-glsl">{ { #include ../../../src/main/resources/shaders/ default .frag } }
+<pre><code class="language-glsl">#version 150 core
+
+in vec4 vertexColor;
+in vec2 textureCoord;
+
+out vec4 fragColor;
+
+uniform sampler2D texImage;
+
+void main() {
+    vec4 textureColor = texture(texImage, textureCoord);
+    fragColor = vertexColor * textureColor;
+}
 </code></pre>
 <p>Also, there is also an identity color fragment shader, used to render the cursor and the status bar:</p>
 <p>src/main/resources/shaders/color.frag:</p>
-<pre><code class="language-glsl">{ { #include ../../../src/main/resources/shaders/color.frag } }
+<pre><code class="language-glsl">#version 150 core
+
+in vec4 vertexColor;
+out vec4 fragColor;
+
+void main() {
+    fragColor = vertexColor;
+}
 </code></pre>
 <h3 id="compiling-and-linking-shaders"><a class="header" href="#compiling-and-linking-shaders">Compiling and Linking Shaders</a></h3>
 <p>Shaders are compiled and linked as follows:</p>

@@ -207,7 +207,7 @@ public class Font {
             /* Create glyph and draw char on image */
             Glyph ch = new Glyph(charWidth, charHeight, x[0], finalImage.getHeight() - charHeight, 0f);
             g.drawImage(charImage, x[0], 0, null);
-            x[0] += ch.width;
+            x[0] += ch.width();
             glyphs.put(c, ch);
         });
 
@@ -315,7 +315,7 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(c);
-            lineWidth += g.width;
+            lineWidth += g.width();
         }
         width = Math.max(width, lineWidth);
         return width;
@@ -343,7 +343,7 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(c);
-            lineHeight = Math.max(lineHeight, g.height);
+            lineHeight = Math.max(lineHeight, g.height());
         }
         height += lineHeight;
         return height;
@@ -382,8 +382,8 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(ch);
-            renderer.drawTextureRegion(texture, drawX, drawY, g.x, g.y, g.width, g.height, c);
-            drawX += g.width;
+            renderer.drawTextureRegion(texture, drawX, drawY, g.x(), g.y(), g.width(), g.height(), c);
+            drawX += g.width();
         }
     }
 

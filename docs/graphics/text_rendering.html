@@ -1,0 +1,731 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Text rendering - Aioh technical guide</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Getting started</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">2.1.</strong> Installation</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.2.</strong> OpenGL</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.3.</strong> DoD vs OOP</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.4.</strong> Window setup</div></li></ol></li><li class="chapter-item expanded "><a href="../utils.html"><strong aria-hidden="true">3.</strong> Utils</a></li><li class="chapter-item expanded "><a href="../graphics.html"><strong aria-hidden="true">4.</strong> Graphics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../graphics/vbo.html"><strong aria-hidden="true">4.1.</strong> The vertex buffer</a></li><li class="chapter-item expanded "><a href="../graphics/shaders.html"><strong aria-hidden="true">4.2.</strong> Shaders</a></li><li class="chapter-item expanded "><a href="../graphics/uniforms.html"><strong aria-hidden="true">4.3.</strong> Uniforms</a></li><li class="chapter-item expanded "><a href="../graphics/shader_programs.html"><strong aria-hidden="true">4.4.</strong> Shader programs</a></li><li class="chapter-item expanded "><a href="../graphics/textures.html"><strong aria-hidden="true">4.5.</strong> Textures</a></li><li class="chapter-item expanded "><a href="../graphics/timer.html"><strong aria-hidden="true">4.6.</strong> Timer</a></li><li class="chapter-item expanded "><a href="../graphics/renderer.html"><strong aria-hidden="true">4.7.</strong> The renderer</a></li><li class="chapter-item expanded "><a href="../graphics/graphics_pipeline.html"><strong aria-hidden="true">4.8.</strong> Graphics pipeline</a></li><li class="chapter-item expanded "><a href="../graphics/text_rendering.html" class="active"><strong aria-hidden="true">4.9.</strong> Text rendering</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> The core editor</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> The buttons selector</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> The file browser</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> The database editor</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">8.1.</strong> The database manager</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.2.</strong> Datatypes</div></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.3.</strong> Database editor states</div></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Aioh technical guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="text-rendering"><a class="header" href="#text-rendering">Text Rendering</a></h2>
+<p>In OpenGL, texts are not native objects; instead, we treat text as textures. Text is rendered by generating a texture
+from the font, and then mapping this texture onto a 2D surface or geometry. This allows the text to be manipulated like
+any other texture, enabling effects such as scaling, rotation, and filtering.</p>
+<h4 id="steps-for-text-rendering"><a class="header" href="#steps-for-text-rendering">Steps for Text Rendering:</a></h4>
+<ol>
+<li>
+<p><strong>Load Fonts</strong>: Fonts are loaded using <code>java.io.FileInputStream</code> and created using <code>java.awt.Font</code>:</p>
+<p>src/main/java/com/aioh/Main.java:</p>
+<pre><code class="language-java">var fontFile = new FileInputStream(AiohUtils.FONTS_PATH + "/iosevka-regular.ttf");
+var font = java.awt.Font.createFont(TRUETYPE_FONT, fontFile).deriveFont(PLAIN, AiohEditor.FONT_SIZE);
+</code></pre>
+</li>
+<li>
+<p><strong>Generate Glyphs</strong>: Individual characters are rasterized into textures and cached using
+<code>com.aioh.graphics.text.Font</code>.</p>
+</li>
+<li>
+<p><strong>Render Text</strong>: The glyph textures are drawn onto the screen.</p>
+</li>
+</ol>
+<p>src/main/java/com/aioh/graphics/text/Glyph.java:</p>
+<pre><code class="language-java">/*
+ * The MIT License (MIT)
+ *
+ * Copyright © 2015-2016, Heiko Brumme
+ *
+ * Modified by Sherif Nasser, 2024
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.aioh.graphics.text;
+
+/**
+ * This class represents a font glyph.
+ *
+ * @author Heiko Brumme
+ * @author Sherif Nasser
+ */
+public record Glyph(int width, int height, int x, int y, float advance) {
+
+    /**
+     * Creates a font Glyph.
+     *
+     * @param width   Width of the Glyph
+     * @param height  Height of the Glyph
+     * @param x       X coordinate on the font texture
+     * @param y       Y coordinate on the font texture
+     * @param advance Advance width
+     */
+    public Glyph {
+    }
+
+}
+
+</code></pre>
+<p>src/main/java/com/aioh/graphics/text/Font.java:</p>
+<pre><code class="language-java">/*
+ * The MIT License (MIT)
+ *
+ * Copyright © 2014-2017, Heiko Brumme
+ *
+ * Modified by Sherif Nasser, 2024
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.aioh.graphics.text;
+
+import com.aioh.graphics.AiohRenderer;
+import com.aioh.graphics.Texture;
+import glm_.vec4.Vec4;
+import org.lwjgl.system.MemoryUtil;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.awt.Font.*;
+
+/**
+ * This class contains a font texture for drawing text.
+ *
+ * @author Heiko Brumme
+ * @author Sherif Nasser
+ */
+public class Font {
+
+    /**
+     * Contains the glyphs for each char.
+     */
+    private final Map&lt;Character, Glyph&gt; glyphs;
+    /**
+     * Contains the font texture.
+     */
+    private final Texture texture;
+
+    /**
+     * Height of the font.
+     */
+    private int fontHeight;
+
+    /**
+     * Spacing between lines.
+     */
+    private int fontSpacing = 0;
+
+    /**
+     * Creates a default antialiased font with monospaced glyphs and default
+     * size 16.
+     */
+    public Font() {
+        this(new java.awt.Font(MONOSPACED, PLAIN, 16), true);
+    }
+
+    /**
+     * Creates a default font with monospaced glyphs and default size 16.
+     *
+     * @param antiAlias Wheter the font should be antialiased or not
+     */
+    public Font(boolean antiAlias) {
+        this(new java.awt.Font(MONOSPACED, PLAIN, 16), antiAlias);
+    }
+
+    /**
+     * Creates a default antialiased font with monospaced glyphs and specified
+     * size.
+     *
+     * @param size Font size
+     */
+    public Font(int size) {
+        this(new java.awt.Font(MONOSPACED, PLAIN, size), true);
+    }
+
+    /**
+     * Creates a default font with monospaced glyphs and specified size.
+     *
+     * @param size      Font size
+     * @param antiAlias Wheter the font should be antialiased or not
+     */
+    public Font(int size, boolean antiAlias) {
+        this(new java.awt.Font(MONOSPACED, PLAIN, size), antiAlias);
+    }
+
+    /**
+     * Creates a antialiased Font from an input stream.
+     *
+     * @param in   The input stream
+     * @param size Font size
+     * @throws FontFormatException if fontFile does not contain the required
+     *                             font tables for the specified format
+     * @throws IOException         If font can't be read
+     */
+    public Font(InputStream in, int size) throws FontFormatException, IOException {
+        this(in, size, true);
+    }
+
+    /**
+     * Creates a Font from an input stream.
+     *
+     * @param in        The input stream
+     * @param size      Font size
+     * @param antiAlias Wheter the font should be antialiased or not
+     * @throws FontFormatException if fontFile does not contain the required
+     *                             font tables for the specified format
+     * @throws IOException         If font can't be read
+     */
+    public Font(InputStream in, int size, boolean antiAlias) throws FontFormatException, IOException {
+        this(java.awt.Font.createFont(TRUETYPE_FONT, in).deriveFont(PLAIN, size), antiAlias);
+    }
+
+    /**
+     * Creates a antialiased font from an AWT Font.
+     *
+     * @param font The AWT Font
+     */
+    public Font(java.awt.Font font) {
+        this(font, true);
+    }
+
+    /**
+     * Creates a font from an AWT Font.
+     *
+     * @param font      The AWT Font
+     * @param antiAlias Wheter the font should be antialiased or not
+     */
+    public Font(java.awt.Font font, boolean antiAlias) {
+        glyphs = new HashMap&lt;&gt;();
+        for (int i = 32; i &lt; 256; i++) {
+            if (i == 127) {
+                /* ASCII 127 is the DEL control code, so we can skip it */
+                continue;
+            }
+            glyphs.put((char) i, null);
+        }
+        texture = createFontTexture(font, antiAlias);
+    }
+
+    /**
+     * Creates a font texture from specified AWT font.
+     *
+     * @param font      The AWT font
+     * @param antiAlias Wheter the font should be antialiased or not
+     * @return Font texture
+     */
+    private Texture createFontTexture(java.awt.Font font, boolean antiAlias) {
+        /* Loop through the characters to get charWidth and charHeight */
+        final int[] imageWidth = {0};
+        final int[] imageHeight = {0};
+
+        glyphs.forEach((c, g) -&gt; {
+            BufferedImage ch = createCharImage(font, c, antiAlias);
+            if (ch == null) {
+                /* If char image is null that font does not contain the char */
+                return;
+            }
+
+            imageWidth[0] += ch.getWidth();
+            imageHeight[0] = Math.max(imageHeight[0], ch.getHeight());
+        });
+
+        fontHeight = imageHeight[0];
+
+        /* Image for the texture */
+        BufferedImage image = new BufferedImage(imageWidth[0], imageHeight[0], BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+
+        final int[] x = {0};
+
+        /* Create image for the standard chars */
+
+        BufferedImage finalImage = image;
+        glyphs.forEach((c, _g) -&gt; {
+            BufferedImage charImage = createCharImage(font, c, antiAlias);
+            if (charImage == null) {
+                /* If char image is null that font does not contain the char */
+                return;
+            }
+
+            int charWidth = charImage.getWidth();
+            int charHeight = charImage.getHeight();
+
+            /* Create glyph and draw char on image */
+            Glyph ch = new Glyph(charWidth, charHeight, x[0], finalImage.getHeight() - charHeight, 0f);
+            g.drawImage(charImage, x[0], 0, null);
+            x[0] += ch.width();
+            glyphs.put(c, ch);
+        });
+
+        /* Flip image Horizontal to get the origin to bottom left */
+        AffineTransform transform = AffineTransform.getScaleInstance(1f, -1f);
+        transform.translate(0, -image.getHeight());
+        AffineTransformOp operation = new AffineTransformOp(transform,
+                AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        image = operation.filter(image, null);
+
+        /* Get charWidth and charHeight of image */
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        /* Get pixel data of image */
+        int[] pixels = new int[width * height];
+        image.getRGB(0, 0, width, height, pixels, 0, width);
+
+        /* Put pixel data into a ByteBuffer */
+        ByteBuffer buffer = MemoryUtil.memAlloc(width * height * 4);
+        for (int i = 0; i &lt; height; i++) {
+            for (int j = 0; j &lt; width; j++) {
+                /* Pixel as RGBA: 0xAARRGGBB */
+                int pixel = pixels[i * width + j];
+                /* Red component 0xAARRGGBB &gt;&gt; 16 = 0x0000AARR */
+                buffer.put((byte) ((pixel &gt;&gt; 16) &amp; 0xFF));
+                /* Green component 0xAARRGGBB &gt;&gt; 8 = 0x00AARRGG */
+                buffer.put((byte) ((pixel &gt;&gt; 8) &amp; 0xFF));
+                /* Blue component 0xAARRGGBB &gt;&gt; 0 = 0xAARRGGBB */
+                buffer.put((byte) (pixel &amp; 0xFF));
+                /* Alpha component 0xAARRGGBB &gt;&gt; 24 = 0x000000AA */
+                buffer.put((byte) ((pixel &gt;&gt; 24) &amp; 0xFF));
+            }
+        }
+        /* Do not forget to flip the buffer! */
+        buffer.flip();
+
+        /* Create texture */
+        Texture fontTexture = Texture.createTexture(width, height, buffer);
+        MemoryUtil.memFree(buffer);
+        return fontTexture;
+    }
+
+    /**
+     * Creates a char image from specified AWT font and char.
+     *
+     * @param font      The AWT font
+     * @param c         The char
+     * @param antiAlias Wheter the char should be antialiased or not
+     * @return Char image
+     */
+    private BufferedImage createCharImage(java.awt.Font font, char c, boolean antiAlias) {
+        /* Creating temporary image to extract character size */
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        if (antiAlias) {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        g.setFont(font);
+        FontMetrics metrics = g.getFontMetrics();
+        g.dispose();
+
+        /* Get char charWidth and charHeight */
+        int charWidth = metrics.charWidth(c);
+        int charHeight = metrics.getHeight();
+
+        /* Check if charWidth is 0 */
+        if (charWidth == 0) {
+            return null;
+        }
+
+        /* Create image for holding the char */
+        image = new BufferedImage(charWidth, charHeight, BufferedImage.TYPE_INT_ARGB);
+        g = image.createGraphics();
+        if (antiAlias) {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        g.setFont(font);
+        g.setPaint(java.awt.Color.WHITE);
+        g.drawString(String.valueOf(c), 0, metrics.getAscent());
+        g.dispose();
+        return image;
+    }
+
+    /**
+     * Gets the width of the specified text.
+     *
+     * @param text The text
+     * @return Width of text
+     */
+    public int getWidth(CharSequence text) {
+        int width = 0;
+        int lineWidth = 0;
+        for (int i = 0; i &lt; text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '\n') {
+                /* Line end, set width to maximum from line width and stored
+                 * width */
+                width = Math.max(width, lineWidth);
+                lineWidth = 0;
+                continue;
+            }
+            if (c == '\r') {
+                /* Carriage return, just skip it */
+                continue;
+            }
+            Glyph g = glyphs.get(c);
+            lineWidth += g.width();
+        }
+        width = Math.max(width, lineWidth);
+        return width;
+    }
+
+    /**
+     * Gets the height of the specified text.
+     *
+     * @param text The text
+     * @return Height of text
+     */
+    public int getHeight(CharSequence text) {
+        int height = 0;
+        int lineHeight = 0;
+        for (int i = 0; i &lt; text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '\n') {
+                /* Line end, add line height to stored height */
+                height += lineHeight + fontSpacing;
+                lineHeight = 0;
+                continue;
+            }
+            if (c == '\r') {
+                /* Carriage return, just skip it */
+                continue;
+            }
+            Glyph g = glyphs.get(c);
+            lineHeight = Math.max(lineHeight, g.height());
+        }
+        height += lineHeight;
+        return height;
+    }
+
+    /**
+     * Draw text at the specified position and color.
+     *
+     * @param renderer The renderer to use
+     * @param text     Text to draw
+     * @param x        X coordinate of the text position
+     * @param y        Y coordinate of the text position
+     * @param c        Color to use
+     */
+    public void drawText(AiohRenderer renderer, CharSequence text, float x, float y, Vec4 c) {
+//        int textHeight = getHeight(text);
+
+        float drawX = x;
+        float drawY = y + fontSpacing / 2f;
+//        if (textHeight &gt; fontHeight) {
+//            drawY += textHeight - fontHeight;
+//        }
+
+        texture.bind();
+        for (int i = 0; i &lt; text.length(); i++) {
+            char ch = text.charAt(i);
+
+            if (ch == '\n') {
+                /* Line feed, set x and y to draw at the next line */
+                drawY -= fontHeight + fontSpacing;
+                drawX = x;
+                continue;
+            }
+            if (ch == '\r') {
+                /* Carriage return, just skip it */
+                continue;
+            }
+            Glyph g = glyphs.get(ch);
+            renderer.drawTextureRegion(texture, drawX, drawY, g.x(), g.y(), g.width(), g.height(), c);
+            drawX += g.width();
+        }
+    }
+
+    /**
+     * Draw text at the specified position.
+     *
+     * @param renderer The renderer to use
+     * @param text     Text to draw
+     * @param x        X coordinate of the text position
+     * @param y        Y coordinate of the text position
+     */
+    public void drawText(AiohRenderer renderer, CharSequence text, float x, float y) {
+        drawText(renderer, text, x, y, new Vec4(1));
+    }
+
+    /**
+     * Disposes the font.
+     */
+    public void dispose() {
+        texture.delete();
+    }
+
+    public int getFontHeight() {
+        return fontHeight;
+    }
+
+    public int getFontSpacing() {
+        return fontSpacing;
+    }
+
+    public void setFontSpacing(int fontSpacing) {
+        this.fontSpacing = fontSpacing;
+    }
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../graphics/graphics_pipeline.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../graphics/graphics_pipeline.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

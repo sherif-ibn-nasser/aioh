@@ -7,19 +7,10 @@ that graphics are rendered smoothly and efficiently.
 
 ### Implementation
 
-A simple timer in Aioh is implemented as:
+The timer class in Aioh depends on the [```glfwGetTime```](https://www.glfw.org/docs/3.0/group__time.html) function:
+
+src/main/java/com/aioh/graphics/Timer.java:
 
 ```java
-long lastTime = System.nanoTime();
-final double nsPerFrame = 1_000_000_000.0 / 60; // 60 FPS
-
-while(running){
-long now = System.nanoTime();
-double delta = (now - lastTime) / nsPerFrame;
-lastTime =now;
-
-update(delta);
-
-render();
-}
+{{#include ../../../src/main/java/com/aioh/graphics/Timer.java}}
 ```

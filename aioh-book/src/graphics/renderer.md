@@ -10,3 +10,11 @@ buffers, and textures to ensure efficient rendering.
 1. **Initialize Graphics Pipeline**: Set up shaders, vertex buffers, and textures.
 2. **Draw Elements**: Use OpenGL’s draw commands to render objects.
 3. **Swap Buffers**: Display the rendered frame on the screen.
+
+### Implementation
+
+src/main/java/com/aioh/graphics/AiohRenderer.java:
+
+```java
+{{#include ../../../src/main/java/com/aioh/graphics/AiohRenderer.java}}
+```

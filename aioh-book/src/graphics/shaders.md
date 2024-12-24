@@ -1,7 +1,5 @@
 ## Shaders
 
-### What are Shaders?
-
 Shaders are programs executed on the GPU to control the rendering process. Aioh utilizes two primary types of
 shaders:
 
@@ -15,7 +13,7 @@ Aioh shaders are written in GLSL (OpenGL Shading Language). Below is an example 
 src/main/resources/shaders/default.vert:
 
 ```glsl
-{ { #include ../../../src/main/resources/shaders/ default .vert } }
+{{#include ../../../src/main/resources/shaders/default.vert}}
 ```
 
 And the text fragment shader:
@@ -23,7 +21,7 @@ And the text fragment shader:
 src/main/resources/shaders/default.frag:
 
 ```glsl
-{ { #include ../../../src/main/resources/shaders/ default .frag } }
+{{#include ../../../src/main/resources/shaders/default.frag}}
 ```
 
 Also, there is also an identity color fragment shader, used to render the cursor and the status bar:
@@ -31,7 +29,7 @@ Also, there is also an identity color fragment shader, used to render the cursor
 src/main/resources/shaders/color.frag:
 
 ```glsl
-{ { #include ../../../src/main/resources/shaders/color.frag } }
+{{#include ../../../src/main/resources/shaders/color.frag}}
 ```
 
 ### Compiling and Linking Shaders

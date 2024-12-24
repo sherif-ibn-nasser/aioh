@@ -3,6 +3,8 @@
  *
  * Copyright © 2015-2016, Heiko Brumme
  *
+ * Modified by Sherif Nasser, 2024
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -27,14 +29,9 @@ package com.aioh.graphics.text;
  * This class represents a font glyph.
  *
  * @author Heiko Brumme
+ * @author Sherif Nasser
  */
-public class Glyph {
-
-    public final int width;
-    public final int height;
-    public final int x;
-    public final int y;
-    public final float advance;
+public record Glyph(int width, int height, int x, int y, float advance) {
 
     /**
      * Creates a font Glyph.
@@ -45,12 +42,7 @@ public class Glyph {
      * @param y       Y coordinate on the font texture
      * @param advance Advance width
      */
-    public Glyph(int width, int height, int x, int y, float advance) {
-        this.width = width;
-        this.height = height;
-        this.x = x;
-        this.y = y;
-        this.advance = advance;
+    public Glyph {
     }
 
 }
