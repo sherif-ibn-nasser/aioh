@@ -7,6 +7,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An abstraction layer for DBMS
+ *
+ * @author Sherif Nasser
+ */
 public class AiohDBManager {
 
     public static final String URL = "jdbc:mariadb://localhost:3306/";

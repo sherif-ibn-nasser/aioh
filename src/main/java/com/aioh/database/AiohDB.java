@@ -10,6 +10,11 @@ import static com.aioh.AiohDatabaseEditor.ColumnInfo.*;
 import static com.aioh.database.DataType.FALSE_STRING;
 import static com.aioh.database.DataType.TRUE_STRING;
 
+/**
+ * Concrete object representing a SQL database
+ *
+ * @author Sherif Nasser
+ */
 public class AiohDB {
     private String dbName;
     private List<String> tablesNames;

@@ -16,6 +16,11 @@ import static com.aioh.graphics.AiohRenderer.colorProgram;
 import static com.aioh.graphics.AiohRenderer.mainProgram;
 import static org.lwjgl.glfw.GLFW.*;
 
+/**
+ * The core editor
+ *
+ * @author Sherif Nasser
+ */
 public class AiohEditor implements AiohWindow.EventsHandler {
     public static final Vec4 AIOH_COLOR = new Vec4((float) 0x4C / 256, (float) 0xAF / 256, (float) 0x50 / 256, 1);
     public static final Vec4 AIOH_COLOR_DARK = new Vec4((float) 0x38 / 256, (float) 0x7F / 256, (float) 0x3B / 256, 1);

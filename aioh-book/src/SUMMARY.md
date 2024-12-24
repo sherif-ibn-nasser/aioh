@@ -21,13 +21,16 @@
     - [Graphics pipeline](./graphics/graphics_pipeline.md)
     - [Text rendering](./graphics/text_rendering.md)
 
-- [The core editor]()
+- [AiohDBMS](./aioh_dbms.md)
+    - [AiohDBManager](./database/aioh_db_manager.md)
+    - [AiohDB](./database/aioh_db.md)
+    - [AiohDBTable](./database/aioh_db_table.md)
+    - [Datatypes](./database/datatypes.md)
 
-- [The buttons selector]()
+- [The core editor](./editor.md)
+
+- [The buttons selector](./btns_selector.md)
 
 - [The file browser]()
 
-- [The database editor]()
-    - [The database manager]()
-    - [Datatypes]()
-    - [Database editor states]()
+- [The database editor](./database_editor.md)

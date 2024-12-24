@@ -1,5 +1,10 @@
 package com.aioh.database;
 
+/**
+ * Possible enumerated SQL datatypes
+ *
+ * @author Sherif Nasser
+ */
 public enum DataType {
     INT,
     FLOAT,

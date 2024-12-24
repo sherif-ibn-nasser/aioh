@@ -10,6 +10,11 @@ import static com.aioh.graphics.AiohRenderer.mainProgram;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL46.*;
 
+/**
+ * The window manager
+ *
+ * @author Sherif Nasser
+ */
 public class AiohWindow {
 
     public interface EventsHandler {
