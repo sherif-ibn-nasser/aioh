@@ -17,16 +17,17 @@ public class AiohFileBrowser extends AiohButtonsSelector {
     private void displayAllInPath(File path) {
 
         this.lines.clear();
-        this.lines.add(UP_DIR);
+
+        if (path.getParent() != null)
+            this.lines.add(UP_DIR);
 
         for (final File fileEntry : path.listFiles()) {
-            var name = fileEntry.getName();
+            var name = new StringBuilder(fileEntry.getName());
 
-            if (fileEntry.isDirectory()) {
-                lines.add(new StringBuilder(name).append('/'));
-            } else {
-                lines.add(new StringBuilder(name));
-            }
+            if (fileEntry.isDirectory())
+                name.append('/');
+
+            lines.add(name);
         }
 
         setLines(this.lines);
@@ -37,7 +38,10 @@ public class AiohFileBrowser extends AiohButtonsSelector {
     }
 
     public void goUp() {
-        currentPath = currentPath.getParentFile();
+        var up = currentPath.getParentFile();
+        if (up == null)
+            return;
+        currentPath = up;
         displayAllInPath(currentPath);
     }
 

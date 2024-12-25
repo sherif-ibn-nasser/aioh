@@ -315,6 +315,10 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(c);
+
+            if (g == null)
+                g = glyphs.get('?');
+
             lineWidth += g.width();
         }
         width = Math.max(width, lineWidth);
@@ -342,7 +346,12 @@ public class Font {
                 /* Carriage return, just skip it */
                 continue;
             }
+
             Glyph g = glyphs.get(c);
+
+            if (g == null)
+                g = glyphs.get('?');
+
             lineHeight = Math.max(lineHeight, g.height());
         }
         height += lineHeight;
@@ -382,6 +391,10 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(ch);
+
+            if (g == null)
+                g = glyphs.get('?');
+            
             renderer.drawTextureRegion(texture, drawX, drawY, g.x(), g.y(), g.width(), g.height(), c);
             drawX += g.width();
         }
