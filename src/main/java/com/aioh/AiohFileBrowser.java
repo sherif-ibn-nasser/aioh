@@ -56,10 +56,12 @@ public class AiohFileBrowser extends AiohButtonsSelector {
     }
 
     public void displayAllInLastPath() {
+        currentPath = lastPath;
         displayAllInPath(lastPath);
     }
 
     public void displayDirectoriesInLastPath() {
+        currentPath = lastPath;
         displayDirectoriesInPath(lastPath);
     }
 
