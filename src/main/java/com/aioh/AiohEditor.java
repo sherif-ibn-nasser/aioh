@@ -58,6 +58,8 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     public void init() {
+        lines.clear();
+        cursorLine = cursorCol = 0;
         lines.add(new StringBuilder(LINE_INITIAL_CAP));
         renderer.init();
         onInit();
@@ -67,8 +69,15 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     }
 
     public void init(String filePath) {
+        init(new File(filePath));
+    }
+
+
+    public void init(File file) {
+        lines.clear();
+        cursorLine = cursorCol = 0;
         try {
-            var scanner = new Scanner(new File(filePath));
+            var scanner = new Scanner(file);
             while (scanner.hasNextLine()) {
                 var line = scanner.nextLine();
                 lines.add(new StringBuilder(line));
@@ -76,6 +85,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+
+        if (lines.isEmpty())
+            lines.add(new StringBuilder(LINE_INITIAL_CAP));
+
         renderer.init();
         onInit();
         fontHeight = renderer.getFont().getFontHeight();

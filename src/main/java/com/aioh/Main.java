@@ -32,6 +32,7 @@ public class Main {
             AiohEditorStateManager.textEditor.init(args[0]);
 
         AiohEditorStateManager.mainMenu.init();
+        AiohEditorStateManager.fileBrowser.init();
         AiohEditorStateManager.databaseEditor.init();
 
         while (!window.shouldClose()) {
