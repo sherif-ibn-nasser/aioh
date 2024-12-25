@@ -1,0 +1,11 @@
+package com.aioh;
+
+public enum AiohEditorState {
+    TEXT_EDITING,
+    MAIN_MENU,
+    FILE_BROWSING,
+    FILE_SAVE_PATH_SELECTION,
+    FILE_SAVE_FILE_NAME_ENTERING,
+    FILE_SAVE_FILE_EXISTS,
+    DATABASE,
+}

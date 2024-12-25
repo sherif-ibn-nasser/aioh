@@ -315,6 +315,10 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(c);
+
+            if (g == null)
+                g = glyphs.get('?');
+
             lineWidth += g.width();
         }
         width = Math.max(width, lineWidth);
@@ -342,7 +346,12 @@ public class Font {
                 /* Carriage return, just skip it */
                 continue;
             }
+
             Glyph g = glyphs.get(c);
+
+            if (g == null)
+                g = glyphs.get('?');
+
             lineHeight = Math.max(lineHeight, g.height());
         }
         height += lineHeight;
@@ -382,8 +391,55 @@ public class Font {
                 continue;
             }
             Glyph g = glyphs.get(ch);
+
+            if (g == null)
+                g = glyphs.get('?');
+
             renderer.drawTextureRegion(texture, drawX, drawY, g.x(), g.y(), g.width(), g.height(), c);
             drawX += g.width();
+        }
+    }
+
+
+    /**
+     * Draw text at the specified position and color.
+     *
+     * @param renderer The renderer to use
+     * @param text     Text to draw
+     * @param x        X coordinate of the text position
+     * @param y        Y coordinate of the text position
+     * @param c        Color to use
+     */
+    public void drawTextRightAligned(AiohRenderer renderer, CharSequence text, float x, float y, Vec4 c) {
+//        int textHeight = getHeight(text);
+
+        float drawX = x;
+        float drawY = y + fontSpacing / 2f;
+//        if (textHeight > fontHeight) {
+//            drawY += textHeight - fontHeight;
+//        }
+
+        texture.bind();
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char ch = text.charAt(i);
+
+            if (ch == '\n') {
+                /* Line feed, set x and y to draw at the next line */
+                drawY -= fontHeight + fontSpacing;
+                drawX = x;
+                continue;
+            }
+            if (ch == '\r') {
+                /* Carriage return, just skip it */
+                continue;
+            }
+            Glyph g = glyphs.get(ch);
+
+            if (g == null)
+                g = glyphs.get('?');
+
+            drawX -= g.width();
+            renderer.drawTextureRegion(texture, drawX, drawY, g.x(), g.y(), g.width(), g.height(), c);
         }
     }
 

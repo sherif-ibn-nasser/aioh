@@ -22,19 +22,30 @@ public class Main {
         vertexShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.vert");
         defaultFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/default.frag");
         colorFragmentShaderSource = AiohUtils.readFile(AiohUtils.SHADERS_PATH + "/color.frag");
-        var editor = new AiohEditor();
+        var editorStateManager = new AiohEditorStateManager();
 
-        var window = new AiohWindow("Aioh", 1280, 720, editor);
+        var window = new AiohWindow("Aioh", 1280, 720, editorStateManager);
 
         if (args.length == 0)
-            editor.init();
+            AiohEditorStateManager.textEditor.init();
         else
-            editor.init(args[0]);
+            AiohEditorStateManager.textEditor.init(args[0]);
+
+        AiohEditorStateManager.mainMenu.init();
+        AiohEditorStateManager.fileBrowser.init();
+        AiohEditorStateManager.fileNameEditor.init();
+        AiohEditorStateManager.databaseEditor.init();
+
+        AiohEditorStateManager.fileNameEditor.title = """
+                Enter file name
+                Save (Enter)
+                Back (ESC)""";
+        AiohEditorStateManager.fileNameEditor.titlePosY = 2 * AiohEditorStateManager.fileNameEditor.renderer.getDebugFont().getFontHeight();
 
         while (!window.shouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT);
             glClearColor(0x2a / 256f, 0x2a / 256f, 0x2a / 256f, 1);
-            editor.loop();
+            editorStateManager.loop();
             window.update();
         }
 

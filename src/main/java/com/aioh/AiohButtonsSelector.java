@@ -18,7 +18,8 @@ public class AiohButtonsSelector extends AiohEditor {
 
     public static final StringBuilder NO_BUTTON = new StringBuilder("No");
     public static final StringBuilder YES_BUTTON = new StringBuilder("Yes");
-    private static final ArrayList<StringBuilder> NO_YES_BUTTONS = new ArrayList<>(2);
+
+    public static final ArrayList<StringBuilder> NO_YES_BUTTONS = new ArrayList<>(2);
 
     static {
         NO_YES_BUTTONS.add(NO_BUTTON);
@@ -80,6 +81,12 @@ public class AiohButtonsSelector extends AiohEditor {
                 -cameraPos.getY() - (cursorLine + 0.5f) * fontHeight,
                 TEXT_SELECTION_COLOR
         );
+    }
+
+    @Override
+    protected void onDrawMainProgram() {
+        super.drawTitle();
+        super.drawText();
     }
 
     @Override
