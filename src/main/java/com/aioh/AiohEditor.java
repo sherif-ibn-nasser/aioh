@@ -36,6 +36,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     public static final int CHARS_COUNT_CAMERA_SCALE_THRESHOLD = 50;
     public static final int LINES_COUNT_CAMERA_SCALE_THRESHOLD = 10;
 
+    private String currentFile;
     private Timer timer = new Timer();
     protected AiohRenderer renderer = new AiohRenderer();
     protected ArrayList<StringBuilder> lines = new ArrayList<>(32);
@@ -72,10 +73,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         init(new File(filePath));
     }
 
-
     public void init(File file) {
         lines.clear();
         cursorLine = cursorCol = 0;
+        currentFile = file.getAbsolutePath();
         try {
             var scanner = new Scanner(file);
             while (scanner.hasNextLine()) {
@@ -131,6 +132,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     protected void onDrawMainProgram() {
         drawTitle();
         drawText();
+        drawStatusBar(
+                currentFile == null ? null : "Current file: " + currentFile,
+                "Cursor: " + (cursorLine + 1) + ":" + (cursorCol + 1)
+        );
     }
 
     protected void onDrawColorProgram() {
@@ -221,7 +226,7 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         renderer.getFont().drawText(renderer, text, centerX - 0.5f * FONT_SIZE, centerY - 0.5f * fontHeight, color);
     }
 
-    private void drawText() {
+    protected void drawText() {
         // TODO: Optimize and render only visible lines
         var text = new StringBuilder(lines.size());
         for (int i = 0; i < lines.size(); i++) {
@@ -295,6 +300,47 @@ public class AiohEditor implements AiohWindow.EventsHandler {
                     AIOH_COLOR
             );
 
+    }
+
+    protected void drawStatusBar(CharSequence leftAlignedText, CharSequence rightAlignedText) {
+
+        renderer.end();
+
+        AiohRenderer.colorProgram.use();
+        AiohRenderer.colorProgram.setUniform("cameraScale", 1.0f);
+
+        renderer.begin();
+        renderer.drawSolidRect(
+                -AiohWindow.width / 2f,
+                -AiohWindow.height / 2f,
+                AiohWindow.width / 2f,
+                -AiohWindow.height / 2f + renderer.getDebugFont().getFontHeight(),
+                AIOH_COLOR_DARK
+        );
+        renderer.end();
+
+        AiohRenderer.mainProgram.use();
+        AiohRenderer.mainProgram.setUniform("cameraScale", 1.0f);
+
+        renderer.begin();
+
+        if (leftAlignedText != null)
+            renderer.getDebugFont().drawText(
+                    renderer,
+                    leftAlignedText,
+                    -AiohWindow.width / 2f + 10,
+                    -AiohWindow.height / 2f,
+                    WHITE_COLOR
+            );
+
+        if (rightAlignedText != null)
+            renderer.getDebugFont().drawTextRightAligned(
+                    renderer,
+                    rightAlignedText,
+                    AiohWindow.width / 2f - 10,
+                    -AiohWindow.height / 2f,
+                    WHITE_COLOR
+            );
     }
 
     private StringBuilder getCurrentLine() {

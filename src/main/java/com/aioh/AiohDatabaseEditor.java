@@ -4,7 +4,6 @@ import com.aioh.database.AiohDB;
 import com.aioh.database.AiohDBManager;
 import com.aioh.database.AiohDBTable;
 import com.aioh.database.DataType;
-import com.aioh.graphics.AiohRenderer;
 import glm_.vec4.Vec4;
 
 import java.util.ArrayList;
@@ -500,34 +499,12 @@ public class AiohDatabaseEditor extends AiohEditor {
         if (state != AiohDatabaseEditorState.COLUMNS_DISPLAY)
             return;
 
-        renderer.end();
-
-        AiohRenderer.colorProgram.use();
-        AiohRenderer.colorProgram.setUniform("cameraScale", 1.0f);
-
-        renderer.begin();
-        renderer.drawSolidRect(
-                -AiohWindow.width / 2f,
-                -AiohWindow.height / 2f,
-                AiohWindow.width / 2f,
-                -AiohWindow.height / 2f + renderer.getDebugFont().getFontHeight(),
-                AIOH_COLOR_DARK
-        );
-        renderer.end();
-
-        AiohRenderer.mainProgram.use();
-        AiohRenderer.mainProgram.setUniform("cameraScale", 1.0f);
-
-        renderer.begin();
-        renderer.getDebugFont().drawText(
-                renderer,
-                "Row No.: " + (databaseRow + 1) +
+        super.drawStatusBar("Row No.: " + (databaseRow + 1) +
                         ", Column: \"" +
                         getCurrentColName() +
-                        "\" (" + dbTable.columnsTypes().get(databaseCol) + ")",
-                -AiohWindow.width / 2f + 10,
-                -AiohWindow.height / 2f,
-                WHITE_COLOR
+                        "\" (" + dbTable.columnsTypes().get(databaseCol) + ")"
+                ,
+                null
         );
     }
 

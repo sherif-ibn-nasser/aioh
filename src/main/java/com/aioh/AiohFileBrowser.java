@@ -14,6 +14,12 @@ public class AiohFileBrowser extends AiohButtonsSelector {
         lines.add(UP_DIR);
     }
 
+    @Override
+    protected void onDrawMainProgram() {
+        super.onDrawMainProgram();
+        super.drawStatusBar("Current directory: " + currentPath.getAbsolutePath(), null);
+    }
+
     private void displayAllInPath(File path) {
 
         this.lines.clear();

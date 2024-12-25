@@ -84,6 +84,12 @@ public class AiohButtonsSelector extends AiohEditor {
     }
 
     @Override
+    protected void onDrawMainProgram() {
+        super.drawTitle();
+        super.drawText();
+    }
+
+    @Override
     public void onTextInput(char[] newChars) {
 
     }

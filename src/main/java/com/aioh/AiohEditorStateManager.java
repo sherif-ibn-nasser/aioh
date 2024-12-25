@@ -105,6 +105,7 @@ public class AiohEditorStateManager implements AiohWindow.EventsHandler {
         } else if (mainMenu.getSelected() == AiohMainMenu.OPEN_RECENT_BUTTON) {
             // TODO
         } else if (mainMenu.getSelected() == AiohMainMenu.DATABASE_MODE_BUTTON) {
+            databaseEditor.init();
             state = AiohEditorState.DATABASE;
         } else if (mainMenu.getSelected() == AiohMainMenu.EXIT_BUTTON) {
             glfwSetWindowShouldClose(AiohWindow.windowId, true);

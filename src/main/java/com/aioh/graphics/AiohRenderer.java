@@ -91,7 +91,7 @@ public class AiohRenderer {
 
         /* Create fonts */
         font = new Font(Main.font, true);
-        debugFont = new Font(Main.font.deriveFont(24f), false);
+        debugFont = new Font(Main.font.deriveFont(22f), false);
     }
 
     /**
