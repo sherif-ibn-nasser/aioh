@@ -33,7 +33,14 @@ public class Main {
 
         AiohEditorStateManager.mainMenu.init();
         AiohEditorStateManager.fileBrowser.init();
+        AiohEditorStateManager.fileNameEditor.init();
         AiohEditorStateManager.databaseEditor.init();
+
+        AiohEditorStateManager.fileNameEditor.title = """
+                Enter file name
+                Save (Enter)
+                Back (ESC)""";
+        AiohEditorStateManager.fileNameEditor.titlePosY = 2 * AiohEditorStateManager.fileNameEditor.renderer.getDebugFont().getFontHeight();
 
         while (!window.shouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT);

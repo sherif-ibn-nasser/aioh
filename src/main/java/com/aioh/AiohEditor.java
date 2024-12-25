@@ -54,6 +54,10 @@ public class AiohEditor implements AiohWindow.EventsHandler {
     protected String title = null;
     protected float titlePosX = 0, titlePosY = 0;
 
+    public String getCurrentFile() {
+        return currentFile;
+    }
+
     public static boolean isDefaultContext() {
         return GL.getCapabilities().OpenGL32;
     }
@@ -665,4 +669,5 @@ public class AiohEditor implements AiohWindow.EventsHandler {
         }
 
     }
+
 }

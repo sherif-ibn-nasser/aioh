@@ -39,8 +39,28 @@ public class AiohFileBrowser extends AiohButtonsSelector {
         setLines(this.lines);
     }
 
+
+    private void displayDirectoriesInPath(File path) {
+
+        this.lines.clear();
+
+        if (path.getParent() != null)
+            this.lines.add(UP_DIR);
+
+        for (final File fileEntry : path.listFiles()) {
+            if (fileEntry.isDirectory())
+                lines.add(new StringBuilder(fileEntry.getName()).append('/'));
+        }
+
+        setLines(this.lines);
+    }
+
     public void displayAllInLastPath() {
         displayAllInPath(lastPath);
+    }
+
+    public void displayDirectoriesInLastPath() {
+        displayDirectoriesInPath(lastPath);
     }
 
     public void goUp() {
@@ -63,4 +83,9 @@ public class AiohFileBrowser extends AiohButtonsSelector {
     public File getLastPath() {
         return lastPath;
     }
+
+    public File getCurrentPath() {
+        return currentPath;
+    }
+
 }
