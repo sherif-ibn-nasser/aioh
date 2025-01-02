@@ -11,20 +11,21 @@ OpenGL for rendering, Aioh delivers smooth scrolling, crisp text rendering, and 
 working with large files.
 
 While Aioh provides excellent support for Right-to-Left (RTL) languages, including Arabic, it is not limited to a
-specific language or programming environment. The editor includes specialized features for Nazm Programming Language,
-but it is designed as a general-purpose editor for a wide range of use cases.
+specific language or programming environment. The editor includes specialized features for Nazm Programming Language
+but is designed as a general-purpose editor for a wide range of use cases.
 
 ## TODO
 
-- [X] Text rendering
+- [X] Text Rendering
 - [X] Text selection
 - [ ] Text manipulation (Cut, Copy, Paste)
 - [ ] Text searching
 - [ ] Key bindings
-- [ ] Load/Save files
-- [ ] Files browsing
+- [X] Load/Save files
+- [X] Files browsing
 - [ ] Syntax highlighting
 - [ ] RTL rendering
+- [X] Database editor
 
 ## Key Features
 
